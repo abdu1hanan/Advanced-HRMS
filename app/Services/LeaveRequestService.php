@@ -67,6 +67,10 @@ class LeaveRequestService
 
             if ($user->manager_id) {
                 User::find($user->manager_id)?->notify(new LeaveRequestSubmitted($request));
+                
+                // Also notify Super Admins of the leave request
+                User::whereHas('role', fn ($q) => $q->where('name', Role::SUPER_ADMIN))
+                    ->each(fn ($admin) => $admin->notify(new LeaveRequestSubmitted($request)));
             } else {
                 User::whereHas('role', fn ($q) => $q->where('name', Role::SUPER_ADMIN))
                     ->each(fn ($admin) => $admin->notify(new LeaveRequestSubmittedNoManager($request)));

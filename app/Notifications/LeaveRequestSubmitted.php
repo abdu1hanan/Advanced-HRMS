@@ -19,6 +19,10 @@ class LeaveRequestSubmitted extends Notification
 
     public function toArray(object $notifiable): array
     {
+        $url = $notifiable->isSuperAdmin() 
+            ? route('super-admin.leave-requests.index') 
+            : route('admin.team.leaves');
+
         return [
             'type' => 'leave_submitted',
             'leave_request_id' => $this->leaveRequest->id,
@@ -27,7 +31,7 @@ class LeaveRequestSubmitted extends Notification
             'start_date' => $this->leaveRequest->start_date->format('Y-m-d'),
             'end_date' => $this->leaveRequest->end_date->format('Y-m-d'),
             'message' => "{$this->leaveRequest->user->name} submitted a {$this->leaveRequest->leaveType->name} leave request.",
-            'url' => route('admin.team.leaves'),
+            'url' => $url,
         ];
     }
 }

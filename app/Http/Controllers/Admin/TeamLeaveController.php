@@ -52,7 +52,7 @@ class TeamLeaveController extends Controller
         $year = (int) now()->year;
 
         $query = LeaveRequest::with(['user.department', 'leaveType', 'reviewer', 'comments.user'])
-            ->whereIn('status', [LeaveRequest::STATUS_APPROVED, LeaveRequest::STATUS_REJECTED, LeaveRequest::STATUS_CANCELLED])
+            ->whereIn('status', [LeaveRequest::STATUS_APPROVED, LeaveRequest::STATUS_REJECTED, LeaveRequest::STATUS_CANCELLED, 'approved_by_manager'])
             ->whereIn('user_id', $subordinateIds);
 
         $user = null;
