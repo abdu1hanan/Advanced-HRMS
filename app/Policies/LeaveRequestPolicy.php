@@ -14,6 +14,10 @@ class LeaveRequestPolicy
 
     public function view(User $user, LeaveRequest $leaveRequest): bool
     {
+        if ($leaveRequest->user_id === $user->id) {
+            return true;
+        }
+
         if ($user->isSuperAdmin()) {
             return true;
         }
@@ -22,12 +26,12 @@ class LeaveRequestPolicy
             return $leaveRequest->user->manager_id === $user->id;
         }
 
-        return $leaveRequest->user_id === $user->id;
+        return false;
     }
 
     public function create(User $user): bool
     {
-        return $user->isEmployee();
+        return $user->isEmployee() || $user->isAdmin();
     }
 
     public function review(User $user, LeaveRequest $leaveRequest): bool

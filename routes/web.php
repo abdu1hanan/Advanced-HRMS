@@ -31,7 +31,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 
-    Route::middleware('role:employee')->prefix('employee')->name('employee.')->group(function () {
+    Route::middleware('role:employee,admin')->prefix('employee')->name('employee.')->group(function () {
         Route::get('/dashboard', EmployeeDashboardController::class)->name('dashboard');
         Route::post('/leave-requests', [EmployeeLeaveRequestController::class, 'store'])->name('leave-requests.store');
         Route::post('/leave-requests/{leaveRequest}/cancel', [EmployeeLeaveRequestController::class, 'cancel'])->name('leave-requests.cancel');
@@ -40,6 +40,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
+        Route::get('/leaves/apply', [TeamLeaveController::class, 'applyView'])->name('leaves.apply');
+        Route::get('/team/directory', [TeamLeaveController::class, 'directoryView'])->name('team.directory');
         Route::get('/team/leaves', [TeamLeaveController::class, 'index'])->name('team.leaves');
         Route::get('/team/leaves/history', [TeamLeaveController::class, 'history'])->name('team.leaves.history');
         Route::post('/leave-requests/{leaveRequest}/approve', [TeamLeaveController::class, 'approve'])->name('leave-requests.approve');

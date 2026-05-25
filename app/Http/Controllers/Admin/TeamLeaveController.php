@@ -215,4 +215,57 @@ class TeamLeaveController extends Controller
             abort(403, 'This request has been resolved by Super Admin and cannot be modified.');
         }
     }
+
+    public function applyView(Request $request): View
+    {
+        $user = Auth::user();
+        $year = (int) now()->year;
+
+        foreach (\App\Models\LeaveType::where('is_active', true)->get() as $type) {
+            $this->balanceService->ensureBalanceRow($user, $type, $year);
+        }
+
+        $balances = $user->leaveBalances()
+            ->with('leaveType')
+            ->where('year', $year)
+            ->get()
+            ->map(function ($balance) {
+                $balance->remaining = $this->balanceService->availableDays($balance);
+                return $balance;
+            });
+
+        $recentRequests = LeaveRequest::query()
+            ->where('user_id', $user->id)
+            ->with(['leaveType', 'comments.user'])
+            ->latest()
+            ->limit(25)
+            ->get();
+
+        $leaveTypes = \App\Models\LeaveType::where('is_active', true)->orderBy('name')->get();
+
+        return view('admin.team.apply', compact('user', 'balances', 'recentRequests', 'leaveTypes', 'year'));
+    }
+
+    public function directoryView(Request $request): View
+    {
+        $admin = Auth::user();
+        $subordinateIds = $admin->subordinate_ids;
+        $year = (int) now()->year;
+
+        $query = User::with(['department', 'role', 'leaveBalances.leaveType'])
+            ->whereIn('id', $subordinateIds);
+
+        if ($request->filled('search')) {
+            $search = '%' . $request->search . '%';
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', $search)
+                  ->orWhere('email', 'like', $search)
+                  ->orWhere('employee_code', 'like', $search);
+            });
+        }
+
+        $team = $query->orderBy('name')->paginate(10)->withQueryString();
+
+        return view('admin.team.directory', compact('team', 'year'));
+    }
 }

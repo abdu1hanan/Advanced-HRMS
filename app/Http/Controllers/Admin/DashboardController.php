@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
-use App\Models\User;
+use App\Models\LeaveType;
+use App\Services\LeaveBalanceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -15,6 +16,7 @@ class DashboardController extends Controller
     {
         $admin = Auth::user();
         $subordinateIds = $admin->subordinate_ids;
+        $year = (int) now()->year;
 
         // Subordinate Count
         $teamCount = count($subordinateIds);
@@ -34,21 +36,21 @@ class DashboardController extends Controller
             ->where('end_date', '>=', $today)
             ->get();
 
-        // Team Directory with search and pagination
-        $query = User::with(['department', 'role', 'leaveBalances.leaveType'])
-            ->whereIn('id', $subordinateIds);
-
-        if ($request->filled('search')) {
-            $search = '%' . $request->search . '%';
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', $search)
-                  ->orWhere('email', 'like', $search)
-                  ->orWhere('employee_code', 'like', $search);
-            });
+        // Ensure Line Manager's own leave balances exist for the dynamic stack
+        $balanceService = app(LeaveBalanceService::class);
+        foreach (LeaveType::where('is_active', true)->get() as $type) {
+            $balanceService->ensureBalanceRow($admin, $type, $year);
         }
 
-        $team = $query->orderBy('name')->paginate(10)->withQueryString();
+        $balances = $admin->leaveBalances()
+            ->with('leaveType')
+            ->where('year', $year)
+            ->get()
+            ->map(function ($balance) use ($balanceService) {
+                $balance->remaining = $balanceService->availableDays($balance);
+                return $balance;
+            });
 
-        return view('admin.dashboard', compact('teamCount', 'pendingLeaves', 'outToday', 'team'));
+        return view('admin.dashboard', compact('admin', 'teamCount', 'pendingLeaves', 'outToday', 'balances', 'year'));
     }
 }
