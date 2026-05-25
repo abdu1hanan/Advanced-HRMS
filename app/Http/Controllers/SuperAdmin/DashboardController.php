@@ -18,6 +18,12 @@ class DashboardController extends Controller
             'pending_leaves' => LeaveRequest::whereIn('status', [LeaveRequest::STATUS_PENDING, 'approved_by_manager', 'rejected_by_manager'])->count(),
         ];
 
-        return view('super-admin.dashboard', compact('stats'));
+        $recentRequests = LeaveRequest::with(['user.department', 'leaveType'])
+            ->whereIn('status', [LeaveRequest::STATUS_PENDING, 'approved_by_manager', 'rejected_by_manager'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        return view('super-admin.dashboard', compact('stats', 'recentRequests'));
     }
 }

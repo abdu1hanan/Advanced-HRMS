@@ -7,9 +7,10 @@
     <title>@yield('title', config('app.name', 'BeetleOps HRMS'))</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
     @stack('styles')
 </head>
-<body class="bg-light d-flex flex-column vh-100 overflow-hidden">
+<body class="d-flex flex-column vh-100 overflow-hidden">
     @auth
         @include('layouts.navbar')
     @endauth
@@ -22,7 +23,7 @@
         @endauth
         <div class="row h-100">
             @auth
-                <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-flex flex-column bg-dark sidebar collapse h-100 pt-3 overflow-y-auto">
+                <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-flex flex-column sidebar collapse h-100 pt-3 overflow-y-auto">
                     <div class="flex-grow-1">
                         @if(auth()->user()->isSuperAdmin())
                             @include('layouts.nav-super-admin')
@@ -51,9 +52,9 @@
                         </ul>
                     </div>
                 </nav>
-                <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 h-100 overflow-y-auto">
+                <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 h-100 overflow-y-auto animated-page">
             @else
-                <main class="col-12 py-4 h-100 overflow-y-auto">
+                <main class="col-12 py-4 h-100 overflow-y-auto animated-page">
             @endauth
 
                 @if(session('success'))
