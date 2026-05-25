@@ -112,7 +112,7 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 #sidebarMenu.collapsed {
-    width: 60px !important; /* Retain a sleek vertical strip */
+    width: 65px !important; /* Perfectly match logo width */
     padding-left: 0 !important;
     padding-right: 0 !important;
 }
@@ -284,6 +284,8 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    position: relative !important;
+    z-index: 1060 !important; /* Fix stacking context so dropdown overlays cleanly */
 }
 
 .navbar-circle-btn {
@@ -333,7 +335,8 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 
 .navbar-center-title {
     font-weight: 600 !important;
-    letter-spacing: 0.08em !important;
+    letter-spacing: 0.6em !important; /* Far apart letter spacing */
+    text-indent: 0.6em; /* Offsets trailing spacing to align dead-center */
     font-size: 1.15rem !important;
     text-transform: uppercase;
     color: #ffffff !important;
@@ -367,5 +370,28 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 .dropdown-header {
     color: #ffffff !important;
     font-weight: 700 !important;
+}
+
+/* Minimized line height compact notification list items with separators */
+.notification-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    transition: var(--transition-fast) !important;
+}
+.notification-item:last-child {
+    border-bottom: none !important;
+}
+.notification-item .dropdown-item {
+    padding: 0.5rem 0.8rem !important;
+    line-height: 1.25 !important;
+}
+.notification-item .small {
+    font-size: 0.8rem !important;
+    color: #ffffff !important;
+    margin-bottom: 2px !important;
+    line-height: 1.2 !important;
+}
+.notification-item .text-muted {
+    font-size: 0.7rem !important;
+    color: rgba(255, 255, 255, 0.45) !important;
 }
 

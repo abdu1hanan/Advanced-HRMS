@@ -1,14 +1,10 @@
-<nav class="navbar navbar-expand-lg navbar-dark navbar-glass py-2.5">
+<nav class="navbar navbar-expand-lg navbar-dark navbar-glass py-1">
     <div class="container-fluid d-flex align-items-center justify-content-between">
         
-        <!-- Left Side: Brand Logo & Desktop Sidebar Toggle Trigger -->
-        <div class="d-flex align-items-center gap-3">
-            <!-- Company Logo Icon -->
-            <img src="{{ asset('images/logo.png') }}" alt="Logo" style="height: 65px; width: 65px; object-fit: contain;" onerror="this.onerror=null; this.src='https://placehold.co/32x32/ffffff/000000?text=C';">
-            
-            <button class="sidebar-toggle-btn d-none d-md-flex" id="desktopSidebarToggle" type="button" title="Toggle Sidebar">
-                <i class="bi bi-x-lg" id="toggleIcon"></i>
-            </button>
+        <!-- Left Side: Brand Logo (acts as menu toggle trigger) -->
+        <div class="d-flex align-items-center" style="width: 65px; justify-content: center;">
+            <!-- Company Logo Icon (triggers toggle menu directly) -->
+            <img src="{{ asset('images/logo.png') }}" id="desktopSidebarToggle" alt="Logo" style="height: 65px; width: 65px; object-fit: contain; cursor: pointer; user-select: none;" onerror="this.onerror=null; this.src='https://placehold.co/65x48/ffffff/000000?text=C';">
         </div>
 
         <!-- Center: Centered Title -> HRMS Only -->
@@ -30,7 +26,7 @@
                         Notifications
                         <button type="button" class="btn btn-link btn-sm p-0 text-white-50 text-decoration-none" id="mark-all-read">Mark all read</button>
                     </li>
-                    <li><hr class="dropdown-divider border-secondary"></li>
+                    <li><hr class="dropdown-divider border-secondary my-1.5"></li>
                     <li class="px-3 py-2 text-white-50 small text-center" id="notification-empty">No notifications</li>
                 </ul>
             </div>
