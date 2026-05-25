@@ -20,6 +20,7 @@ class LeaveRequestController extends Controller
             'status' => ['nullable', 'in:pending,approved,rejected,cancelled,approved_by_manager,rejected_by_manager'],
             'department_id' => ['nullable', 'exists:departments,id'],
             'user_id' => ['nullable', 'exists:users,id'],
+            'leave_type_id' => ['nullable', 'exists:leave_types,id'],
         ]);
 
         $query = LeaveRequest::with(['user.department', 'leaveType', 'reviewer', 'comments.user']);
@@ -42,15 +43,25 @@ class LeaveRequestController extends Controller
             $query->where('user_id', $validated['user_id']);
         }
 
+        if (! empty($validated['leave_type_id'])) {
+            $query->where('leave_type_id', $validated['leave_type_id']);
+        }
+
         $requests = $query->latest()->paginate(25)->withQueryString();
         $departments = Department::orderBy('name')->get();
         $allUsers = User::orderBy('name')->get();
+        $leaveTypes = \App\Models\LeaveType::where('is_active', true)->orderBy('name')->get();
 
-        return view('super-admin.leave-requests.index', compact('requests', 'departments', 'allUsers'));
+        return view('super-admin.leave-requests.index', compact('requests', 'departments', 'allUsers', 'leaveTypes'));
     }
 
     public function history(Request $request): View
     {
+        $validated = $request->validate([
+            'user_id' => ['nullable', 'exists:users,id'],
+            'leave_type_id' => ['nullable', 'exists:leave_types,id'],
+        ]);
+
         $year = (int) now()->year;
         $query = LeaveRequest::with(['user.department', 'leaveType', 'reviewer', 'comments.user'])
             ->whereIn('status', [LeaveRequest::STATUS_APPROVED, LeaveRequest::STATUS_REJECTED, LeaveRequest::STATUS_CANCELLED]);
@@ -58,8 +69,8 @@ class LeaveRequestController extends Controller
         $user = null;
         $balances = collect();
 
-        if ($request->filled('user_id')) {
-            $user = User::find($request->user_id);
+        if (! empty($validated['user_id'])) {
+            $user = User::find($validated['user_id']);
             if ($user) {
                 $query->where('user_id', $user->id);
                 foreach (\App\Models\LeaveType::where('is_active', true)->get() as $type) {
@@ -69,10 +80,15 @@ class LeaveRequestController extends Controller
             }
         }
 
+        if (! empty($validated['leave_type_id'])) {
+            $query->where('leave_type_id', $validated['leave_type_id']);
+        }
+
         $history = $query->latest()->paginate(20)->withQueryString();
         $allUsers = User::orderBy('name')->get();
+        $leaveTypes = \App\Models\LeaveType::where('is_active', true)->orderBy('name')->get();
 
-        return view('super-admin.leave-requests.history', compact('user', 'balances', 'history', 'year', 'allUsers'));
+        return view('super-admin.leave-requests.history', compact('user', 'balances', 'history', 'year', 'allUsers', 'leaveTypes'));
     }
 
     public function comment(Request $request, LeaveRequest $leaveRequest)

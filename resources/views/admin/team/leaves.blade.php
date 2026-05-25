@@ -20,8 +20,17 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-md-6 text-end mt-auto">
-            <a href="{{ route('admin.team.leaves.history') }}" class="btn btn-outline-secondary shadow-sm"><i class="bi bi-clock-history me-1"></i> Team History</a>
+        <div class="col-md-3">
+            <label class="form-label small text-muted mb-1">Leave Type Filter</label>
+            <select name="leave_type_id" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()">
+                <option value="">All types</option>
+                @foreach($leaveTypes as $type)
+                    <option value="{{ $type->id }}" @selected(request('leave_type_id')==$type->id)>{{ $type->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-3 text-end mt-auto">
+            <a href="{{ route('admin.team.leaves.history') }}" class="btn btn-outline-secondary shadow-sm w-100"><i class="bi bi-clock-history me-1"></i> Team History</a>
         </div>
     </form>
     

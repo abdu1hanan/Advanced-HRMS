@@ -21,6 +21,7 @@ class TeamLeaveController extends Controller
         $validated = $request->validate([
             'department_id' => ['nullable', 'exists:departments,id'],
             'user_id' => ['nullable', 'exists:users,id'],
+            'leave_type_id' => ['nullable', 'exists:leave_types,id'],
         ]);
 
         $subordinateIds = Auth::user()->subordinate_ids;
@@ -37,17 +38,29 @@ class TeamLeaveController extends Controller
             $query->where('user_id', $validated['user_id']);
         }
 
+        if (! empty($validated['leave_type_id'])) {
+            $query->where('leave_type_id', $validated['leave_type_id']);
+        }
+
         $requests = $query->latest()->paginate(25)->withQueryString();
         
         // Get only departments headed by this admin and subordinates for filters
         $departments = Auth::user()->headedDepartments()->orderBy('name')->get();
         $allUsers = User::whereIn('id', $subordinateIds)->orderBy('name')->get();
+        $leaveTypes = \App\Models\LeaveType::where('is_active', true)->orderBy('name')->get();
 
-        return view('admin.team.leaves', compact('requests', 'departments', 'allUsers'));
+        return view('admin.team.leaves', compact('requests', 'departments', 'allUsers', 'leaveTypes'));
     }
 
     public function history(Request $request): View
     {
+        $validated = $request->validate([
+            'department_id' => ['nullable', 'exists:departments,id'],
+            'user_id' => ['nullable', 'exists:users,id'],
+            'status' => ['nullable', 'string'],
+            'leave_type_id' => ['nullable', 'exists:leave_types,id'],
+        ]);
+
         $subordinateIds = Auth::user()->subordinate_ids;
         $year = (int) now()->year;
 
@@ -58,8 +71,8 @@ class TeamLeaveController extends Controller
         $user = null;
         $balances = collect();
 
-        if ($request->filled('user_id')) {
-            $user = User::whereIn('id', $subordinateIds)->find($request->user_id);
+        if (! empty($validated['user_id'])) {
+            $user = User::whereIn('id', $subordinateIds)->find($validated['user_id']);
             if ($user) {
                 $query->where('user_id', $user->id);
                 foreach (\App\Models\LeaveType::where('is_active', true)->get() as $type) {
@@ -69,23 +82,28 @@ class TeamLeaveController extends Controller
             }
         }
 
-        if ($request->filled('department_id')) {
-            $query->whereHas('user', fn ($q) => $q->where('department_id', $request->department_id));
+        if (! empty($validated['department_id'])) {
+            $query->whereHas('user', fn ($q) => $q->where('department_id', $validated['department_id']));
         }
 
-        if ($request->filled('status')) {
-            if ($request->status === LeaveRequest::STATUS_REJECTED) {
+        if (! empty($validated['status'])) {
+            if ($validated['status'] === LeaveRequest::STATUS_REJECTED) {
                 $query->whereIn('status', [LeaveRequest::STATUS_REJECTED, 'rejected_by_manager']);
             } else {
-                $query->where('status', $request->status);
+                $query->where('status', $validated['status']);
             }
+        }
+
+        if (! empty($validated['leave_type_id'])) {
+            $query->where('leave_type_id', $validated['leave_type_id']);
         }
 
         $history = $query->latest()->paginate(20)->withQueryString();
         $allUsers = User::whereIn('id', $subordinateIds)->orderBy('name')->get();
         $departments = Auth::user()->headedDepartments()->orderBy('name')->get();
+        $leaveTypes = \App\Models\LeaveType::where('is_active', true)->orderBy('name')->get();
 
-        return view('admin.team.history', compact('user', 'balances', 'history', 'year', 'allUsers', 'departments'));
+        return view('admin.team.history', compact('user', 'balances', 'history', 'year', 'allUsers', 'departments', 'leaveTypes'));
     }
 
     public function comment(Request $request, LeaveRequest $leaveRequest)
