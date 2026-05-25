@@ -299,11 +299,11 @@
                 const superAdminAlert = document.getElementById('m_super_admin_alert');
                 
                 const status = dataDiv.querySelector('.d-status').textContent.trim();
-                const isFinal = status === 'approved' || status === 'rejected' || status === 'cancelled' || status === 'rejected_by_manager';
+                const isFinal = status === 'approved' || status === 'rejected' || status === 'cancelled';
                 
                 if (isSuperAdminResolved || isFinal) {
                     mActionButtons.classList.add('d-none');
-                    if (isSuperAdminResolved) {
+                    if (isSuperAdminResolved || status === 'approved' || status === 'rejected') {
                         superAdminAlert.classList.remove('d-none');
                     } else {
                         superAdminAlert.classList.add('d-none');
@@ -316,8 +316,8 @@
                     const btnApprove = document.getElementById('btn-approve');
                     const btnReject = document.getElementById('btn-reject');
                     
-                    btnApprove.classList.toggle('d-none', status === 'approved_by_manager' || status === 'approved');
-                    btnReject.classList.toggle('d-none', status === 'rejected_by_manager' || status === 'rejected' || status === 'cancelled');
+                    btnApprove.classList.toggle('d-none', status === 'approved_by_manager');
+                    btnReject.classList.toggle('d-none', status === 'rejected_by_manager');
                 }
 
                 // Clear inline alerts

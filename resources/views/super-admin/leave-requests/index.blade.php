@@ -290,8 +290,18 @@
                 
                 // Toggle action buttons based on status
                 const status = dataDiv.querySelector('.d-status').textContent.trim();
-                const isFinal = status === 'approved' || status === 'rejected' || status === 'cancelled' || status === 'rejected_by_manager';
-                document.getElementById('m_action_buttons').classList.toggle('d-none', isFinal);
+                const mActionButtons = document.getElementById('m_action_buttons');
+                
+                if (status === 'cancelled') {
+                    mActionButtons.classList.add('d-none');
+                } else {
+                    mActionButtons.classList.remove('d-none');
+                    const btnApprove = document.getElementById('btn-approve');
+                    const btnReject = document.getElementById('btn-reject');
+                    
+                    btnApprove.classList.toggle('d-none', status === 'approved');
+                    btnReject.classList.toggle('d-none', status === 'rejected');
+                }
 
                 // Clear inline alerts
                 const alertContainer = document.getElementById('modal-alert-container');

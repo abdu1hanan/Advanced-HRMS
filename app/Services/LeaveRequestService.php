@@ -104,6 +104,15 @@ class LeaveRequestService
 
             $request->update(['status' => LeaveRequest::STATUS_CANCELLED]);
 
+            $request->load(['user', 'leaveType']);
+
+            if ($request->user->manager_id) {
+                User::find($request->user->manager_id)?->notify(new \App\Notifications\LeaveRequestCancelled($request, $user->name));
+            }
+
+            User::whereHas('role', fn ($q) => $q->where('name', Role::SUPER_ADMIN))
+                ->each(fn ($admin) => $admin->notify(new \App\Notifications\LeaveRequestCancelled($request, $user->name)));
+
             return $request;
         });
     }
