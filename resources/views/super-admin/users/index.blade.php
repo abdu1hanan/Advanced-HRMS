@@ -4,7 +4,7 @@
     <!-- Top Action Tabs -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex gap-2">
-            <a href="{{ route('super-admin.users.index') }}" class="{{ !$showDeleted ? 'row-btn-blue' : 'btn btn-outline-secondary' }} py-2 px-4 d-inline-flex align-items-center" style="height: 36px;">Active Users</a>
+            <a href="{{ route('super-admin.users.index') }}" class="{{ !$showDeleted ? 'btn btn-primary' : 'btn btn-outline-secondary' }} py-2 px-4 d-inline-flex align-items-center" style="height: 36px;">Active Users</a>
             <a href="{{ route('super-admin.users.index', ['show' => 'deleted']) }}" class="{{ $showDeleted ? 'row-btn-red' : 'btn btn-outline-secondary' }} py-2 px-4 d-inline-flex align-items-center" style="height: 36px;">Deleted Users</a>
         </div>
     </div>
@@ -17,9 +17,9 @@
                     <tr>
                         <th class="ps-4">Name</th>
                         <th>Email</th>
+                        <th>Line Manager / Status</th>
                         <th>Choose Role</th>
                         <th>Choose Department</th>
-                        <th>Line Manager / Status</th>
                         @if($showDeleted)<th>Deleted At</th>@endif
                         <th class="pe-4 text-end" style="width: 220px;">Actions</th>
                     </tr>
@@ -32,6 +32,18 @@
                             
                             <!-- Email -->
                             <td>{{ $user->email }}</td>
+
+                            <!-- Line Manager / Status Column (Stacked vertically to prevent horizontal stretching) -->
+                            <td>
+                                <div class="d-flex flex-column align-items-start gap-1">
+                                    @foreach($user->headedDepartments as $headed)
+                                        <span class="row-badge-green">Head of {{ $headed->name }}</span>
+                                    @endforeach
+                                    @if($user->headedDepartments->isEmpty())
+                                        <span class="text-white opacity-75">{{ $user->manager?->name ?? '—' }}</span>
+                                    @endif
+                                </div>
+                            </td>
                             
                             <!-- Choose Role Column -->
                             <td>
@@ -64,16 +76,6 @@
                                 @endif
                             </td>
                             
-                            <!-- Line Manager / Status Column -->
-                            <td>
-                                @foreach($user->headedDepartments as $headed)
-                                    <span class="row-badge-green me-1">Head of {{ $headed->name }}</span>
-                                @endforeach
-                                @if($user->headedDepartments->isEmpty())
-                                    <span class="text-white opacity-75">{{ $user->manager?->name ?? '—' }}</span>
-                                @endif
-                            </td>
-                            
                             <!-- Deleted At Column -->
                             @if($showDeleted)
                                 <td class="small text-muted">{{ $user->deleted_at?->format('M d, Y') }}</td>
@@ -95,7 +97,7 @@
                                     </form>
                                     
                                     <div class="d-inline-flex gap-2">
-                                        <!-- Blue Save Button (Exactly matched size) -->
+                                        <!-- Blue Save Button -->
                                         <button type="submit" form="update-form-{{ $user->id }}" class="row-btn-blue btn-save-user">Save</button>
                                         
                                         <!-- Red Outline Delete Button (Restored) -->
