@@ -2,16 +2,40 @@
     <x-slot name="header">Leave History</x-slot>
     
     <form class="row g-3 mb-4 align-items-center" method="GET" id="filterForm">
-        <div class="col-md-5">
+        <div class="col-md-3">
+            <label class="form-label small text-muted mb-1">Status Filter</label>
+            <select name="status" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()">
+                <option value="">All History statuses</option>
+                @foreach([
+                    'approved' => 'Fully Approved (by CEO)',
+                    'rejected' => 'Rejected (by CEO)',
+                    'rejected_by_manager' => 'Rejected by Line Manager',
+                    'approved_by_manager' => 'Manager Approved (CEO Pending)',
+                    'cancelled' => 'Cancelled'
+                ] as $value => $label)
+                    <option value="{{ $value }}" @selected(request('status')==$value)>{{ $label }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small text-muted mb-1">Department Filter</label>
+            <select name="department_id" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()">
+                <option value="">All departments</option>
+                @foreach($departments as $dept)
+                    <option value="{{ $dept->id }}" @selected(request('department_id')==$dept->id)>{{ $dept->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-3">
             <label class="form-label small text-muted mb-1">Employee Filter</label>
             <select name="user_id" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()">
                 <option value="">All employees</option>
                 @foreach($allUsers as $u)
-                    <option value="{{ $u->id }}" @selected(request('user_id')==$u->id)>{{ $u->name }} ({{ $u->department?->name ?? 'No Dept' }})</option>
+                    <option value="{{ $u->id }}" @selected(request('user_id')==$u->id)>{{ $u->name }}</option>
                 @endforeach
             </select>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-3">
             <label class="form-label small text-muted mb-1">Leave Type Filter</label>
             <select name="leave_type_id" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()">
                 <option value="">All types</option>
@@ -19,9 +43,6 @@
                     <option value="{{ $type->id }}" @selected(request('leave_type_id')==$type->id)>{{ $type->name }}</option>
                 @endforeach
             </select>
-        </div>
-        <div class="col-md-2 text-end mt-auto">
-            <a href="{{ route('super-admin.leave-requests.index') }}" class="btn btn-outline-secondary shadow-sm w-100"><i class="bi bi-arrow-left me-1"></i> Active Requests</a>
         </div>
     </form>
 
@@ -168,8 +189,6 @@
             <div class="card-footer bg-white border-0 pt-3">{{ $history->links() }}</div>
         @endif
     </div>
-    
-    <a href="{{ route('super-admin.leave-requests.index') }}" class="btn btn-secondary shadow-sm mt-3"><i class="bi bi-arrow-left me-1"></i> Back to All Requests</a>
 
     <!-- View / Action Modal -->
     <div class="modal fade" id="requestModal" tabindex="-1">

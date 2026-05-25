@@ -2,16 +2,23 @@
     <x-slot name="header">All Leave Requests</x-slot>
     
     <form class="row g-3 mb-4 align-items-center" method="GET" id="filterForm">
-        <div class="col-md-2">
+        <div class="col-md-3">
             <label class="form-label small text-muted mb-1">Status Filter</label>
             <select name="status" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()">
-                <option value="">All statuses</option>
-                @foreach(['pending' => 'Pending / Manager Approved', 'approved' => 'Approved', 'rejected' => 'Rejected', 'cancelled' => 'Cancelled'] as $value => $label)
+                <option value="">All Active Leaves</option>
+                @foreach([
+                    'pending' => 'Manager Approval Pending',
+                    'approved_by_manager' => 'Manager Approved (CEO Pending)',
+                    'rejected_by_manager' => 'Rejected by Line Manager',
+                    'approved' => 'Fully Approved (by CEO)',
+                    'rejected' => 'Rejected (by CEO)',
+                    'cancelled' => 'Cancelled'
+                ] as $value => $label)
                     <option value="{{ $value }}" @selected(request('status')==$value)>{{ $label }}</option>
                 @endforeach
             </select>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
             <label class="form-label small text-muted mb-1">Department Filter</label>
             <select name="department_id" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()">
                 <option value="">All departments</option>
@@ -37,9 +44,6 @@
                     <option value="{{ $type->id }}" @selected(request('leave_type_id')==$type->id)>{{ $type->name }}</option>
                 @endforeach
             </select>
-        </div>
-        <div class="col-md-2 text-end mt-auto">
-            <a href="{{ route('super-admin.leave-requests.history') }}" class="btn btn-outline-secondary shadow-sm w-100"><i class="bi bi-clock-history me-1"></i> History</a>
         </div>
     </form>
     

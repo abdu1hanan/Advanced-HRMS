@@ -22,13 +22,19 @@ class TeamLeaveController extends Controller
             'department_id' => ['nullable', 'exists:departments,id'],
             'user_id' => ['nullable', 'exists:users,id'],
             'leave_type_id' => ['nullable', 'exists:leave_types,id'],
+            'status' => ['nullable', 'string'],
         ]);
 
         $subordinateIds = Auth::user()->subordinate_ids;
 
         $query = LeaveRequest::with(['user.department', 'leaveType', 'reviewer', 'comments.user'])
-            ->where('status', LeaveRequest::STATUS_PENDING)
             ->whereIn('user_id', $subordinateIds);
+
+        if (! empty($validated['status'])) {
+            $query->where('status', $validated['status']);
+        } else {
+            $query->where('status', LeaveRequest::STATUS_PENDING);
+        }
 
         if (! empty($validated['department_id'])) {
             $query->whereHas('user', fn ($q) => $q->where('department_id', $validated['department_id']));

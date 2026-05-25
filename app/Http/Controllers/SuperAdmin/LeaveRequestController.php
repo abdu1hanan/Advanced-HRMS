@@ -60,11 +60,22 @@ class LeaveRequestController extends Controller
         $validated = $request->validate([
             'user_id' => ['nullable', 'exists:users,id'],
             'leave_type_id' => ['nullable', 'exists:leave_types,id'],
+            'department_id' => ['nullable', 'exists:departments,id'],
+            'status' => ['nullable', 'string'],
         ]);
 
         $year = (int) now()->year;
-        $query = LeaveRequest::with(['user.department', 'leaveType', 'reviewer', 'comments.user'])
-            ->whereIn('status', [LeaveRequest::STATUS_APPROVED, LeaveRequest::STATUS_REJECTED, LeaveRequest::STATUS_CANCELLED]);
+        $query = LeaveRequest::with(['user.department', 'leaveType', 'reviewer', 'comments.user']);
+
+        if (! empty($validated['status'])) {
+            if ($validated['status'] === LeaveRequest::STATUS_REJECTED) {
+                $query->whereIn('status', [LeaveRequest::STATUS_REJECTED, 'rejected_by_manager']);
+            } else {
+                $query->where('status', $validated['status']);
+            }
+        } else {
+            $query->whereIn('status', [LeaveRequest::STATUS_APPROVED, LeaveRequest::STATUS_REJECTED, LeaveRequest::STATUS_CANCELLED, 'rejected_by_manager', 'approved_by_manager']);
+        }
 
         $user = null;
         $balances = collect();
@@ -80,15 +91,20 @@ class LeaveRequestController extends Controller
             }
         }
 
+        if (! empty($validated['department_id'])) {
+            $query->whereHas('user', fn ($q) => $q->where('department_id', $validated['department_id']));
+        }
+
         if (! empty($validated['leave_type_id'])) {
             $query->where('leave_type_id', $validated['leave_type_id']);
         }
 
         $history = $query->latest()->paginate(20)->withQueryString();
         $allUsers = User::orderBy('name')->get();
+        $departments = Department::orderBy('name')->get();
         $leaveTypes = \App\Models\LeaveType::where('is_active', true)->orderBy('name')->get();
 
-        return view('super-admin.leave-requests.history', compact('user', 'balances', 'history', 'year', 'allUsers', 'leaveTypes'));
+        return view('super-admin.leave-requests.history', compact('user', 'balances', 'history', 'year', 'allUsers', 'departments', 'leaveTypes'));
     }
 
     public function comment(Request $request, LeaveRequest $leaveRequest)
