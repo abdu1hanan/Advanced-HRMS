@@ -740,3 +740,26 @@ select.form-select option {
 .dept-select-width {
     width: 185px !important;
 }
+
+/* Red outline action buttons (restored for delete buttons in rows) */
+.row-btn-outline-red {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 32px !important;
+    padding: 0 1.2rem !important;
+    font-size: 0.75rem !important;
+    border-radius: 50px !important;
+    border: 1px solid rgba(220, 53, 69, 0.4) !important;
+    background-color: transparent !important;
+    color: #ff6b6b !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    transition: var(--transition-fast) !important;
+    cursor: pointer;
+}
+.row-btn-outline-red:hover {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: #ffffff !important;
+}

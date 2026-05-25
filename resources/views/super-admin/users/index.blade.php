@@ -1,11 +1,11 @@
 <x-app-layout>
     <x-slot name="header">User Management</x-slot>
 
-    <!-- Top Action Row -->
+    <!-- Top Action Tabs -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="btn-group" role="group">
-            <a href="{{ route('super-admin.users.index') }}" class="btn btn-sm {{ !$showDeleted ? 'btn-primary' : 'btn-outline-secondary' }}">Active Users</a>
-            <a href="{{ route('super-admin.users.index', ['show' => 'deleted']) }}" class="btn btn-sm {{ $showDeleted ? 'btn-primary' : 'btn-outline-secondary' }}">Deleted Users</a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('super-admin.users.index') }}" class="{{ !$showDeleted ? 'row-btn-blue' : 'btn btn-outline-secondary' }} py-2 px-4 d-inline-flex align-items-center" style="height: 36px;">Active Users</a>
+            <a href="{{ route('super-admin.users.index', ['show' => 'deleted']) }}" class="{{ $showDeleted ? 'row-btn-red' : 'btn btn-outline-secondary' }} py-2 px-4 d-inline-flex align-items-center" style="height: 36px;">Deleted Users</a>
         </div>
     </div>
 
@@ -17,34 +17,54 @@
                     <tr>
                         <th class="ps-4">Name</th>
                         <th>Email</th>
-                        <th>Role Status</th>
-                        <th>Department</th>
+                        <th>Choose Role</th>
+                        <th>Choose Department</th>
                         <th>Line Manager / Status</th>
                         @if($showDeleted)<th>Deleted At</th>@endif
-                        <th class="pe-4 text-end">Update Controls &amp; Actions</th>
+                        <th class="pe-4 text-end" style="width: 220px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($users as $user)
                         <tr>
+                            <!-- User Name -->
                             <td class="ps-4 fw-semibold text-white">{{ $user->name }}</td>
+                            
+                            <!-- Email -->
                             <td>{{ $user->email }}</td>
+                            
+                            <!-- Choose Role Column -->
                             <td>
                                 @if($user->isSuperAdmin())
                                     <span class="row-badge">Super Admin</span>
-                                @else
+                                @elseif($showDeleted)
                                     <span class="text-white opacity-75">{{ $user->role?->label ?? '—' }}</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if($user->department_id && $user->department)
-                                    <span class="text-white fw-medium">{{ $user->department->name }}</span>
-                                @elseif($user->department_id)
-                                    <span class="text-muted">No department (deleted)</span>
                                 @else
-                                    <span class="text-muted">—</span>
+                                    <select name="role_id" form="update-form-{{ $user->id }}" class="form-select form-select-sm role-select-width">
+                                        @foreach($roles as $role)
+                                            <option value="{{ $role->id }}" @selected($user->role_id == $role->id)>{{ $role->label }}</option>
+                                        @endforeach
+                                    </select>
                                 @endif
                             </td>
+                            
+                            <!-- Choose Department Column -->
+                            <td>
+                                @if($user->isSuperAdmin())
+                                    <span class="text-muted">—</span>
+                                @elseif($showDeleted)
+                                    <span class="text-white fw-medium">{{ $user->department?->name ?? '—' }}</span>
+                                @else
+                                    <select name="department_id" form="update-form-{{ $user->id }}" class="form-select form-select-sm dept-select-width">
+                                        <option value="">— Department —</option>
+                                        @foreach($departments as $dept)
+                                            <option value="{{ $dept->id }}" @selected($user->department_id == $dept->id)>{{ $dept->name }}</option>
+                                        @endforeach
+                                    </select>
+                                @endif
+                            </td>
+                            
+                            <!-- Line Manager / Status Column -->
                             <td>
                                 @foreach($user->headedDepartments as $headed)
                                     <span class="row-badge-green me-1">Head of {{ $headed->name }}</span>
@@ -53,63 +73,38 @@
                                     <span class="text-white opacity-75">{{ $user->manager?->name ?? '—' }}</span>
                                 @endif
                             </td>
+                            
+                            <!-- Deleted At Column -->
                             @if($showDeleted)
                                 <td class="small text-muted">{{ $user->deleted_at?->format('M d, Y') }}</td>
                             @endif
+                            
+                            <!-- Actions Column -->
                             <td class="pe-4 text-end">
                                 @if($showDeleted)
-                                    <form method="POST" action="{{ route('super-admin.users.restore', $user.id) }}" class="d-inline">
+                                    <form method="POST" action="{{ route('super-admin.users.restore', $user->id) }}" class="d-inline">
                                         @csrf
                                         <button type="submit" class="row-btn-blue">Restore</button>
                                     </form>
                                 @elseif(!$user->isSuperAdmin())
-                                    <form method="POST" action="{{ route('super-admin.users.update', $user) }}" class="row g-2 align-items-center justify-content-end user-update-form d-inline-flex" data-user-id="{{ $user->id }}" data-department-id="{{ $user->department_id }}">
+                                    <!-- Primary Form wrapper (uses HTML5 form attribute bindings to align fields into columns) -->
+                                    <form method="POST" id="update-form-{{ $user->id }}" action="{{ route('super-admin.users.update', $user) }}" class="user-update-form d-none" data-user-id="{{ $user->id }}" data-department-id="{{ $user->department_id }}">
                                         @csrf
                                         @method('PATCH')
                                         <input type="hidden" name="confirm_head_replace" value="0" class="confirm-head-replace-input">
-                                        
-                                        <!-- Choose Role Input with Header Label -->
-                                        <div class="col-auto text-start">
-                                            <div class="d-flex flex-column">
-                                                <span class="text-uppercase fw-bold opacity-50 mb-1" style="font-size: 0.62rem; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.65);">Choose Role</span>
-                                                <select name="role_id" class="form-select form-select-sm role-select-width">
-                                                    @foreach($roles as $role)
-                                                        <option value="{{ $role->id }}" @selected($user->role_id == $role->id)>{{ $role->label }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <!-- Choose Department Input with Header Label -->
-                                        <div class="col-auto text-start">
-                                            <div class="d-flex flex-column">
-                                                <span class="text-uppercase fw-bold opacity-50 mb-1" style="font-size: 0.62rem; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.65);">Choose Department</span>
-                                                <select name="department_id" class="form-select form-select-sm dept-select-width">
-                                                    <option value="">— Department —</option>
-                                                    @foreach($departments as $dept)
-                                                        <option value="{{ $dept->id }}" @selected($user->department_id == $dept->id)>{{ $dept->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <!-- Actions Container -->
-                                        <div class="col-auto text-start">
-                                            <div class="d-flex flex-column">
-                                                <span class="text-uppercase fw-bold opacity-50 mb-1" style="font-size: 0.62rem; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.65); pointer-events: none; opacity: 0;">Actions</span>
-                                                <button type="submit" class="row-btn-blue btn-save-user">Save</button>
-                                            </div>
-                                        </div>
                                     </form>
                                     
-                                    <form method="POST" action="{{ route('super-admin.users.destroy', $user) }}" class="d-inline-flex ms-2" onsubmit="return confirm('This will remove the user profile from HRMS. They can be restored later. Continue?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <div class="d-flex flex-column">
-                                            <span class="text-uppercase fw-bold opacity-50 mb-1" style="font-size: 0.62rem; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.65); pointer-events: none; opacity: 0;">Actions</span>
-                                            <button type="submit" class="row-btn-red">Delete</button>
-                                        </div>
-                                    </form>
+                                    <div class="d-inline-flex gap-2">
+                                        <!-- Blue Save Button (Exactly matched size) -->
+                                        <button type="submit" form="update-form-{{ $user->id }}" class="row-btn-blue btn-save-user">Save</button>
+                                        
+                                        <!-- Red Outline Delete Button (Restored) -->
+                                        <form method="POST" action="{{ route('super-admin.users.destroy', $user) }}" class="d-inline" onsubmit="return confirm('This will remove the user profile from HRMS. They can be restored later. Continue?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="row-btn-outline-red">Delete</button>
+                                        </form>
+                                    </div>
                                 @else
                                     <span class="row-badge">System Administrator</span>
                                 @endif
