@@ -73,10 +73,10 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     overflow: hidden;
 }
 .spotify-card:hover {
-    border-color: var(--border-hover) !important;
-    background-color: rgba(22, 22, 22, 0.9) !important;
-    transform: none !important; /* GET RID of zoom/translation entirely */
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8) !important;
+    border-color: var(--border-color) !important;
+    background-color: var(--bg-surface) !important;
+    transform: none !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6) !important;
 }
 
 /* Ultra-Clean Grid Separator Lines */
@@ -262,21 +262,20 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 
 /* Sidebar collapse sleek toggle button */
 .sidebar-toggle-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.08);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
+    padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    font-size: 1.4rem !important;
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: var(--transition-fast) !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
 }
 .sidebar-toggle-btn:hover {
-    background-color: rgba(255, 255, 255, 0.16);
-    border-color: var(--text-primary);
+    color: rgba(255, 255, 255, 0.7) !important;
 }
 
 /* Glassmorphism Navbar & Circular Elements */
@@ -333,10 +332,40 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 }
 
 .navbar-center-title {
-    font-weight: 900 !important;
-    letter-spacing: -0.05em !important;
-    font-size: 1.3rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.08em !important;
+    font-size: 1.15rem !important;
     text-transform: uppercase;
     color: #ffffff !important;
+}
+
+/* Row hovers and list item actions */
+.list-group-item {
+    transition: var(--transition-fast) !important;
+}
+.list-group-item:hover {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Glass Dropdown overlays with high z-index and high contrast text */
+.dropdown-menu {
+    background-color: #121212 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    z-index: 2000 !important; /* Force render on top of all dashboard cards */
+    border-radius: var(--radius-md) !important;
+}
+.dropdown-item {
+    color: #ffffff !important;
+    padding: 0.6rem 1rem !important;
+    font-size: 0.85rem !important;
+    transition: var(--transition-fast) !important;
+}
+.dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+}
+.dropdown-header {
+    color: #ffffff !important;
+    font-weight: 700 !important;
 }
 

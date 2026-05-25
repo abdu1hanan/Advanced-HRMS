@@ -126,21 +126,29 @@
     @endauth
     <script>
         $(document).ready(function() {
+            var sidebar = $('#sidebarMenu');
+            var icon = $('#toggleIcon');
+
+            // Set correct initial icon
+            if (sidebar.hasClass('collapsed')) {
+                icon.removeClass('bi-x-lg').addClass('bi-list');
+            } else {
+                icon.removeClass('bi-list').addClass('bi-x-lg');
+            }
+
             $('#desktopSidebarToggle').on('click', function() {
-                var sidebar = $('#sidebarMenu');
                 var main = $('main');
-                var icon = $('#toggleIcon');
 
                 sidebar.toggleClass('collapsed');
                 main.toggleClass('expanded');
 
                 if (sidebar.hasClass('collapsed')) {
-                    icon.removeClass('bi-chevron-left').addClass('bi-chevron-right');
+                    icon.removeClass('bi-x-lg').addClass('bi-list');
                     // Remove standard column classes on collapse to allow custom width transitions
                     sidebar.removeClass('col-md-3 col-lg-2').css('width', '60px');
                     main.removeClass('col-md-9 col-lg-10').css('width', 'calc(100% - 60px)');
                 } else {
-                    icon.removeClass('bi-chevron-right').addClass('bi-chevron-left');
+                    icon.removeClass('bi-list').addClass('bi-x-lg');
                     // Restore standard bootstrap grid columns
                     sidebar.addClass('col-md-3 col-lg-2').css('width', '');
                     main.addClass('col-md-9 col-lg-10').css('width', '');

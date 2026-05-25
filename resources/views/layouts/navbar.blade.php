@@ -3,13 +3,11 @@
         
         <!-- Left Side: Brand Logo & Desktop Sidebar Toggle Trigger -->
         <div class="d-flex align-items-center gap-3">
-            <!-- Company Logo Icon Upload Placeholder -->
-            <div class="company-logo-container d-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm" style="width: 34px; height: 34px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.15);">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-100 h-100 object-fit-cover" onerror="this.onerror=null; this.src='https://placehold.co/34x34/ffffff/000000?text=C';">
-            </div>
+            <!-- Company Logo Icon -->
+            <img src="{{ asset('images/logo.png') }}" alt="Logo" style="height: 65px; width: 65px; object-fit: contain;" onerror="this.onerror=null; this.src='https://placehold.co/32x32/ffffff/000000?text=C';">
             
             <button class="sidebar-toggle-btn d-none d-md-flex" id="desktopSidebarToggle" type="button" title="Toggle Sidebar">
-                <i class="bi bi-chevron-left" id="toggleIcon"></i>
+                <i class="bi bi-x-lg" id="toggleIcon"></i>
             </button>
         </div>
 
