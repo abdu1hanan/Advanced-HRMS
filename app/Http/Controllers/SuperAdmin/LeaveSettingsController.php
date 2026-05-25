@@ -76,17 +76,23 @@ class LeaveSettingsController extends Controller
             'entitled' => ['required', 'numeric', 'min:0'],
         ]);
 
-        LeaveBalanceOverride::withTrashed()->updateOrCreate(
-            [
+        $override = LeaveBalanceOverride::withTrashed()->where([
+            'user_id' => $validated['user_id'],
+            'leave_type_id' => $validated['leave_type_id'],
+            'year' => $validated['year'],
+        ])->first();
+
+        if ($override) {
+            $override->restore();
+            $override->update(['entitled' => $validated['entitled']]);
+        } else {
+            LeaveBalanceOverride::create([
                 'user_id' => $validated['user_id'],
                 'leave_type_id' => $validated['leave_type_id'],
                 'year' => $validated['year'],
-            ],
-            [
                 'entitled' => $validated['entitled'],
-                'deleted_at' => null, // Restore if previously soft-deleted!
-            ]
-        );
+            ]);
+        }
 
         $user = User::find($validated['user_id']);
         $type = LeaveType::find($validated['leave_type_id']);

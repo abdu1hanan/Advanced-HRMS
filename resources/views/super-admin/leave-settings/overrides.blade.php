@@ -105,11 +105,9 @@
                             </td>
                             <td class="text-end pe-4">
                                 @if(!$override->trashed())
-                                    <form method="POST" action="{{ route('super-admin.leave-settings.overrides.destroy', $override->id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this manual override? The employee\'s leave balance will immediately be restored to the global default settings.')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm px-2.5"><i class="bi bi-trash me-1"></i> Delete</button>
-                                    </form>
+                                    <button type="button" class="btn btn-sm btn-outline-danger shadow-sm px-2.5" onclick="confirmDeleteOverride('{{ route('super-admin.leave-settings.overrides.destroy', $override->id) }}')">
+                                        <i class="bi bi-trash me-1"></i> Delete
+                                    </button>
                                 @else
                                     <span class="text-muted small">None</span>
                                 @endif
@@ -132,4 +130,44 @@
     <div class="mb-4">
         <a href="{{ route('super-admin.leave-settings.index') }}" class="btn btn-secondary shadow-sm px-4 fw-semibold"><i class="bi bi-arrow-left me-1"></i> Back to Leave Settings</a>
     </div>
+
+    <!-- Delete Confirmation Modal Popup -->
+    <div class="modal fade" id="deleteOverrideModal" tabindex="-1" aria-labelledby="deleteOverrideModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger text-white border-0 py-3">
+                    <h5 class="modal-title d-flex align-items-center fw-bold" id="deleteOverrideModalLabel">
+                        <i class="bi bi-trash-fill me-2 fs-4"></i> Delete Override
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3 text-danger">
+                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-2 text-dark">Confirm Deletion</h4>
+                    <p class="text-muted mb-0">
+                        Are you sure you want to delete this manual override? The employee's leave balance will immediately be restored to the global default settings.
+                    </p>
+                </div>
+                <div class="modal-footer bg-light border-0 py-3 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary px-4 fw-semibold" data-bs-dismiss="modal">Cancel</button>
+                    <form id="deleteOverrideForm" method="POST" action="" class="m-0">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger px-4 fw-semibold shadow-sm">Yes, Delete Override</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function confirmDeleteOverride(actionUrl) {
+            const form = document.getElementById('deleteOverrideForm');
+            form.action = actionUrl;
+            const modal = new bootstrap.Modal(document.getElementById('deleteOverrideModal'));
+            modal.show();
+        }
+    </script>
 </x-app-layout>
