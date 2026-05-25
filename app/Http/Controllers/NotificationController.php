@@ -19,8 +19,12 @@ class NotificationController extends Controller
     {
         $notifications = Auth::user()
             ->notifications()
+            ->where(function ($query) {
+                $query->where('created_at', '>=', now()->subHours(24))
+                      ->orWhereNull('read_at');
+            })
             ->latest()
-            ->limit(15)
+            ->limit(50)
             ->get()
             ->map(fn ($n) => [
                 'id' => $n->id,

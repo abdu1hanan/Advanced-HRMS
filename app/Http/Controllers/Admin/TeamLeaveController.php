@@ -90,12 +90,7 @@ class TeamLeaveController extends Controller
         
         $request->validate(['comment' => 'required|string']);
         
-        $leaveRequest->comments()->create([
-            'user_id' => auth()->id(),
-            'comment' => $request->comment,
-        ]);
-        
-        $leaveRequest->user->notify(new \App\Notifications\LeaveRequestCommented($leaveRequest, auth()->user()->name));
+        app(\App\Services\LeaveRequestService::class)->addComment($leaveRequest, auth()->user(), $request->comment);
 
         return back()->with('success', 'Comment added successfully.');
     }
@@ -110,10 +105,7 @@ class TeamLeaveController extends Controller
         }
 
         if ($request->filled('comment')) {
-            $leaveRequest->comments()->create([
-                'user_id' => auth()->id(),
-                'comment' => $request->comment,
-            ]);
+            app(\App\Services\LeaveRequestService::class)->addComment($leaveRequest, auth()->user(), $request->comment);
         }
 
         DB::transaction(function () use ($leaveRequest) {
@@ -152,10 +144,7 @@ class TeamLeaveController extends Controller
         }
 
         if ($request->filled('comment')) {
-            $leaveRequest->comments()->create([
-                'user_id' => auth()->id(),
-                'comment' => $request->comment,
-            ]);
+            app(\App\Services\LeaveRequestService::class)->addComment($leaveRequest, auth()->user(), $request->comment);
         }
 
         DB::transaction(function () use ($leaveRequest) {
@@ -174,6 +163,12 @@ class TeamLeaveController extends Controller
         });
 
         $leaveRequest->user->notify(new \App\Notifications\LeaveRequestReviewed($leaveRequest));
+
+        // Notify all Super Admins of manager rejection
+        $superAdmins = User::whereHas('role', fn($q) => $q->where('name', 'super_admin'))->get();
+        foreach ($superAdmins as $admin) {
+            $admin->notify(new \App\Notifications\LeaveRequestManagerRejected($leaveRequest, auth()->user()->name));
+        }
 
         return back()->with('success', 'Leave request rejected.');
     }

@@ -107,15 +107,7 @@ class LeaveRequestController extends Controller
 
         $request->validate(['comment' => 'required|string']);
 
-        $leaveRequest->comments()->create([
-            'user_id' => Auth::id(),
-            'comment' => $request->comment,
-        ]);
-
-        $superAdmin = User::whereHas('role', fn($q) => $q->where('name', 'super_admin'))->first();
-        if ($superAdmin) {
-            $superAdmin->notify(new \App\Notifications\LeaveRequestCommented($leaveRequest, Auth::user()->name));
-        }
+        app(\App\Services\LeaveRequestService::class)->addComment($leaveRequest, Auth::user(), $request->comment);
 
         return back()->with('success', 'Comment added.');
     }

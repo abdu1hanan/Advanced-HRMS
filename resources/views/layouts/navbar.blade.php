@@ -7,7 +7,7 @@
                     <i class="bi bi-bell fs-5"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notification-badge">0</span>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width: 320px;" id="notification-list">
+                <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width: 320px; max-height: 400px; overflow-y: auto;" id="notification-list">
                     <li class="dropdown-header d-flex justify-content-between align-items-center">
                         Notifications
                         <button type="button" class="btn btn-link btn-sm p-0" id="mark-all-read">Mark all read</button>

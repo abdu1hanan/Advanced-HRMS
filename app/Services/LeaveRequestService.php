@@ -153,6 +153,37 @@ class LeaveRequestService
         });
     }
 
+    public function addComment(LeaveRequest $leaveRequest, User $user, string $commentText): void
+    {
+        $leaveRequest->comments()->create([
+            'user_id' => $user->id,
+            'comment' => $commentText,
+        ]);
+
+        // Send notifications to all concerned parties except the commenter themselves!
+        // 1. Employee
+        if ($leaveRequest->user_id !== $user->id) {
+            $leaveRequest->user->notify(new \App\Notifications\LeaveRequestCommented($leaveRequest, $user->name));
+        }
+
+        // 2. Line Manager
+        $managerId = $leaveRequest->user->manager_id;
+        if ($managerId && $managerId !== $user->id) {
+            $manager = User::find($managerId);
+            if ($manager) {
+                $manager->notify(new \App\Notifications\LeaveRequestCommented($leaveRequest, $user->name));
+            }
+        }
+
+        // 3. Super Admins
+        $superAdmins = User::whereHas('role', fn($q) => $q->where('name', 'super_admin'))->get();
+        foreach ($superAdmins as $admin) {
+            if ($admin->id !== $user->id) {
+                $admin->notify(new \App\Notifications\LeaveRequestCommented($leaveRequest, $user->name));
+            }
+        }
+    }
+
     protected function assertNoOverlap(User $user, string $start, string $end): void
     {
         $overlap = LeaveRequest::query()

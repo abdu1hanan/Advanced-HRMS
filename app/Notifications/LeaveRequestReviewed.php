@@ -23,21 +23,33 @@ class LeaveRequestReviewed extends Notification
         $reviewer = $this->leaveRequest->reviewer;
         
         if ($statusText === 'approved_by_manager') {
-            $reviewerName = $reviewer ? $reviewer->name : 'your Line Manager';
-            $message = "Your leave request was recommended for approval by your Line Manager ({$reviewerName}). CEO final approval is pending.";
+            $reviewerName = $reviewer ? $reviewer->name : 'Line Manager';
+            if (stripos($reviewerName, 'manager') !== false) {
+                $message = "Your leave request was recommended for approval by {$reviewerName}. CEO final approval is pending.";
+            } else {
+                $message = "Your leave request was recommended for approval by your Line Manager ({$reviewerName}). CEO final approval is pending.";
+            }
         } elseif ($statusText === 'approved') {
             if ($reviewer && $reviewer->isSuperAdmin()) {
                 $message = "Your leave request was fully approved by the CEO / System Administrator.";
             } else {
-                $reviewerName = $reviewer ? $reviewer->name : 'your Line Manager';
-                $message = "Your leave request was approved by {$reviewerName}.";
+                $reviewerName = $reviewer ? $reviewer->name : 'Line Manager';
+                if (stripos($reviewerName, 'manager') !== false) {
+                    $message = "Your leave request was approved by {$reviewerName}.";
+                } else {
+                    $message = "Your leave request was approved by your Line Manager ({$reviewerName}).";
+                }
             }
         } elseif ($statusText === 'rejected') {
             if ($reviewer && $reviewer->isSuperAdmin()) {
                 $message = "Your leave request was rejected by the CEO / System Administrator.";
             } else {
-                $reviewerName = $reviewer ? $reviewer->name : 'your Line Manager';
-                $message = "Your leave request was rejected by your Line Manager ({$reviewerName}).";
+                $reviewerName = $reviewer ? $reviewer->name : 'Line Manager';
+                if (stripos($reviewerName, 'manager') !== false) {
+                    $message = "Your leave request was rejected by {$reviewerName}.";
+                } else {
+                    $message = "Your leave request was rejected by your Line Manager ({$reviewerName}).";
+                }
             }
         } else {
             $message = "Your leave request was {$statusText}.";

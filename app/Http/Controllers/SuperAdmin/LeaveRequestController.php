@@ -77,12 +77,7 @@ class LeaveRequestController extends Controller
     {
         $request->validate(['comment' => 'required|string']);
         
-        $leaveRequest->comments()->create([
-            'user_id' => auth()->id(),
-            'comment' => $request->comment,
-        ]);
-        
-        $leaveRequest->user->notify(new \App\Notifications\LeaveRequestCommented($leaveRequest, auth()->user()->name));
+        app(\App\Services\LeaveRequestService::class)->addComment($leaveRequest, auth()->user(), $request->comment);
 
         return back()->with('success', 'Comment added successfully.');
     }
@@ -94,11 +89,10 @@ class LeaveRequestController extends Controller
         }
 
         if ($request->filled('comment')) {
-            $leaveRequest->comments()->create([
-                'user_id' => auth()->id(),
-                'comment' => $request->comment,
-            ]);
+            app(\App\Services\LeaveRequestService::class)->addComment($leaveRequest, auth()->user(), $request->comment);
         }
+
+        $previousReviewerId = $leaveRequest->reviewed_by;
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($leaveRequest) {
             $year = (int) $leaveRequest->start_date->year;
@@ -120,6 +114,14 @@ class LeaveRequestController extends Controller
         
         $leaveRequest->user->notify(new \App\Notifications\LeaveRequestReviewed($leaveRequest));
 
+        // Notify previous reviewer (Line Manager) that Super Admin approved the request
+        if ($previousReviewerId && $previousReviewerId !== auth()->id()) {
+            $prevReviewer = User::find($previousReviewerId);
+            if ($prevReviewer) {
+                $prevReviewer->notify(new \App\Notifications\LeaveRequestAdminApprovedToManager($leaveRequest, auth()->user()->name));
+            }
+        }
+
         return back()->with('success', 'Leave request approved.');
     }
 
@@ -130,10 +132,7 @@ class LeaveRequestController extends Controller
         }
 
         if ($request->filled('comment')) {
-            $leaveRequest->comments()->create([
-                'user_id' => auth()->id(),
-                'comment' => $request->comment,
-            ]);
+            app(\App\Services\LeaveRequestService::class)->addComment($leaveRequest, auth()->user(), $request->comment);
         }
 
         $previousReviewerId = $leaveRequest->reviewed_by;
