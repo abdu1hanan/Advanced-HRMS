@@ -70,9 +70,11 @@
                             <td>{{ $req->days_count }}</td>
                             <td>
                                 @if($req->status === 'approved')
-                                    <span class="badge bg-success">Approved</span>
+                                    <span class="badge bg-success">Fully Approved</span>
                                 @elseif($req->status === 'rejected')
-                                    <span class="badge bg-danger">Rejected</span>
+                                    <span class="badge bg-danger">Rejected by CEO</span>
+                                @elseif($req->status === 'rejected_by_manager')
+                                    <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle">Rejected by Line Manager</span>
                                 @else
                                     <span class="badge bg-secondary">{{ ucfirst($req->status) }}</span>
                                 @endif

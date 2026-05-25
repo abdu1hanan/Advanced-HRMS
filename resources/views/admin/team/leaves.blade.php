@@ -58,7 +58,11 @@
                                     </span>
                                 @elseif($request->status === 'rejected')
                                     <span class="badge bg-danger">
-                                        <i class="bi bi-x-circle-fill me-1"></i> Rejected
+                                        <i class="bi bi-x-circle-fill me-1"></i> Rejected by CEO
+                                    </span>
+                                @elseif($request->status === 'rejected_by_manager')
+                                    <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle">
+                                        <i class="bi bi-x-circle-fill me-1"></i> Rejected by You
                                     </span>
                                 @elseif($request->status === 'cancelled')
                                     <span class="badge bg-secondary">
@@ -282,7 +286,7 @@
                     const btnReject = document.getElementById('btn-reject');
                     
                     btnApprove.classList.toggle('d-none', status === 'approved_by_manager' || status === 'approved');
-                    btnReject.classList.toggle('d-none', status === 'rejected' || status === 'cancelled');
+                    btnReject.classList.toggle('d-none', status === 'rejected_by_manager' || status === 'rejected' || status === 'cancelled');
                 }
 
                 // Clear inline alerts

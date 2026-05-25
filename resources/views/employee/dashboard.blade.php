@@ -131,7 +131,11 @@
                                             </span>
                                         @elseif($req->status === 'rejected')
                                             <span class="badge bg-danger">
-                                                <i class="bi bi-x-circle-fill me-1"></i> Rejected
+                                                <i class="bi bi-x-circle-fill me-1"></i> Rejected by CEO
+                                            </span>
+                                        @elseif($req->status === 'rejected_by_manager')
+                                            <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle">
+                                                <i class="bi bi-x-circle-fill me-1"></i> Rejected by Line Manager
                                             </span>
                                         @elseif($req->status === 'cancelled')
                                             <span class="badge bg-secondary">

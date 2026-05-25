@@ -112,7 +112,7 @@ class TeamLeaveController extends Controller
             $year = (int) $leaveRequest->start_date->year;
             $balance = $this->balanceService->ensureBalanceRow($leaveRequest->user, $leaveRequest->leaveType, $year);
 
-            if ($leaveRequest->status === LeaveRequest::STATUS_REJECTED) {
+            if (in_array($leaveRequest->status, [LeaveRequest::STATUS_REJECTED, 'rejected_by_manager'])) {
                 $balance->increment('pending', $leaveRequest->days_count);
             }
 
@@ -139,7 +139,7 @@ class TeamLeaveController extends Controller
         $this->authorizeAccess($leaveRequest);
         $this->assertNotOverriddenBySuperAdmin($leaveRequest);
 
-        if ($leaveRequest->status === LeaveRequest::STATUS_REJECTED) {
+        if ($leaveRequest->status === 'rejected_by_manager' || $leaveRequest->status === LeaveRequest::STATUS_REJECTED) {
             return back()->with('error', 'Request is already rejected.');
         }
 
@@ -156,7 +156,7 @@ class TeamLeaveController extends Controller
             }
 
             $leaveRequest->update([
-                'status' => LeaveRequest::STATUS_REJECTED,
+                'status' => 'rejected_by_manager',
                 'reviewed_by' => auth()->id(),
                 'reviewed_at' => now(),
             ]);

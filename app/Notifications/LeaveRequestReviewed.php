@@ -40,7 +40,7 @@ class LeaveRequestReviewed extends Notification
                     $message = "Your leave request was approved by your Line Manager ({$reviewerName}).";
                 }
             }
-        } elseif ($statusText === 'rejected') {
+        } elseif ($statusText === 'rejected' || $statusText === 'rejected_by_manager') {
             if ($reviewer && $reviewer->isSuperAdmin()) {
                 $message = "Your leave request was rejected by the CEO / System Administrator.";
             } else {

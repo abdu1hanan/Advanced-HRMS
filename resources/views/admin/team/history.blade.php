@@ -98,7 +98,9 @@
                                 @elseif($req->status === 'approved')
                                     <span class="badge bg-success">Fully Approved</span>
                                 @elseif($req->status === 'rejected')
-                                    <span class="badge bg-danger">Rejected</span>
+                                    <span class="badge bg-danger">Rejected by CEO</span>
+                                @elseif($req->status === 'rejected_by_manager')
+                                    <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle">Rejected by You</span>
                                 @else
                                     <span class="badge bg-secondary">{{ ucfirst($req->status) }}</span>
                                 @endif
@@ -315,8 +317,8 @@
                     const btnApprove = document.getElementById('btn-approve');
                     const btnReject = document.getElementById('btn-reject');
                     
-                    btnApprove.classList.toggle('d-none', status === 'approved');
-                    btnReject.classList.toggle('d-none', status === 'rejected' || status === 'cancelled');
+                    btnApprove.classList.toggle('d-none', status === 'approved_by_manager' || status === 'approved');
+                    btnReject.classList.toggle('d-none', status === 'rejected_by_manager' || status === 'rejected' || status === 'cancelled');
                 }
 
                 // Clear inline alerts

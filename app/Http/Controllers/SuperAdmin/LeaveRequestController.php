@@ -17,7 +17,7 @@ class LeaveRequestController extends Controller
     public function index(Request $request): View
     {
         $validated = $request->validate([
-            'status' => ['nullable', 'in:pending,approved,rejected,cancelled,approved_by_manager'],
+            'status' => ['nullable', 'in:pending,approved,rejected,cancelled,approved_by_manager,rejected_by_manager'],
             'department_id' => ['nullable', 'exists:departments,id'],
             'user_id' => ['nullable', 'exists:users,id'],
         ]);
@@ -26,10 +26,12 @@ class LeaveRequestController extends Controller
 
         if (! empty($validated['status'])) {
             if ($validated['status'] === 'pending') {
-                $query->whereIn('status', ['pending', 'approved_by_manager']);
+                $query->whereIn('status', ['pending', 'approved_by_manager', 'rejected_by_manager']);
             } else {
                 $query->where('status', $validated['status']);
             }
+        } else {
+            $query->whereIn('status', ['pending', 'approved_by_manager', 'rejected_by_manager']);
         }
 
         if (! empty($validated['department_id'])) {
@@ -101,7 +103,7 @@ class LeaveRequestController extends Controller
             if (in_array($leaveRequest->status, [LeaveRequest::STATUS_PENDING, 'approved_by_manager'])) {
                 $balance->decrement('pending', $leaveRequest->days_count);
                 $balance->increment('used', $leaveRequest->days_count);
-            } elseif (in_array($leaveRequest->status, [LeaveRequest::STATUS_REJECTED, LeaveRequest::STATUS_CANCELLED])) {
+            } elseif (in_array($leaveRequest->status, ['rejected_by_manager', LeaveRequest::STATUS_REJECTED, LeaveRequest::STATUS_CANCELLED])) {
                 $balance->increment('used', $leaveRequest->days_count);
             }
 
@@ -114,11 +116,12 @@ class LeaveRequestController extends Controller
         
         $leaveRequest->user->notify(new \App\Notifications\LeaveRequestReviewed($leaveRequest));
 
-        // Notify previous reviewer (Line Manager) that Super Admin approved the request
-        if ($previousReviewerId && $previousReviewerId !== auth()->id()) {
-            $prevReviewer = User::find($previousReviewerId);
-            if ($prevReviewer) {
-                $prevReviewer->notify(new \App\Notifications\LeaveRequestAdminApprovedToManager($leaveRequest, auth()->user()->name));
+        // Notify direct Line Manager of CEO approval
+        $managerId = $leaveRequest->user->manager_id;
+        if ($managerId) {
+            $manager = User::find($managerId);
+            if ($manager) {
+                $manager->notify(new \App\Notifications\LeaveRequestAdminApprovedToManager($leaveRequest, auth()->user()->name));
             }
         }
 
@@ -134,8 +137,6 @@ class LeaveRequestController extends Controller
         if ($request->filled('comment')) {
             app(\App\Services\LeaveRequestService::class)->addComment($leaveRequest, auth()->user(), $request->comment);
         }
-
-        $previousReviewerId = $leaveRequest->reviewed_by;
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($leaveRequest) {
             $year = (int) $leaveRequest->start_date->year;
@@ -156,10 +157,12 @@ class LeaveRequestController extends Controller
 
         $leaveRequest->user->notify(new \App\Notifications\LeaveRequestReviewed($leaveRequest));
 
-        if ($previousReviewerId && $previousReviewerId !== auth()->id()) {
-            $prevReviewer = User::find($previousReviewerId);
-            if ($prevReviewer) {
-                $prevReviewer->notify(new \App\Notifications\LeaveRequestOverridden($leaveRequest, auth()->user()->name));
+        // Notify direct Line Manager of CEO rejection
+        $managerId = $leaveRequest->user->manager_id;
+        if ($managerId) {
+            $manager = User::find($managerId);
+            if ($manager) {
+                $manager->notify(new \App\Notifications\LeaveRequestOverridden($leaveRequest, auth()->user()->name));
             }
         }
 
