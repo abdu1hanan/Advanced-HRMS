@@ -22,7 +22,7 @@ class LeaveRequestManagerRejected extends Notification
         return [
             'type' => 'leave_manager_rejected',
             'leave_request_id' => $this->leaveRequest->id,
-            'message' => "{$this->managerName} rejected {$this->leaveRequest->user->name}'s leave request.",
+            'message' => "Line Manager ({$this->managerName}) rejected {$this->leaveRequest->user->name}'s leave request.",
             'url' => route('super-admin.leave-requests.index'),
         ];
     }

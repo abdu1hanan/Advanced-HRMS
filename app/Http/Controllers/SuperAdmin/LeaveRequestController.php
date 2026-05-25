@@ -94,7 +94,7 @@ class LeaveRequestController extends Controller
             app(\App\Services\LeaveRequestService::class)->addComment($leaveRequest, auth()->user(), $request->comment);
         }
 
-        $previousReviewerId = $leaveRequest->reviewed_by;
+        $previousStatus = $leaveRequest->status;
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($leaveRequest) {
             $year = (int) $leaveRequest->start_date->year;
@@ -121,7 +121,7 @@ class LeaveRequestController extends Controller
         if ($managerId) {
             $manager = User::find($managerId);
             if ($manager) {
-                $manager->notify(new \App\Notifications\LeaveRequestAdminApprovedToManager($leaveRequest, auth()->user()->name));
+                $manager->notify(new \App\Notifications\LeaveRequestAdminApprovedToManager($leaveRequest, auth()->user()->name, $previousStatus));
             }
         }
 
@@ -137,6 +137,8 @@ class LeaveRequestController extends Controller
         if ($request->filled('comment')) {
             app(\App\Services\LeaveRequestService::class)->addComment($leaveRequest, auth()->user(), $request->comment);
         }
+
+        $previousStatus = $leaveRequest->status;
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($leaveRequest) {
             $year = (int) $leaveRequest->start_date->year;
@@ -162,7 +164,7 @@ class LeaveRequestController extends Controller
         if ($managerId) {
             $manager = User::find($managerId);
             if ($manager) {
-                $manager->notify(new \App\Notifications\LeaveRequestOverridden($leaveRequest, auth()->user()->name));
+                $manager->notify(new \App\Notifications\LeaveRequestOverridden($leaveRequest, auth()->user()->name, $previousStatus));
             }
         }
 

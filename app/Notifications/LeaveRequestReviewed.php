@@ -23,34 +23,35 @@ class LeaveRequestReviewed extends Notification
         $reviewer = $this->leaveRequest->reviewer;
         
         if ($statusText === 'approved_by_manager') {
-            $reviewerName = $reviewer ? $reviewer->name : 'Line Manager';
-            if (stripos($reviewerName, 'manager') !== false) {
-                $message = "Your leave request was recommended for approval by {$reviewerName}. CEO final approval is pending.";
-            } else {
+            $manager = $this->leaveRequest->user->manager;
+            $reviewerName = $reviewer ? $reviewer->name : ($manager ? $manager->name : '');
+            if ($reviewerName) {
                 $message = "Your leave request was recommended for approval by your Line Manager ({$reviewerName}). CEO final approval is pending.";
+            } else {
+                $message = "Your leave request was recommended for approval by your Line Manager. CEO final approval is pending.";
             }
         } elseif ($statusText === 'approved') {
             if ($reviewer && $reviewer->isSuperAdmin()) {
                 $message = "Your leave request was fully approved by the CEO / System Administrator.";
             } else {
-                $reviewerName = $reviewer ? $reviewer->name : 'Line Manager';
-                if (stripos($reviewerName, 'manager') !== false) {
-                    $message = "Your leave request was approved by {$reviewerName}.";
-                } else {
+                $manager = $this->leaveRequest->user->manager;
+                $reviewerName = $reviewer ? $reviewer->name : ($manager ? $manager->name : '');
+                if ($reviewerName) {
                     $message = "Your leave request was approved by your Line Manager ({$reviewerName}).";
-                }
-            }
-        } elseif ($statusText === 'rejected' || $statusText === 'rejected_by_manager') {
-            if ($reviewer && $reviewer->isSuperAdmin()) {
-                $message = "Your leave request was rejected by the CEO / System Administrator.";
-            } else {
-                $reviewerName = $reviewer ? $reviewer->name : 'Line Manager';
-                if (stripos($reviewerName, 'manager') !== false) {
-                    $message = "Your leave request was rejected by {$reviewerName}.";
                 } else {
-                    $message = "Your leave request was rejected by your Line Manager ({$reviewerName}).";
+                    $message = "Your leave request was approved by your Line Manager.";
                 }
             }
+        } elseif ($statusText === 'rejected_by_manager') {
+            $manager = $this->leaveRequest->user->manager;
+            $reviewerName = $reviewer ? $reviewer->name : ($manager ? $manager->name : '');
+            if ($reviewerName) {
+                $message = "Your leave request was rejected by your Line Manager ({$reviewerName}).";
+            } else {
+                $message = "Your leave request was rejected by your Line Manager.";
+            }
+        } elseif ($statusText === 'rejected') {
+            $message = "Your leave request was rejected by the CEO / System Administrator.";
         } else {
             $message = "Your leave request was {$statusText}.";
         }

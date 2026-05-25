@@ -22,7 +22,7 @@ class LeaveRequestManagerApproved extends Notification
         return [
             'type' => 'leave_manager_approved',
             'leave_request_id' => $this->leaveRequest->id,
-            'message' => "{$this->managerName} approved {$this->leaveRequest->user->name}'s leave request. Final approval required.",
+            'message' => "Line Manager ({$this->managerName}) approved {$this->leaveRequest->user->name}'s leave request. Final approval required.",
             'url' => route('super-admin.leave-requests.index'),
         ];
     }

@@ -10,7 +10,11 @@ class LeaveRequestOverridden extends Notification
 {
     use Queueable;
 
-    public function __construct(public LeaveRequest $leaveRequest, public string $superAdminName) {}
+    public function __construct(
+        public LeaveRequest $leaveRequest, 
+        public string $superAdminName, 
+        public string $previousStatus = 'approved_by_manager'
+    ) {}
 
     public function via(object $notifiable): array
     {
@@ -19,10 +23,17 @@ class LeaveRequestOverridden extends Notification
 
     public function toArray(object $notifiable): array
     {
+        $priorWord = 'approved';
+        if ($this->previousStatus === 'rejected_by_manager') {
+            $priorWord = 'rejected';
+        } elseif ($this->previousStatus === 'pending') {
+            $priorWord = 'reviewed';
+        }
+
         return [
             'type' => 'leave_overridden',
             'leave_request_id' => $this->leaveRequest->id,
-            'message' => "{$this->superAdminName} rejected the leave request for {$this->leaveRequest->user->name} that you previously approved.",
+            'message' => "{$this->superAdminName} rejected the leave request for {$this->leaveRequest->user->name} that you previously {$priorWord}.",
             'url' => route('admin.team.leaves.history'),
         ];
     }
