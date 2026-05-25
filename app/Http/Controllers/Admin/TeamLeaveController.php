@@ -243,7 +243,35 @@ class TeamLeaveController extends Controller
 
         $leaveTypes = \App\Models\LeaveType::where('is_active', true)->orderBy('name')->get();
 
-        return view('admin.team.apply', compact('user', 'balances', 'recentRequests', 'leaveTypes', 'year'));
+        return view('admin.team.apply', compact('user', 'balances', 'leaveTypes', 'year'));
+    }
+
+    public function recordView(Request $request): View
+    {
+        $user = Auth::user();
+        $year = (int) now()->year;
+
+        $validated = $request->validate([
+            'leave_type_id' => ['nullable', 'exists:leave_types,id'],
+            'status' => ['nullable', 'string'],
+        ]);
+
+        $query = LeaveRequest::query()
+            ->where('user_id', $user->id)
+            ->with(['leaveType', 'comments.user']);
+
+        if (! empty($validated['status'])) {
+            $query->where('status', $validated['status']);
+        }
+
+        if (! empty($validated['leave_type_id'])) {
+            $query->where('leave_type_id', $validated['leave_type_id']);
+        }
+
+        $recentRequests = $query->latest()->paginate(15)->withQueryString();
+        $leaveTypes = \App\Models\LeaveType::where('is_active', true)->orderBy('name')->get();
+
+        return view('admin.team.record', compact('user', 'recentRequests', 'leaveTypes', 'year'));
     }
 
     public function directoryView(Request $request): View

@@ -41,6 +41,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
         Route::get('/leaves/apply', [TeamLeaveController::class, 'applyView'])->name('leaves.apply');
+        Route::get('/leaves/record', [TeamLeaveController::class, 'recordView'])->name('leaves.record');
         Route::get('/team/directory', [TeamLeaveController::class, 'directoryView'])->name('team.directory');
         Route::get('/team/leaves', [TeamLeaveController::class, 'index'])->name('team.leaves');
         Route::get('/team/leaves/history', [TeamLeaveController::class, 'history'])->name('team.leaves.history');
