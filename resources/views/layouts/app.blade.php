@@ -133,6 +133,26 @@
     @auth
         <script src="{{ asset('js/notifications.js') }}"></script>
     @endauth
+    <script>
+        $(document).ready(function() {
+            $('#desktopSidebarToggle').on('click', function() {
+                var sidebar = $('#sidebarMenu');
+                var main = $('main');
+                var icon = $('#toggleIcon');
+
+                sidebar.toggleClass('collapsed');
+                main.toggleClass('expanded');
+
+                if (sidebar.hasClass('collapsed')) {
+                    icon.removeClass('bi-chevron-left').addClass('bi-chevron-right');
+                    main.removeClass('col-md-9 col-lg-10').addClass('col-12');
+                } else {
+                    icon.removeClass('bi-chevron-right').addClass('bi-chevron-left');
+                    main.addClass('col-md-9 col-lg-10').removeClass('col-12');
+                }
+            });
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>

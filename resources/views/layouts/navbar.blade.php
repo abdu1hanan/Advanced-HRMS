@@ -1,6 +1,11 @@
 <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #000000; border-bottom: 1px solid rgba(255, 255, 255, 0.06);">
     <div class="container-fluid">
-        <a class="navbar-brand fw-bold text-white" href="{{ route('dashboard') }}">BeetleOps HRMS</a>
+        <div class="d-flex align-items-center gap-2">
+            <a class="navbar-brand fw-bold text-white" href="{{ route('dashboard') }}">BeetleOps HRMS</a>
+            <button class="sidebar-toggle-btn d-none d-md-flex" id="desktopSidebarToggle" type="button" title="Toggle Sidebar">
+                <i class="bi bi-chevron-left" id="toggleIcon"></i>
+            </button>
+        </div>
         <div class="ms-auto d-flex align-items-center gap-3">
             <div class="dropdown">
                 <button class="btn btn-outline-light btn-sm position-relative border-0" type="button" id="notificationDropdown" data-bs-toggle="dropdown">
