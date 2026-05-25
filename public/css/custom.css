@@ -112,55 +112,81 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 #sidebarMenu.collapsed {
-    width: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    transform: translateX(-100%);
+    width: 60px !important; /* Retain a sleek vertical strip */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
-.main-content-area {
-    transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+#sidebarMenu.collapsed .flex-grow-1,
+#sidebarMenu.collapsed .mt-auto {
+    display: none !important;
 }
-.main-content-area.expanded {
-    margin-left: 0 !important;
-    width: 100% !important;
+#sidebarMenu.collapsed .collapsed-vertical-brand {
+    display: flex !important;
 }
 
-/* Sidebar stagger list animations */
+.main-content-area {
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Sidebar stagger list animations - Slower and smoother */
 @keyframes listFadeIn {
     from { opacity: 0; transform: translateX(-15px); }
     to { opacity: 1; transform: translateX(0); }
 }
 .nav-item {
     opacity: 0;
-    animation: listFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: listFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important; /* Clean dull horizontal line separator */
 }
-.nav-item:nth-child(1) { animation-delay: 0.04s; }
-.nav-item:nth-child(2) { animation-delay: 0.08s; }
-.nav-item:nth-child(3) { animation-delay: 0.12s; }
-.nav-item:nth-child(4) { animation-delay: 0.16s; }
-.nav-item:nth-child(5) { animation-delay: 0.20s; }
-.nav-item:nth-child(6) { animation-delay: 0.24s; }
-.nav-item:nth-child(7) { animation-delay: 0.28s; }
-.nav-item:nth-child(8) { animation-delay: 0.32s; }
+.nav-item:last-child {
+    border-bottom: none !important;
+}
+.nav-item:nth-child(1) { animation-delay: 0.08s; }
+.nav-item:nth-child(2) { animation-delay: 0.16s; }
+.nav-item:nth-child(3) { animation-delay: 0.24s; }
+.nav-item:nth-child(4) { animation-delay: 0.32s; }
+.nav-item:nth-child(5) { animation-delay: 0.40s; }
+.nav-item:nth-child(6) { animation-delay: 0.48s; }
+.nav-item:nth-child(7) { animation-delay: 0.56s; }
+.nav-item:nth-child(8) { animation-delay: 0.64s; }
 
-/* Nav Links Circular edges */
+/* Nav Links - Transparent Hover & Selected (text highlight only) */
 .nav-link {
-    color: var(--text-muted) !important;
+    color: rgba(255, 255, 255, 0.5) !important; /* Dull by default */
     font-weight: 600 !important;
     font-size: 0.85rem !important;
-    padding: 0.7rem 1.2rem !important;
-    border-radius: 50px !important; /* Circular edges */
+    padding: 0.8rem 1rem !important;
     transition: var(--transition-fast) !important;
     letter-spacing: -0.015em;
 }
 .nav-link:hover {
-    color: var(--text-primary) !important;
-    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: #ffffff !important; /* High contrast text on hover */
+    background-color: transparent !important; /* Remove background circle */
 }
 .nav-link.active {
-    color: var(--text-primary) !important;
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important; /* Bright active selection text */
+    font-weight: 800 !important;
+    background-color: transparent !important; /* Remove active circle */
     box-shadow: none !important;
+}
+
+/* Collapsed giant sideways brand */
+.collapsed-vertical-brand {
+    display: none;
+    writing-mode: vertical-rl;
+    text-transform: uppercase;
+    font-weight: 900;
+    font-size: 2.2rem;
+    letter-spacing: -0.08em;
+    color: rgba(255, 255, 255, 0.06); /* Stunning watermark appearance */
+    text-align: center;
+    height: 90%;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    white-space: nowrap;
+    margin: auto;
+    transform: rotate(180deg);
 }
 
 /* Fully Circular Buttons */

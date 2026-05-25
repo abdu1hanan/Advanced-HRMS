@@ -16,14 +16,10 @@
     @endauth
 
     <div class="container-fluid flex-grow-1 overflow-hidden">
-        @auth
-        <button class="btn btn-dark d-md-none m-2 position-absolute" style="z-index: 1050;" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
-            <i class="bi bi-list"></i> Menu
-        </button>
-        @endauth
         <div class="row h-100">
             @auth
                 <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-flex flex-column sidebar collapse h-100 pt-3 overflow-y-auto">
+                    <div class="collapsed-vertical-brand">BeetleOps</div>
                     <div class="flex-grow-1">
                         @if(auth()->user()->isSuperAdmin())
                             @include('layouts.nav-super-admin')
@@ -37,7 +33,7 @@
                     <div class="mt-auto pb-4 px-2">
                         <ul class="nav flex-column border-top border-secondary pt-2">
                             <li class="nav-item">
-                                <a class="nav-link text-white {{ request()->routeIs('profile.edit') ? 'active bg-secondary rounded' : '' }}" href="{{ route('profile.edit') }}">
+                                <a class="nav-link text-white {{ request()->routeIs('profile.edit') ? 'active' : '' }}" href="{{ route('profile.edit') }}">
                                     <i class="bi bi-person-circle me-2"></i>Profile
                                 </a>
                             </li>
@@ -52,9 +48,9 @@
                         </ul>
                     </div>
                 </nav>
-                <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 h-100 overflow-y-auto animated-page">
+                <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 h-100 overflow-y-auto animated-page main-content-area">
             @else
-                <main class="col-12 py-4 h-100 overflow-y-auto animated-page">
+                <main class="col-12 py-4 h-100 overflow-y-auto animated-page main-content-area">
             @endauth
 
                 @if(session('success'))
@@ -80,6 +76,7 @@
                 @endisset
 
                 {{ $slot ?? '' }}
+                @yield('content')
             </main>
         </div>
     </div>
@@ -88,12 +85,6 @@
     <div class="modal fade" id="cancelLeaveModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-danger text-white border-0 py-3">
-                    <h5 class="modal-title d-flex align-items-center fw-bold">
-                        <i class="bi bi-exclamation-octagon-fill me-2"></i> Cancel Leave Request
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
                 <div class="modal-body p-4 text-center">
                     <div class="mb-3 text-danger">
                         <i class="bi bi-x-circle-fill" style="font-size: 3rem;"></i>
@@ -145,10 +136,14 @@
 
                 if (sidebar.hasClass('collapsed')) {
                     icon.removeClass('bi-chevron-left').addClass('bi-chevron-right');
-                    main.removeClass('col-md-9 col-lg-10').addClass('col-12');
+                    // Remove standard column classes on collapse to allow custom width transitions
+                    sidebar.removeClass('col-md-3 col-lg-2').css('width', '60px');
+                    main.removeClass('col-md-9 col-lg-10').css('width', 'calc(100% - 60px)');
                 } else {
                     icon.removeClass('bi-chevron-right').addClass('bi-chevron-left');
-                    main.addClass('col-md-9 col-lg-10').removeClass('col-12');
+                    // Restore standard bootstrap grid columns
+                    sidebar.addClass('col-md-3 col-lg-2').css('width', '');
+                    main.addClass('col-md-9 col-lg-10').css('width', '');
                 }
             });
         });
