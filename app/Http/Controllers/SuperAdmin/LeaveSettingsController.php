@@ -35,15 +35,34 @@ class LeaveSettingsController extends Controller
         return back()->with('success', "Default leave balances applied to all employees for {$year}.");
     }
 
-    public function overrides(): View
+    public function overrides(Request $request): View
     {
-        $users = User::with('role')->orderBy('name')->paginate(20);
+        $users = User::orderBy('name')->get();
         $leaveTypes = LeaveType::where('is_active', true)->orderBy('name')->get();
         $year = (int) now()->year;
-        $overrides = LeaveBalanceOverride::with(['user', 'leaveType'])
-            ->where('year', $year)
-            ->latest()
-            ->paginate(20, ['*'], 'overrides_page');
+
+        // Build overrides query
+        $query = LeaveBalanceOverride::with(['user', 'leaveType'])->where('year', $year);
+
+        // Apply Status Filter (Soft Deletes)
+        $status = $request->input('filter_status', 'active');
+        if ($status === 'deleted') {
+            $query->onlyTrashed();
+        } elseif ($status === 'all') {
+            $query->withTrashed();
+        }
+
+        // Apply Employee Filter
+        if ($request->filled('filter_user_id')) {
+            $query->where('user_id', $request->filter_user_id);
+        }
+
+        // Apply Leave Type Filter
+        if ($request->filled('filter_leave_type_id')) {
+            $query->where('leave_type_id', $request->filter_leave_type_id);
+        }
+
+        $overrides = $query->latest()->paginate(20, ['*'], 'overrides_page')->withQueryString();
 
         return view('super-admin.leave-settings.overrides', compact('users', 'leaveTypes', 'year', 'overrides'));
     }
@@ -57,13 +76,16 @@ class LeaveSettingsController extends Controller
             'entitled' => ['required', 'numeric', 'min:0'],
         ]);
 
-        LeaveBalanceOverride::updateOrCreate(
+        LeaveBalanceOverride::withTrashed()->updateOrCreate(
             [
                 'user_id' => $validated['user_id'],
                 'leave_type_id' => $validated['leave_type_id'],
                 'year' => $validated['year'],
             ],
-            ['entitled' => $validated['entitled']]
+            [
+                'entitled' => $validated['entitled'],
+                'deleted_at' => null, // Restore if previously soft-deleted!
+            ]
         );
 
         $user = User::find($validated['user_id']);
@@ -72,5 +94,26 @@ class LeaveSettingsController extends Controller
         $balance->update(['entitled' => $validated['entitled']]);
 
         return back()->with('success', 'Per-employee leave entitlement updated.');
+    }
+
+    public function destroyOverride(LeaveBalanceOverride $override): RedirectResponse
+    {
+        $user = $override->user;
+        $type = $override->leaveType;
+        $year = $override->year;
+
+        $override->delete();
+
+        // Re-evaluate and restore default balance for this employee
+        $balance = $this->balanceService->ensureBalanceRow($user, $type, $year);
+        $entitled = $this->balanceService->resolveEntitlement($user, $type, $year);
+        $pending = $this->balanceService->sumPendingDays($user->id, $type->id, $year);
+
+        $balance->update([
+            'entitled' => $entitled,
+            'pending' => $pending,
+        ]);
+
+        return back()->with('success', 'Manual override deleted. Default leave balance has been restored.');
     }
 }

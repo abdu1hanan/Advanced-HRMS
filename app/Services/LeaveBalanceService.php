@@ -73,6 +73,9 @@ class LeaveBalanceService
 
     public function applyDefaultsToAll(int $year): void
     {
+        // Soft delete all manual overrides for this year
+        \App\Models\LeaveBalanceOverride::where('year', $year)->delete();
+
         User::query()->each(function (User $user) use ($year) {
             foreach (LeaveType::where('is_active', true)->get() as $type) {
                 $balance = $this->ensureBalanceRow($user, $type, $year);

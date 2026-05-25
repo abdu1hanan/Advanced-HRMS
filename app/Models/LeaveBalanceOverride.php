@@ -5,8 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class LeaveBalanceOverride extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = ['user_id', 'leave_type_id', 'year', 'entitled'];
 
     protected function casts(): array

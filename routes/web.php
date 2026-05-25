@@ -68,6 +68,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/leave-settings/apply-all', [LeaveSettingsController::class, 'applyToAll'])->name('leave-settings.apply-all');
         Route::get('/leave-settings/overrides', [LeaveSettingsController::class, 'overrides'])->name('leave-settings.overrides');
         Route::post('/leave-settings/overrides', [LeaveSettingsController::class, 'storeOverride'])->name('leave-settings.overrides.store');
+        Route::delete('/leave-settings/overrides/{override}', [LeaveSettingsController::class, 'destroyOverride'])->name('leave-settings.overrides.destroy');
         Route::get('/leave-requests', [SuperAdminLeaveRequestController::class, 'index'])->name('leave-requests.index');
         Route::post('/leave-requests/{leaveRequest}/comment', [SuperAdminLeaveRequestController::class, 'comment'])->name('leave-requests.comment');
         Route::post('/leave-requests/{leaveRequest}/approve', [SuperAdminLeaveRequestController::class, 'approve'])->name('leave-requests.approve');
