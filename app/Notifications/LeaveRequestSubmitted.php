@@ -23,6 +23,13 @@ class LeaveRequestSubmitted extends Notification
             ? route('super-admin.leave-requests.index') 
             : route('admin.team.leaves');
 
+        $department = \App\Models\Department::where('head_user_id', $this->leaveRequest->user_id)->first();
+        if ($department) {
+            $message = "Leave requested by Head of {$department->name} ({$this->leaveRequest->user->name}).";
+        } else {
+            $message = "{$this->leaveRequest->user->name} submitted a {$this->leaveRequest->leaveType->name} leave request.";
+        }
+
         return [
             'type' => 'leave_submitted',
             'leave_request_id' => $this->leaveRequest->id,
@@ -30,7 +37,7 @@ class LeaveRequestSubmitted extends Notification
             'leave_type' => $this->leaveRequest->leaveType->name,
             'start_date' => $this->leaveRequest->start_date->format('Y-m-d'),
             'end_date' => $this->leaveRequest->end_date->format('Y-m-d'),
-            'message' => "{$this->leaveRequest->user->name} submitted a {$this->leaveRequest->leaveType->name} leave request.",
+            'message' => $message,
             'url' => $url,
         ];
     }

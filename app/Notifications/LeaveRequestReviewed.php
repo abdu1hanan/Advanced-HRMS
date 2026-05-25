@@ -56,13 +56,17 @@ class LeaveRequestReviewed extends Notification
             $message = "Your leave request was {$statusText}.";
         }
 
+        $url = $notifiable->isAdmin() 
+            ? route('admin.leaves.apply') 
+            : route('employee.dashboard');
+
         return [
             'type' => 'leave_reviewed',
             'leave_request_id' => $this->leaveRequest->id,
             'status' => $this->leaveRequest->status,
             'message' => $message,
             'admin_comment' => $this->leaveRequest->admin_comment,
-            'url' => route('employee.dashboard'),
+            'url' => $url,
         ];
     }
 }

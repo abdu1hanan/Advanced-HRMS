@@ -19,17 +19,20 @@ class LeaveRequestCommented extends Notification
 
     public function toArray(object $notifiable): array
     {
-        $url = route('employee.dashboard');
-        if ($notifiable->isSuperAdmin()) {
-            $url = route('super-admin.leave-requests.index');
-        } elseif ($notifiable->isAdmin()) {
-            $url = route('admin.team.leaves');
+        if ($notifiable->id === $this->leaveRequest->user_id) {
+            $message = "{$this->commenterName} left a comment on your leave request.";
+            $url = $notifiable->isAdmin() ? route('admin.leaves.apply') : route('employee.dashboard');
+        } else {
+            $message = "{$this->commenterName} left a comment on the leave request for {$this->leaveRequest->user->name}.";
+            $url = $notifiable->isSuperAdmin() 
+                ? route('super-admin.leave-requests.index') 
+                : route('admin.team.leaves');
         }
 
         return [
             'type' => 'leave_commented',
             'leave_request_id' => $this->leaveRequest->id,
-            'message' => "{$this->commenterName} left a comment on the leave request for {$this->leaveRequest->user->name}.",
+            'message' => $message,
             'url' => $url,
         ];
     }
