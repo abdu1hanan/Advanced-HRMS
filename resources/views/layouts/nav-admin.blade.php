@@ -1,0 +1,5 @@
+<ul class="nav flex-column px-2">
+    <li class="nav-item"><a class="nav-link text-white {{ request()->routeIs('admin.dashboard') ? 'active bg-secondary rounded' : '' }}" href="{{ route('admin.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+    <li class="nav-item"><a class="nav-link text-white {{ request()->routeIs('admin.team.leaves') ? 'active bg-secondary rounded' : '' }}" href="{{ route('admin.team.leaves') }}"><i class="bi bi-inbox me-2"></i>Pending Leaves</a></li>
+    <li class="nav-item"><a class="nav-link text-white {{ request()->routeIs('admin.team.leaves.history') ? 'active bg-secondary rounded' : '' }}" href="{{ route('admin.team.leaves.history') }}"><i class="bi bi-clock-history me-2"></i>Leave History</a></li>
+</ul>
