@@ -3,7 +3,7 @@ function refreshNotificationCount() {
         .done(function (data) {
             const badge = $('#notification-badge');
             if (data.count > 0) {
-                badge.text(data.count).removeClass('d-none');
+                badge.removeClass('d-none');
             } else {
                 badge.addClass('d-none');
             }
