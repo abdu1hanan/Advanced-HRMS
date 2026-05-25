@@ -49,7 +49,7 @@ class LeaveRequestController extends Controller
 
         $requests = $query->latest()->paginate(25)->withQueryString();
         $departments = Department::orderBy('name')->get();
-        $allUsers = User::orderBy('name')->get();
+        $allUsers = User::whereHas('role', fn ($q) => $q->where('name', '!=', 'super_admin'))->orderBy('name')->get();
         $leaveTypes = \App\Models\LeaveType::where('is_active', true)->orderBy('name')->get();
 
         return view('super-admin.leave-requests.index', compact('requests', 'departments', 'allUsers', 'leaveTypes'));
@@ -99,7 +99,7 @@ class LeaveRequestController extends Controller
         }
 
         $history = $query->latest()->paginate(20)->withQueryString();
-        $allUsers = User::orderBy('name')->get();
+        $allUsers = User::whereHas('role', fn ($q) => $q->where('name', '!=', 'super_admin'))->orderBy('name')->get();
         $departments = Department::orderBy('name')->get();
         $leaveTypes = \App\Models\LeaveType::where('is_active', true)->orderBy('name')->get();
 
