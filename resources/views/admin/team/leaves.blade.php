@@ -58,7 +58,7 @@
                                     </span>
                                 @elseif($request->status === 'rejected')
                                     <span class="badge bg-danger">
-                                        <i class="bi bi-x-circle-fill me-1"></i> Rejected by CEO
+                                        <i class="bi bi-x-circle-fill me-1"></i> Rejected
                                     </span>
                                 @elseif($request->status === 'rejected_by_manager')
                                     <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle">

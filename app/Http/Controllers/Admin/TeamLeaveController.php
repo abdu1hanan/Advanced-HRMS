@@ -52,7 +52,7 @@ class TeamLeaveController extends Controller
         $year = (int) now()->year;
 
         $query = LeaveRequest::with(['user.department', 'leaveType', 'reviewer', 'comments.user'])
-            ->whereIn('status', [LeaveRequest::STATUS_APPROVED, LeaveRequest::STATUS_REJECTED, LeaveRequest::STATUS_CANCELLED, 'approved_by_manager'])
+            ->whereIn('status', [LeaveRequest::STATUS_APPROVED, LeaveRequest::STATUS_REJECTED, LeaveRequest::STATUS_CANCELLED, 'approved_by_manager', 'rejected_by_manager'])
             ->whereIn('user_id', $subordinateIds);
 
         $user = null;
@@ -74,7 +74,11 @@ class TeamLeaveController extends Controller
         }
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            if ($request->status === LeaveRequest::STATUS_REJECTED) {
+                $query->whereIn('status', [LeaveRequest::STATUS_REJECTED, 'rejected_by_manager']);
+            } else {
+                $query->where('status', $request->status);
+            }
         }
 
         $history = $query->latest()->paginate(20)->withQueryString();

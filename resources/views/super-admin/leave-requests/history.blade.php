@@ -72,7 +72,7 @@
                                 @if($req->status === 'approved')
                                     <span class="badge bg-success">Fully Approved</span>
                                 @elseif($req->status === 'rejected')
-                                    <span class="badge bg-danger">Rejected by CEO</span>
+                                    <span class="badge bg-danger">Rejected</span>
                                 @elseif($req->status === 'rejected_by_manager')
                                     <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle">Rejected by Line Manager</span>
                                 @else
@@ -209,8 +209,14 @@
                                     <textarea name="comment" class="form-control" rows="2" placeholder="Type your message or reasoning to the employee..."></textarea>
                                 </div>
                                 
-                                <div class="text-end">
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="submitAction('comment')">Just Comment</button>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="submitAction('comment')">Just Comment</button>
+                                    </div>
+                                    <div id="m_action_buttons">
+                                        <button type="button" class="btn btn-danger btn-sm me-2" id="btn-reject" onclick="submitAction('reject')"><i class="bi bi-x-circle me-1"></i> Reject Leave</button>
+                                        <button type="button" class="btn btn-success btn-sm" id="btn-approve" onclick="submitAction('approve')"><i class="bi bi-check-circle me-1"></i> Approve Leave</button>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -220,9 +226,29 @@
         </div>
     </div>
 
+    <!-- Beautiful Custom Confirm Modal -->
+    <div class="modal fade" id="confirmActionModal" tabindex="-1" style="z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-body text-center p-4">
+                    <div class="text-warning mb-3">
+                        <i class="bi bi-exclamation-circle-fill fs-1"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2" id="confirmTitle">Are you sure?</h5>
+                    <p class="text-muted small mb-4" id="confirmText">Do you really want to proceed with this action?</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-light border px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary px-4" id="btnConfirmAction">Yes, Proceed</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
         <script>
             let currentRequestId = null;
+            let pendingActionType = null;
             const actionForm = document.getElementById('actionForm');
 
             window.openRequestModal = function(id) {
@@ -244,6 +270,14 @@
                 setTimeout(() => {
                     commentsContainer.scrollTop = commentsContainer.scrollHeight;
                 }, 100);
+
+                // Toggle action buttons based on status
+                const status = dataDiv.querySelector('.d-status').textContent.trim();
+                const btnApprove = document.getElementById('btn-approve');
+                const btnReject = document.getElementById('btn-reject');
+                
+                btnApprove.classList.toggle('d-none', status === 'approved');
+                btnReject.classList.toggle('d-none', status === 'rejected' || status === 'cancelled');
 
                 // Reset inline alerts
                 const alertContainer = document.getElementById('modal-alert-container');
@@ -276,10 +310,40 @@
                         }
                         return;
                     }
+                } else {
+                    // For approve/reject, use beautiful custom confirmation modal
+                    pendingActionType = actionType;
+                    const confirmTitle = document.getElementById('confirmTitle');
+                    const confirmText = document.getElementById('confirmText');
+                    const btnConfirmAction = document.getElementById('btnConfirmAction');
+
+                    if (actionType === 'approve') {
+                        confirmTitle.textContent = 'Approve Leave Request?';
+                        confirmText.textContent = 'Are you sure you want to approve this leave request? This will authorize and finalize the leave.';
+                        btnConfirmAction.className = 'btn btn-success px-4';
+                        btnConfirmAction.textContent = 'Yes, Approve';
+                    } else if (actionType === 'reject') {
+                        confirmTitle.textContent = 'Reject Leave Request?';
+                        confirmText.textContent = 'Are you sure you want to reject this leave request? This will decline the request.';
+                        btnConfirmAction.className = 'btn btn-danger px-4';
+                        btnConfirmAction.textContent = 'Yes, Reject';
+                    }
+
+                    const confirmModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmActionModal'));
+                    confirmModal.show();
+                    return;
                 }
                 
                 actionForm.submit();
             };
+
+            document.getElementById('btnConfirmAction').addEventListener('click', function() {
+                if (pendingActionType) {
+                    const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmActionModal'));
+                    if (confirmModal) confirmModal.hide();
+                    actionForm.submit();
+                }
+            });
         </script>
     @endpush
 </x-app-layout>

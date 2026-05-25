@@ -98,7 +98,7 @@
                                 @elseif($req->status === 'approved')
                                     <span class="badge bg-success">Fully Approved</span>
                                 @elseif($req->status === 'rejected')
-                                    <span class="badge bg-danger">Rejected by CEO</span>
+                                    <span class="badge bg-danger">Rejected</span>
                                 @elseif($req->status === 'rejected_by_manager')
                                     <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle">Rejected by You</span>
                                 @else
