@@ -83,6 +83,49 @@
         </div>
     </div>
 
+    <!-- Beautiful Cancel Confirmation Modal Popup -->
+    <div class="modal fade" id="cancelLeaveModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-danger text-white border-0 py-3">
+                    <h5 class="modal-title d-flex align-items-center fw-bold">
+                        <i class="bi bi-exclamation-octagon-fill me-2"></i> Cancel Leave Request
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3 text-danger">
+                        <i class="bi bi-x-circle-fill" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2 text-dark">Are you sure you want to cancel this leave request?</h5>
+                    <p class="text-muted mb-0">
+                        This action will cancel your pending leave request and return your leave balance immediately.
+                    </p>
+                </div>
+                <div class="modal-footer bg-light border-0 py-3 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">No, Keep It</button>
+                    <button type="button" class="btn btn-danger px-4 shadow-sm" id="confirmCancelBtn">Yes, Cancel Request</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Beautiful Cancel Success Modal Popup -->
+    <div class="modal fade" id="cancelSuccessModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3 text-success">
+                        <i class="bi bi-check-circle-fill" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-2 text-dark">Cancelled Successfully</h4>
+                    <p class="text-muted mb-3" id="cancelSuccessMsg"></p>
+                    <button type="button" class="btn btn-success px-4" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/app.js') }}"></script>

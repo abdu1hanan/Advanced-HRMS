@@ -3,7 +3,7 @@
 
     <!-- Filters Row -->
     <form class="row g-3 mb-4 align-items-center" method="GET" id="filterForm">
-        <div class="col-md-4">
+        <div class="col-md-2">
             <label class="form-label small text-muted mb-1">Leave Type</label>
             <select name="leave_type_id" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()">
                 <option value="">All Leave Types</option>
@@ -12,7 +12,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-2">
             <label class="form-label small text-muted mb-1">Status</label>
             <select name="status" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()">
                 <option value="">All Statuses</option>
@@ -28,7 +28,15 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-md-4 text-end mt-auto">
+        <div class="col-md-3">
+            <label class="form-label small text-muted mb-1">From Date</label>
+            <input type="date" name="start_date" class="form-control border-0 shadow-sm" value="{{ request('start_date') }}" onchange="document.getElementById('filterForm').submit()">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small text-muted mb-1">To Date</label>
+            <input type="date" name="end_date" class="form-control border-0 shadow-sm" value="{{ request('end_date') }}" onchange="document.getElementById('filterForm').submit()">
+        </div>
+        <div class="col-md-2 text-end mt-auto">
             <a href="{{ route('admin.leaves.record') }}" class="btn btn-outline-secondary shadow-sm w-100"><i class="bi bi-x-circle me-1"></i> Clear Filters</a>
         </div>
     </form>

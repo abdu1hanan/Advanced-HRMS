@@ -254,6 +254,8 @@ class TeamLeaveController extends Controller
         $validated = $request->validate([
             'leave_type_id' => ['nullable', 'exists:leave_types,id'],
             'status' => ['nullable', 'string'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date'],
         ]);
 
         $query = LeaveRequest::query()
@@ -266,6 +268,14 @@ class TeamLeaveController extends Controller
 
         if (! empty($validated['leave_type_id'])) {
             $query->where('leave_type_id', $validated['leave_type_id']);
+        }
+
+        if (! empty($validated['start_date'])) {
+            $query->where('start_date', '>=', $validated['start_date']);
+        }
+
+        if (! empty($validated['end_date'])) {
+            $query->where('end_date', '<=', $validated['end_date']);
         }
 
         $recentRequests = $query->latest()->paginate(15)->withQueryString();
