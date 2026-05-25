@@ -2,7 +2,7 @@
     <x-slot name="header">Leave History</x-slot>
     
     <form class="row g-3 mb-4 align-items-center" method="GET" id="filterForm">
-        <div class="col-md-3">
+        <div class="col-md-2">
             <label class="form-label small text-muted mb-1">Status Filter</label>
             <select name="status" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()">
                 <option value="">All History statuses</option>
@@ -17,7 +17,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <label class="form-label small text-muted mb-1">Department Filter</label>
             <select name="department_id" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()">
                 <option value="">All departments</option>
@@ -43,6 +43,9 @@
                     <option value="{{ $type->id }}" @selected(request('leave_type_id')==$type->id)>{{ $type->name }}</option>
                 @endforeach
             </select>
+        </div>
+        <div class="col-md-2 text-end mt-auto">
+            <a href="{{ route('super-admin.leave-requests.history') }}" class="btn btn-outline-secondary shadow-sm w-100"><i class="bi bi-x-circle me-1"></i> Clear</a>
         </div>
     </form>
 
@@ -304,11 +307,8 @@
 
                 // Toggle action buttons based on status
                 const status = dataDiv.querySelector('.d-status').textContent.trim();
-                const btnApprove = document.getElementById('btn-approve');
-                const btnReject = document.getElementById('btn-reject');
-                
-                btnApprove.classList.toggle('d-none', status === 'approved');
-                btnReject.classList.toggle('d-none', status === 'rejected' || status === 'cancelled');
+                const isFinal = status === 'approved' || status === 'rejected' || status === 'cancelled' || status === 'rejected_by_manager';
+                document.getElementById('m_action_buttons').classList.toggle('d-none', isFinal);
 
                 // Reset inline alerts
                 const alertContainer = document.getElementById('modal-alert-container');

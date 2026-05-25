@@ -30,9 +30,8 @@
             @endforeach
         </div>
     @endif
-
     <form class="row g-3 mb-4 align-items-center" method="GET" id="filterForm">
-        <div class="col-md-3">
+        <div class="col-md-2">
             <label class="form-label small text-muted mb-1">Status Filter</label>
             <select name="status" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()">
                 <option value="">All History statuses</option>
@@ -47,7 +46,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <label class="form-label small text-muted mb-1">Department Filter</label>
             <select name="department_id" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()">
                 <option value="">All departments</option>
@@ -73,6 +72,9 @@
                     <option value="{{ $type->id }}" @selected(request('leave_type_id')==$type->id)>{{ $type->name }}</option>
                 @endforeach
             </select>
+        </div>
+        <div class="col-md-2 text-end mt-auto">
+            <a href="{{ route('admin.team.leaves.history') }}" class="btn btn-outline-secondary shadow-sm w-100"><i class="bi bi-x-circle me-1"></i> Clear</a>
         </div>
     </form>
 
@@ -314,15 +316,21 @@
                 const mActionButtons = document.getElementById('m_action_buttons');
                 const superAdminAlert = document.getElementById('m_super_admin_alert');
                 
-                if (isSuperAdminResolved) {
+                const status = dataDiv.querySelector('.d-status').textContent.trim();
+                const isFinal = status === 'approved' || status === 'rejected' || status === 'cancelled' || status === 'rejected_by_manager';
+                
+                if (isSuperAdminResolved || isFinal) {
                     mActionButtons.classList.add('d-none');
-                    superAdminAlert.classList.remove('d-none');
+                    if (isSuperAdminResolved) {
+                        superAdminAlert.classList.remove('d-none');
+                    } else {
+                        superAdminAlert.classList.add('d-none');
+                    }
                 } else {
                     superAdminAlert.classList.add('d-none');
                     mActionButtons.classList.remove('d-none');
                     
                     // Toggle action buttons based on status
-                    const status = dataDiv.querySelector('.d-status').textContent.trim();
                     const btnApprove = document.getElementById('btn-approve');
                     const btnReject = document.getElementById('btn-reject');
                     
