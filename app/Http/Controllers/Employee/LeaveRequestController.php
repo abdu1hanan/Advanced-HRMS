@@ -111,4 +111,42 @@ class LeaveRequestController extends Controller
 
         return back()->with('success', 'Comment added.');
     }
+
+    public function recordView(Request $request): \Illuminate\View\View
+    {
+        $user = Auth::user();
+        $year = (int) now()->year;
+
+        $validated = $request->validate([
+            'leave_type_id' => ['nullable', 'exists:leave_types,id'],
+            'status' => ['nullable', 'string'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date'],
+        ]);
+
+        $query = LeaveRequest::query()
+            ->where('user_id', $user->id)
+            ->with(['leaveType', 'comments.user']);
+
+        if (! empty($validated['status'])) {
+            $query->where('status', $validated['status']);
+        }
+
+        if (! empty($validated['leave_type_id'])) {
+            $query->where('leave_type_id', $validated['leave_type_id']);
+        }
+
+        if (! empty($validated['start_date'])) {
+            $query->where('start_date', '>=', $validated['start_date']);
+        }
+
+        if (! empty($validated['end_date'])) {
+            $query->where('end_date', '<=', $validated['end_date']);
+        }
+
+        $recentRequests = $query->latest()->paginate(15)->withQueryString();
+        $leaveTypes = \App\Models\LeaveType::where('is_active', true)->orderBy('name')->get();
+
+        return view('employee.record', compact('user', 'recentRequests', 'leaveTypes', 'year'));
+    }
 }

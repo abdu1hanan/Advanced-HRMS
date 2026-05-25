@@ -41,6 +41,6 @@ class DashboardController extends Controller
 
         $leaveTypes = LeaveType::where('is_active', true)->orderBy('name')->get();
 
-        return view('employee.dashboard', compact('user', 'balances', 'recentRequests', 'leaveTypes', 'year'));
+        return view('employee.dashboard', compact('user', 'balances', 'leaveTypes', 'year'));
     }
 }

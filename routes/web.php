@@ -33,6 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware('role:employee,admin')->prefix('employee')->name('employee.')->group(function () {
         Route::get('/dashboard', EmployeeDashboardController::class)->name('dashboard');
+        Route::get('/leaves/record', [EmployeeLeaveRequestController::class, 'recordView'])->name('leaves.record');
         Route::post('/leave-requests', [EmployeeLeaveRequestController::class, 'store'])->name('leave-requests.store');
         Route::post('/leave-requests/{leaveRequest}/cancel', [EmployeeLeaveRequestController::class, 'cancel'])->name('leave-requests.cancel');
         Route::post('/leave-requests/{leaveRequest}/comment', [EmployeeLeaveRequestController::class, 'comment'])->name('leave-requests.comment');
