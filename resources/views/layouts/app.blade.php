@@ -53,21 +53,29 @@
                 <main class="col-12 py-4 h-100 overflow-y-auto animated-page main-content-area">
             @endauth
 
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <!-- Sleek floating top-centered popup alerts (standard for entire system) -->
+    <div class="sleek-toast-container">
+        @if(session('success'))
+            <div class="sleek-toast sleek-toast-success">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span class="small fw-semibold">{{ session('success') }}</span>
+                </div>
+                <button type="button" class="btn-close ms-3" style="font-size: 0.75rem;" onclick="this.parentElement.remove()"></button>
+            </div>
+        @endif
+        @if($errors->any())
+            @foreach($errors->all() as $error)
+                <div class="sleek-toast sleek-toast-danger">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        <span class="small fw-semibold">{{ $error }}</span>
                     </div>
-                @endif
-                @if($errors->any())
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+                    <button type="button" class="btn-close ms-3" style="font-size: 0.75rem;" onclick="this.parentElement.remove()"></button>
+                </div>
+            @endforeach
+        @endif
+    </div>
 
                 @isset($header)
                     <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
@@ -144,6 +152,15 @@
                     main.addClass('col-md-9 col-lg-10').css('width', '');
                 }
             });
+
+            // Automatically slide up and dismiss sleek toast notification bars after 4 seconds
+            setTimeout(function() {
+                $('.sleek-toast').animate({ opacity: 0, transform: 'translate(-50%, -20px)' }, 400, function() {
+                    $(this).slideUp(300, function() {
+                        $(this).remove();
+                    });
+                });
+            }, 4500);
         });
     </script>
     @stack('scripts')

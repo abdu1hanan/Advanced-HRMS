@@ -763,3 +763,58 @@ select.form-select option {
     border-color: #dc3545 !important;
     color: #ffffff !important;
 }
+
+/* Sleek floating top-centered popup alerts (standard for system) */
+.sleek-toast-container {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 450px;
+    pointer-events: none;
+}
+
+.sleek-toast {
+    pointer-events: auto;
+    background-color: rgba(10, 10, 10, 0.96) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 50px !important; /* Stark premium rounded edge capsule */
+    padding: 0.65rem 1.4rem !important;
+    color: #ffffff !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8) !important;
+    animation: toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    min-height: 48px;
+}
+
+.sleek-toast-success {
+    border-color: rgba(16, 185, 129, 0.4) !important;
+}
+.sleek-toast-success i {
+    color: #10b981 !important;
+}
+
+.sleek-toast-danger {
+    border-color: rgba(225, 29, 72, 0.4) !important;
+}
+.sleek-toast-danger i {
+    color: #e11d48 !important;
+}
+
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -20px) !important;
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0) !important;
+    }
+}
