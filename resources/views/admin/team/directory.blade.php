@@ -40,7 +40,7 @@
                                 <div class="d-flex flex-wrap gap-1.5">
                                     @forelse($member->leaveBalances->where('year', $year) as $balance)
                                         @php
-                                            $left = $balance->entitled - $balance->used;
+                                            $left = max(0, $balance->entitled + $balance->carried_forward - $balance->used);
                                             $pillClass = $left > 0 ? 'bg-success-subtle text-success-emphasis border-success-subtle' : 'bg-danger-subtle text-danger-emphasis border-danger-subtle';
                                         @endphp
                                         <span class="badge border {{ $pillClass }}" style="font-size: 0.7rem;">

@@ -69,7 +69,7 @@
                                     <strong class="d-block text-dark">{{ $balance->pending }}</strong> Pending
                                 </div>
                                 <div class="col-4">
-                                    <strong class="d-block text-success">{{ $balance->entitled - $balance->used }}</strong> Left
+                                    <strong class="d-block text-success">{{ max(0, $balance->entitled + $balance->carried_forward - $balance->used) }}</strong> Left
                                 </div>
                             </div>
                         </div>

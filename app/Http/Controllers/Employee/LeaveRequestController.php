@@ -53,7 +53,7 @@ class LeaveRequestController extends Controller
                 'used' => $b->used,
                 'pending' => $b->pending,
                 'carried_forward' => $b->carried_forward,
-                'remaining' => $this->balanceService->availableDays($b),
+                'remaining' => $this->balanceService->leftDays($b),
             ]);
 
         return response()->json([
@@ -89,7 +89,7 @@ class LeaveRequestController extends Controller
                 'used' => $b->used,
                 'pending' => $b->pending,
                 'carried_forward' => $b->carried_forward,
-                'remaining' => $this->balanceService->availableDays($b),
+                'remaining' => $this->balanceService->leftDays($b),
             ]);
 
         return response()->json([

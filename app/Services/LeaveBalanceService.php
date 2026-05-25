@@ -65,10 +65,21 @@ class LeaveBalanceService
 
     public function availableDays(LeaveBalance $balance): float
     {
-        return (float) $balance->entitled
+        $left = (float) $balance->entitled
             + (float) $balance->carried_forward
             - (float) $balance->used
             - (float) $balance->pending;
+
+        return max(0.0, $left);
+    }
+
+    public function leftDays(LeaveBalance $balance): float
+    {
+        $left = (float) $balance->entitled
+            + (float) $balance->carried_forward
+            - (float) $balance->used;
+
+        return max(0.0, $left);
     }
 
     public function applyDefaultsToAll(int $year): void

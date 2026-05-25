@@ -47,7 +47,7 @@ class DashboardController extends Controller
             ->where('year', $year)
             ->get()
             ->map(function ($balance) use ($balanceService) {
-                $balance->remaining = $balanceService->availableDays($balance);
+                $balance->remaining = $balanceService->leftDays($balance);
                 return $balance;
             });
 
