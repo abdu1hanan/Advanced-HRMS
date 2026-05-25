@@ -136,8 +136,8 @@
 
                 if (sidebar.hasClass('collapsed')) {
                     // Remove standard column classes on collapse to allow custom width transitions
-                    sidebar.removeClass('col-md-3 col-lg-2').css('width', '65px');
-                    main.removeClass('col-md-9 col-lg-10').css('width', 'calc(100% - 65px)');
+                    sidebar.removeClass('col-md-3 col-lg-2').css('width', '85px');
+                    main.removeClass('col-md-9 col-lg-10').css('width', 'calc(100% - 85px)');
                 } else {
                     // Restore standard bootstrap grid columns
                     sidebar.addClass('col-md-3 col-lg-2').css('width', '');

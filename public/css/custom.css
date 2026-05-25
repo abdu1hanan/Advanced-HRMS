@@ -112,7 +112,7 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 #sidebarMenu.collapsed {
-    width: 65px !important; /* Perfectly match logo width */
+    width: 85px !important; /* Centered perfectly with 65px logo above it */
     padding-left: 0 !important;
     padding-right: 0 !important;
 }
@@ -335,19 +335,73 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 
 .navbar-center-title {
     font-weight: 600 !important;
-    letter-spacing: 0.6em !important; /* Far apart letter spacing */
-    text-indent: 0.6em; /* Offsets trailing spacing to align dead-center */
-    font-size: 1.15rem !important;
+    letter-spacing: 0.65em !important; /* Far apart letter spacing */
+    text-indent: 0.65em; /* Offsets trailing spacing to align dead-center */
+    font-size: 1.8rem !important; /* Enlarge text to fill vertically */
+    line-height: 1.0 !important;
     text-transform: uppercase;
     color: #ffffff !important;
 }
 
 /* Row hovers and list item actions */
 .list-group-item {
+    border: none !important;
+    padding: 0.65rem 1rem !important; /* Perfect full-width padding */
+    margin-bottom: 0.25rem !important;
+    border-radius: var(--radius-md) !important;
     transition: var(--transition-fast) !important;
 }
 .list-group-item:hover {
-    background-color: rgba(255, 255, 255, 0.03) !important;
+    background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Dashboard Top Card standard height tokens & minimized line heights */
+.dashboard-top-card {
+    height: 180px !important;
+}
+.dashboard-top-card h2 {
+    line-height: 1.0 !important;
+    letter-spacing: -0.05em !important;
+}
+.dashboard-top-card span, 
+.dashboard-top-card label, 
+.dashboard-top-card strong {
+    line-height: 1.15 !important;
+}
+
+/* Harmonized small row action badges & buttons */
+.row-badge {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 28px !important;
+    padding: 0 0.8rem !important;
+    font-size: 0.72rem !important;
+    border-radius: 50px !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+}
+.row-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 28px !important;
+    padding: 0 0.8rem !important;
+    font-size: 0.72rem !important;
+    border-radius: 50px !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    background-color: transparent !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    transition: var(--transition-fast) !important;
+}
+.row-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    border-color: #ffffff !important;
 }
 
 /* Glass Dropdown overlays with high z-index and high contrast text */

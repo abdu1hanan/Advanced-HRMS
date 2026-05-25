@@ -8,7 +8,7 @@
         <div class="row g-4 mb-4 align-items-stretch">
             <!-- Profile Card (Left) -->
             <div class="col-lg-5">
-                <div class="spotify-card h-100 p-4 d-flex flex-column justify-content-center">
+                <div class="spotify-card dashboard-top-card p-4 d-flex flex-column justify-content-center">
                     <div class="d-flex align-items-center mb-3 grid-separator">
                         <div class="bg-white text-dark rounded-circle p-3 me-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 50px; height: 50px;">
                             <i class="bi bi-shield-lock-fill fs-4"></i>
@@ -40,7 +40,7 @@
             <div class="col-lg-7">
                 <div class="row g-3 h-100">
                     <div class="col-sm-4">
-                        <div class="spotify-card h-100 p-4 d-flex flex-column justify-content-between">
+                        <div class="spotify-card dashboard-top-card p-4 d-flex flex-column justify-content-between">
                             <div>
                                 <span class="text-white small text-uppercase fw-semibold opacity-75" style="letter-spacing: 0.05em;">Active Users</span>
                                 <h2 class="display-6 fw-bold text-white mt-2 mb-0" style="letter-spacing: -0.05em;">{{ $stats['users'] }}</h2>
@@ -53,7 +53,7 @@
                         </div>
                     </div>
                     <div class="col-sm-4">
-                        <div class="spotify-card h-100 p-4 d-flex flex-column justify-content-between">
+                        <div class="spotify-card dashboard-top-card p-4 d-flex flex-column justify-content-between">
                             <div>
                                 <span class="text-white small text-uppercase fw-semibold opacity-75" style="letter-spacing: 0.05em;">Departments</span>
                                 <h2 class="display-6 fw-bold text-white mt-2 mb-0" style="letter-spacing: -0.05em;">{{ $stats['departments'] }}</h2>
@@ -66,7 +66,7 @@
                         </div>
                     </div>
                     <div class="col-sm-4">
-                        <div class="spotify-card h-100 p-4 d-flex flex-column justify-content-between">
+                        <div class="spotify-card dashboard-top-card p-4 d-flex flex-column justify-content-between">
                             <div>
                                 <span class="text-white small text-uppercase fw-semibold opacity-75" style="letter-spacing: 0.05em;">Pending Leaves</span>
                                 <h2 class="display-6 fw-bold text-white mt-2 mb-0" style="letter-spacing: -0.05em;">{{ $stats['pending_leaves'] }}</h2>
@@ -109,32 +109,32 @@
             
             <div class="list-group list-group-flush">
                 @forelse($recentRequests as $req)
-                    <div class="list-group-item bg-transparent border-bottom border-secondary py-3 px-0 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="list-group-item bg-transparent d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div class="d-flex align-items-center gap-3">
                             <div class="bg-dark text-white rounded-circle p-2.5 d-flex align-items-center justify-content-center border border-secondary" style="width: 40px; height: 40px;">
                                 <i class="bi bi-person-fill fs-5"></i>
                             </div>
                             <div>
-                                <div class="fw-semibold text-white fs-6" style="letter-spacing: -0.02em;">{{ $req->user->name }}</div>
-                                <small class="text-white opacity-75">{{ $req->user->department?->name ?? 'No Department' }} &bull; {{ $req->leaveType->name }}</small>
+                                <div class="fw-semibold text-white fs-6" style="letter-spacing: -0.02em; line-height: 1.1;">{{ $req->user->name }}</div>
+                                <small class="text-white opacity-75" style="line-height: 1.1;">{{ $req->user->department?->name ?? 'No Department' }} &bull; {{ $req->leaveType->name }}</small>
                             </div>
                         </div>
                         
                         <div class="d-flex align-items-center gap-4">
                             <div class="text-end">
-                                <div class="text-white fw-semibold small" style="letter-spacing: -0.02em;">{{ $req->start_date->format('M d') }} – {{ $req->end_date->format('M d, Y') }}</div>
-                                <small class="text-white opacity-50">{{ $req->days_count }} days total</small>
+                                <div class="text-white fw-semibold small" style="letter-spacing: -0.02em; line-height: 1.1;">{{ $req->start_date->format('M d') }} – {{ $req->end_date->format('M d, Y') }}</div>
+                                <small class="text-white opacity-50" style="line-height: 1.1;">{{ $req->days_count }} days total</small>
                             </div>
                             
                             @if($req->status === 'approved_by_manager')
-                                <span class="badge bg-white text-black fw-bold px-2.5 py-1.5"><i class="bi bi-check me-1"></i> Manager Approved</span>
+                                <span class="row-badge"><i class="bi bi-check me-1"></i> Manager Approved</span>
                             @elseif($req->status === 'rejected_by_manager')
-                                <span class="badge bg-white text-black fw-bold px-2.5 py-1.5"><i class="bi bi-x me-1"></i> Manager Rejected</span>
+                                <span class="row-badge"><i class="bi bi-x me-1"></i> Manager Rejected</span>
                             @else
-                                <span class="badge bg-white text-black fw-bold px-2.5 py-1.5"><i class="bi bi-clock-fill me-1"></i> Pending Manager</span>
+                                <span class="row-badge"><i class="bi bi-clock-fill me-1"></i> Pending Manager</span>
                             @endif
 
-                            <a href="{{ route('super-admin.leave-requests.index', ['status' => 'pending']) }}" class="btn btn-outline-secondary btn-sm py-1 px-3 fs-7">
+                            <a href="{{ route('super-admin.leave-requests.index', ['status' => 'pending']) }}" class="row-btn">
                                 Review Request
                             </a>
                         </div>
