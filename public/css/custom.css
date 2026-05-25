@@ -671,3 +671,72 @@ select.form-select option {
     border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
     padding: 1rem 1.25rem !important;
 }
+
+/* Stark Blue & Red filled user row action buttons (perfectly sized) */
+.row-btn-blue {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 32px !important;
+    padding: 0 1.2rem !important;
+    font-size: 0.75rem !important;
+    border-radius: 50px !important;
+    border: 1px solid #1e4ed8 !important;
+    background-color: #1e4ed8 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    transition: var(--transition-fast) !important;
+    cursor: pointer;
+}
+.row-btn-blue:hover {
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+    color: #ffffff !important;
+}
+
+.row-btn-red {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 32px !important;
+    padding: 0 1.2rem !important;
+    font-size: 0.75rem !important;
+    border-radius: 50px !important;
+    border: 1px solid #e11d48 !important;
+    background-color: #e11d48 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    transition: var(--transition-fast) !important;
+    cursor: pointer;
+}
+.row-btn-red:hover {
+    background-color: #f43f5e !important;
+    border-color: #f43f5e !important;
+    color: #ffffff !important;
+}
+
+/* Beautiful Neon Green badge outlines for Head Departments */
+.row-badge-green {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 28px !important;
+    padding: 0 0.8rem !important;
+    font-size: 0.72rem !important;
+    border-radius: 50px !important;
+    background-color: rgba(16, 185, 129, 0.15) !important;
+    color: #10b981 !important;
+    border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+}
+
+/* Spacious select widths to accommodate long descriptive texts */
+.role-select-width {
+    width: 175px !important;
+}
+.dept-select-width {
+    width: 185px !important;
+}

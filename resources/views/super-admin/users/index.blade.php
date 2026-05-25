@@ -9,20 +9,6 @@
         </div>
     </div>
 
-    @if(session('head_replace_prompt'))
-        <div class="alert alert-warning border-0 bg-warning text-black mb-4 py-3 px-4 rounded-3 small">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            Line manager already exists: <strong>{{ session('head_replace_prompt')['previous_head_name'] }}</strong>.
-            Save again with confirmation below or use the modal on next assign.
-        </div>
-    @endif
-
-    <div class="alert alert-info border-0 bg-dark text-white opacity-75 mb-4 py-3 px-4 rounded-3 small" style="border: 1px solid rgba(255, 255, 255, 0.08) !important;">
-        <i class="bi bi-info-circle-fill me-2 text-white"></i>
-        Set role to <strong>Admin</strong> and choose a <strong>Department</strong>, then Save — user becomes line manager for that department.
-        Super Admin cannot be assigned from this page.
-    </div>
-
     <!-- Main Table Card -->
     <div class="spotify-card mb-4">
         <div class="table-responsive">
@@ -31,11 +17,11 @@
                     <tr>
                         <th class="ps-4">Name</th>
                         <th>Email</th>
-                        <th>Role</th>
+                        <th>Role Status</th>
                         <th>Department</th>
                         <th>Line Manager / Status</th>
                         @if($showDeleted)<th>Deleted At</th>@endif
-                        <th class="pe-4 text-end">Actions</th>
+                        <th class="pe-4 text-end">Update Controls &amp; Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -61,7 +47,7 @@
                             </td>
                             <td>
                                 @foreach($user->headedDepartments as $headed)
-                                    <span class="row-badge me-1" style="background-color: #ffffff !important; color: #000000 !important;">Head of {{ $headed->name }}</span>
+                                    <span class="row-badge-green me-1">Head of {{ $headed->name }}</span>
                                 @endforeach
                                 @if($user->headedDepartments->isEmpty())
                                     <span class="text-white opacity-75">{{ $user->manager?->name ?? '—' }}</span>
@@ -72,9 +58,9 @@
                             @endif
                             <td class="pe-4 text-end">
                                 @if($showDeleted)
-                                    <form method="POST" action="{{ route('super-admin.users.restore', $user->id) }}" class="d-inline">
+                                    <form method="POST" action="{{ route('super-admin.users.restore', $user.id) }}" class="d-inline">
                                         @csrf
-                                        <button type="submit" class="btn btn-sm btn-primary py-1 px-3">Restore</button>
+                                        <button type="submit" class="row-btn-blue">Restore</button>
                                     </form>
                                 @elseif(!$user->isSuperAdmin())
                                     <form method="POST" action="{{ route('super-admin.users.update', $user) }}" class="row g-2 align-items-center justify-content-end user-update-form d-inline-flex" data-user-id="{{ $user->id }}" data-department-id="{{ $user->department_id }}">
@@ -82,30 +68,47 @@
                                         @method('PATCH')
                                         <input type="hidden" name="confirm_head_replace" value="0" class="confirm-head-replace-input">
                                         
-                                        <div class="col-auto">
-                                            <select name="role_id" class="form-select form-select-sm">
-                                                @foreach($roles as $role)
-                                                    <option value="{{ $role->id }}" @selected($user->role_id == $role->id)>{{ $role->label }}</option>
-                                                @endforeach
-                                            </select>
+                                        <!-- Choose Role Input with Header Label -->
+                                        <div class="col-auto text-start">
+                                            <div class="d-flex flex-column">
+                                                <span class="text-uppercase fw-bold opacity-50 mb-1" style="font-size: 0.62rem; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.65);">Choose Role</span>
+                                                <select name="role_id" class="form-select form-select-sm role-select-width">
+                                                    @foreach($roles as $role)
+                                                        <option value="{{ $role->id }}" @selected($user->role_id == $role->id)>{{ $role->label }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
-                                        <div class="col-auto">
-                                            <select name="department_id" class="form-select form-select-sm department-select">
-                                                <option value="">— Department —</option>
-                                                @foreach($departments as $dept)
-                                                    <option value="{{ $dept->id }}" @selected($user->department_id == $dept->id)>{{ $dept->name }}</option>
-                                                @endforeach
-                                            </select>
+
+                                        <!-- Choose Department Input with Header Label -->
+                                        <div class="col-auto text-start">
+                                            <div class="d-flex flex-column">
+                                                <span class="text-uppercase fw-bold opacity-50 mb-1" style="font-size: 0.62rem; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.65);">Choose Department</span>
+                                                <select name="department_id" class="form-select form-select-sm dept-select-width">
+                                                    <option value="">— Department —</option>
+                                                    @foreach($departments as $dept)
+                                                        <option value="{{ $dept->id }}" @selected($user->department_id == $dept->id)>{{ $dept->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
-                                        <div class="col-auto">
-                                            <button type="submit" class="btn btn-sm btn-primary py-1 px-3 btn-save-user">Save</button>
+
+                                        <!-- Actions Container -->
+                                        <div class="col-auto text-start">
+                                            <div class="d-flex flex-column">
+                                                <span class="text-uppercase fw-bold opacity-50 mb-1" style="font-size: 0.62rem; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.65); pointer-events: none; opacity: 0;">Actions</span>
+                                                <button type="submit" class="row-btn-blue btn-save-user">Save</button>
+                                            </div>
                                         </div>
                                     </form>
                                     
-                                    <form method="POST" action="{{ route('super-admin.users.destroy', $user) }}" class="d-inline ms-2" onsubmit="return confirm('This will remove the user profile from HRMS. They can be restored later. Continue?');">
+                                    <form method="POST" action="{{ route('super-admin.users.destroy', $user) }}" class="d-inline-flex ms-2" onsubmit="return confirm('This will remove the user profile from HRMS. They can be restored later. Continue?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="row-btn" style="border-color: rgba(220, 53, 69, 0.4) !important; color: #ff6b6b !important;">Delete</button>
+                                        <div class="d-flex flex-column">
+                                            <span class="text-uppercase fw-bold opacity-50 mb-1" style="font-size: 0.62rem; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.65); pointer-events: none; opacity: 0;">Actions</span>
+                                            <button type="submit" class="row-btn-red">Delete</button>
+                                        </div>
                                     </form>
                                 @else
                                     <span class="row-badge">System Administrator</span>
@@ -137,7 +140,7 @@
         @endif
     </div>
 
-    <!-- Hierarchy Replacement Confirmation Modal -->
+    <!-- Hierarchy Replacement Confirmation Modal (Pop-up standard for entire system) -->
     <div class="modal fade" id="replaceHeadModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -151,7 +154,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="row-btn" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary px-4" id="confirm-replace-head">Replace Manager</button>
+                    <button type="button" class="row-btn-blue px-4" id="confirm-replace-head">Replace Manager</button>
                 </div>
             </div>
         </div>
