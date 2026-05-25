@@ -36,7 +36,9 @@
 
 /* Base Body Styles */
 body {
-    background-color: var(--bg-base) !important;
+    background-color: #030303 !important; /* Pure modern dark background */
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px) !important; /* Thin barely visible white dotted grid */
+    background-size: 24px 24px !important;
     color: var(--text-secondary) !important;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     overflow: hidden !important;
@@ -84,21 +86,21 @@ h6,
 
 /* Glassmorphism Cards - Flat & Premium */
 .spotify-card {
-    background-color: var(--bg-surface) !important;
+    background-color: rgba(10, 10, 10, 0.94) !important; /* Darker carbon glass */
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border-color) !important;
     border-radius: var(--radius-lg);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: none !important; /* Remove drop shadows completely */
     transition: var(--transition-fast) !important;
     overflow: hidden;
 }
 
 .spotify-card:hover {
     border-color: var(--border-color) !important;
-    background-color: var(--bg-surface) !important;
+    background-color: rgba(10, 10, 10, 0.94) !important;
     transform: none !important;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: none !important; /* Still and shadowless */
 }
 
 /* Ultra-Clean Grid Separator Lines */
@@ -135,7 +137,7 @@ h6,
 
 /* Sidebar Absolute Black Panel & Toggle collapsing support */
 #sidebarMenu {
-    background-color: #050505 !important;
+    background-color: #050505 !important; /* Solid elegant black background */
     border-right: 1px solid var(--border-color);
     transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
@@ -275,26 +277,30 @@ h6,
 }
 
 .btn-primary {
-    background-color: var(--text-primary) !important;
-    border: 1px solid var(--text-primary) !important;
-    color: var(--bg-base) !important;
+    background-color: #ffffff !important;
+    border: 1px solid #ffffff !important;
+    color: #000000 !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .btn-primary:hover {
-    background-color: #e5e7eb !important;
-    border-color: #e5e7eb !important;
+    background-color: rgba(255, 255, 255, 0.85) !important;
+    border-color: rgba(255, 255, 255, 0.85) !important;
+    color: #000000 !important;
     transform: none !important;
 }
 
 .btn-outline-secondary {
-    border: 1px solid var(--border-color) !important;
-    color: var(--text-primary) !important;
-    background-color: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+    background-color: transparent !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .btn-outline-secondary:hover {
-    border-color: var(--text-primary) !important;
-    background-color: rgba(255, 255, 255, 0.08) !important;
+    border-color: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
 }
 
 .btn-danger {
@@ -372,9 +378,7 @@ h6,
 
 /* Glassmorphism Navbar & Circular Elements */
 .navbar-glass {
-    background-color: rgba(0, 0, 0, 0.75) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
+    background-color: #050505 !important; /* Solid elegant black background matching side menu */
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     position: relative !important;
     z-index: 1060 !important;
@@ -429,16 +433,20 @@ h6,
 
 .navbar-center-title {
     font-weight: 900 !important;
-    /* Revert to thick */
-    letter-spacing: 0.65em !important;
-    /* Far apart letter spacing */
-    text-indent: 0.65em;
-    /* Offsets trailing spacing to align dead-center */
-    font-size: 1.8rem !important;
-    /* Enlarge text to fill vertically */
+    letter-spacing: -0.02em !important; /* Modern compressed letter spacing */
+    text-indent: 0 !important;
+    font-size: 1.5rem !important; /* Sleek elegant size */
     line-height: 1.0 !important;
     text-transform: uppercase;
     color: #ffffff !important;
+}
+
+/* Beautiful margin & padding for center cards to prevent congestion */
+main {
+    padding-top: 1.5rem !important;
+    padding-left: 1.75rem !important;
+    padding-right: 1.75rem !important;
+    padding-bottom: 1.75rem !important;
 }
 
 /* Row hovers and list item actions */

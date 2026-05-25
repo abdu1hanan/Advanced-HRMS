@@ -1,73 +1,69 @@
 <x-app-layout>
     <x-slot name="header">Super Admin Dashboard</x-slot>
 
-    <!-- Top Row: Minimal glass layout side-by-side -->
+    <!-- Top Row: Minimal carbon glass layout side-by-side -->
     <div class="row g-4 mb-4 align-items-stretch">
-        <!-- Profile Card (Left) -->
+        <!-- Redesigned Profile Card (Left) -->
         <div class="col-lg-5">
             <div class="spotify-card dashboard-top-card p-4 d-flex flex-column justify-content-center">
                 <div class="d-flex align-items-center grid-separator">
-                    <div class="bg-white text-dark rounded-circle p-3 me-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px;">
-                        <i class="bi bi-shield-lock-fill fs-4"></i>
+                    <div class="rounded-circle border d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; border-color: rgba(255, 255, 255, 0.15) !important;">
+                        <i class="bi bi-shield-lock-fill fs-5 text-white"></i>
                     </div>
                     <div>
-                        <!-- Less bold username -->
-                        <h4 class="fw-semibold mb-0 text-white" style="letter-spacing: -0.03em; line-height: 1.1;">{{ auth()->user()->name }}</h4>
-                        <span class="text-white fw-medium small opacity-75">System Administrator</span>
+                        <h4 class="fw-semibold mb-0 text-white" style="letter-spacing: -0.02em; line-height: 1.1; font-size: 1.2rem;">{{ auth()->user()->name }}</h4>
+                        <span class="text-white fw-medium small opacity-50" style="font-size: 0.78rem;">System Administrator</span>
                     </div>
                 </div>
-                <div class="row g-2 text-start mt-1">
+                <div class="row g-2 text-start mt-2">
                     <div class="col-6">
-                        <label class="text-white small opacity-50 d-block mb-0">Role Hierarchy</label>
-                        <strong class="text-white fw-semibold">Super Admin</strong>
+                        <label class="text-white small opacity-50 d-block mb-0" style="font-size: 0.7rem;">Role Hierarchy</label>
+                        <strong class="text-white fw-semibold" style="font-size: 0.85rem;">Super Admin</strong>
                     </div>
                     <div class="col-6">
-                        <label class="text-white small opacity-50 d-block mb-0">Security Level</label>
-                        <strong class="text-white fw-semibold">System Level 5</strong>
+                        <label class="text-white small opacity-50 d-block mb-0" style="font-size: 0.7rem;">Security Level</label>
+                        <strong class="text-white fw-semibold" style="font-size: 0.85rem;">System Level 5</strong>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Dynamic Statistics Widget (Right) -->
+        <!-- Redesigned Minimalist Statistics Widgets (Right) -->
         <div class="col-lg-7">
             <div class="row g-3 h-100">
                 <div class="col-sm-4">
                     <div class="spotify-card dashboard-top-card p-4 d-flex flex-column justify-content-between">
                         <div>
-                            <span class="text-white small text-uppercase fw-semibold opacity-75" style="letter-spacing: 0.05em;">Active Users</span>
-                            <h2 class="display-6 fw-bold text-white mt-1 mb-0">{{ $stats['users'] }}</h2>
+                            <span class="text-uppercase fw-bold opacity-50" style="font-size: 0.65rem; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.7);">Active Users</span>
+                            <h2 class="fw-bold text-white mt-2 mb-0" style="font-size: 2.2rem; letter-spacing: -0.04em;">{{ $stats['users'] }}</h2>
                         </div>
-                        <div class="grid-separator"></div>
-                        <div class="d-flex align-items-center text-white small opacity-75">
-                            <i class="bi bi-people-fill me-2 fs-5"></i>
-                            <span class="fw-medium">Portal accounts</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="spotify-card dashboard-top-card p-4 d-flex flex-column justify-content-between">
-                        <div>
-                            <span class="text-white small text-uppercase fw-semibold opacity-75" style="letter-spacing: 0.05em;">Departments</span>
-                            <h2 class="display-6 fw-bold text-white mt-1 mb-0">{{ $stats['departments'] }}</h2>
-                        </div>
-                        <div class="grid-separator"></div>
-                        <div class="d-flex align-items-center text-white small opacity-75">
-                            <i class="bi bi-diagram-3-fill me-2 fs-5"></i>
-                            <span class="fw-medium">Operations units</span>
+                        <div class="d-flex align-items-center text-white opacity-50 small">
+                            <i class="bi bi-people-fill me-2 fs-6"></i>
+                            <span class="fw-medium" style="font-size: 0.75rem;">Portal accounts</span>
                         </div>
                     </div>
                 </div>
                 <div class="col-sm-4">
                     <div class="spotify-card dashboard-top-card p-4 d-flex flex-column justify-content-between">
                         <div>
-                            <span class="text-white small text-uppercase fw-semibold opacity-75" style="letter-spacing: 0.05em;">Pending Leaves</span>
-                            <h2 class="display-6 fw-bold text-white mt-1 mb-0">{{ $stats['pending_leaves'] }}</h2>
+                            <span class="text-uppercase fw-bold opacity-50" style="font-size: 0.65rem; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.7);">Departments</span>
+                            <h2 class="fw-bold text-white mt-2 mb-0" style="font-size: 2.2rem; letter-spacing: -0.04em;">{{ $stats['departments'] }}</h2>
                         </div>
-                        <div class="grid-separator"></div>
-                        <div class="d-flex align-items-center text-white small opacity-75">
-                            <i class="bi bi-clock-history me-2 fs-5"></i>
-                            <span class="fw-medium">Requires action</span>
+                        <div class="d-flex align-items-center text-white opacity-50 small">
+                            <i class="bi bi-diagram-3-fill me-2 fs-6"></i>
+                            <span class="fw-medium" style="font-size: 0.75rem;">Operations units</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="spotify-card dashboard-top-card p-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <span class="text-uppercase fw-bold opacity-50" style="font-size: 0.65rem; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.7);">Pending Leaves</span>
+                            <h2 class="fw-bold text-white mt-2 mb-0" style="font-size: 2.2rem; letter-spacing: -0.04em;">{{ $stats['pending_leaves'] }}</h2>
+                        </div>
+                        <div class="d-flex align-items-center text-white opacity-50 small">
+                            <i class="bi bi-clock-history me-2 fs-6"></i>
+                            <span class="fw-medium" style="font-size: 0.75rem;">Requires action</span>
                         </div>
                     </div>
                 </div>
