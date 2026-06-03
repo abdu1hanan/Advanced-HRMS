@@ -1,4 +1,4 @@
-# BeetleOps HRMS
+# HRMS
 
 A modern, fully-featured Human Resource Management System (HRMS) built with **Laravel**, **Blade**, **Bootstrap 5**, **jQuery/AJAX**, and **MySQL**. It features an elegant dark glassmorphism dashboard, granular role-based permissions, automated department hierarchies, and dynamic leave request/approval workflows.
 
@@ -6,7 +6,7 @@ Perfect as a ready-to-use internal tool or a standout project for your resume.
 
 ---
 
-## 🚀 Quick Start Guide
+## Quick Start Guide
 
 ### 1. Database Setup
 Create a new MySQL database for the project (e.g., using DBeaver, phpMyAdmin, or terminal):
@@ -24,8 +24,8 @@ Open `.env` and fill in your database details:
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=hrms_beetleops
-DB_USERNAME=root
+DB_DATABASE=your_db_name
+DB_USERNAME=your_mysql_username
 DB_PASSWORD=your_mysql_password
 ```
 
@@ -46,7 +46,7 @@ Open your browser and navigate to: `http://127.0.0.1:8000`
 
 ---
 
-## 🔑 Default Credentials
+## Default Credentials
 
 To explore the dashboard, log in with the default seeded credentials:
 
@@ -55,9 +55,9 @@ To explore the dashboard, log in with the default seeded credentials:
 
 ---
 
-## 🎨 Customizing the Company Logo
+## Customizing the Company Logo
 
-To make this HRMS your own, swap the default branding logo with your company logo:
+To make this HRMS your own, swap the default placeholder logo with your company logo:
 
 1. Place your custom logo in `public/images/logo.png`.
 2. **Recommended Size:** The logo should be **65x65 pixels** (or a square aspect ratio) so it matches the navbar toggle layout and doesn't break the responsive side menu container.
