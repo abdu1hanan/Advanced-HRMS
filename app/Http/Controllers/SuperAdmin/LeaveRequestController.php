@@ -66,7 +66,7 @@ class LeaveRequestController extends Controller
 
         $year = (int) now()->year;
         $query = LeaveRequest::with(['user.department', 'leaveType', 'reviewer', 'comments.user'])
-            ->whereIn('status', [LeaveRequest::STATUS_APPROVED, LeaveRequest::STATUS_REJECTED, LeaveRequest::STATUS_CANCELLED, 'rejected_by_manager', 'approved_by_manager']);
+            ->whereIn('status', [LeaveRequest::STATUS_APPROVED, LeaveRequest::STATUS_REJECTED, LeaveRequest::STATUS_CANCELLED, 'rejected_by_manager']);
 
         if (! empty($validated['status'])) {
             if ($validated['status'] === LeaveRequest::STATUS_REJECTED) {

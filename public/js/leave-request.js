@@ -25,7 +25,7 @@ $(function () {
             method: 'POST',
             data: form.serialize(),
             success: function (res) {
-                showLeaveAlert(res.message, 'success');
+                window.showToast(res.message, 'success');
                 form[0].reset();
                 updateBalanceCards(res.balances);
                 if (typeof refreshNotificationCount === 'function') {
@@ -39,7 +39,7 @@ $(function () {
                     const errs = Object.values(xhr.responseJSON.errors).flat();
                     if (errs.length) msg = errs.join(' ');
                 }
-                showLeaveAlert(msg, 'danger');
+                window.showToast(msg, 'danger');
             },
         });
     });
@@ -60,21 +60,19 @@ $(function () {
 
         $.post(window.leaveCancelUrl + '/' + cancelRequestId + '/cancel', function (res) {
             const id = cancelRequestId;
-            $('#leave-row-' + id).find('.badge')
-                .removeClass('bg-warning bg-warning-subtle text-dark-emphasis bg-info-subtle text-info-emphasis border-info-subtle text-dark')
-                .addClass('bg-secondary text-white')
-                .html('<i class="bi bi-dash-circle-fill me-1"></i> Cancelled');
+            const badgeEl = $('#leave-row-' + id).find('.row-badge-warning, .row-badge-blue, .row-badge-green, .row-badge-red, .row-badge-gray, .badge');
+            badgeEl.removeClass()
+                .addClass('row-badge-gray')
+                .html('<i class="bi bi-x-circle me-1"></i> Cancelled');
             $('#leave-row-' + id).find('.btn-cancel-leave').remove();
             updateBalanceCards(res.balances);
             
-            // Show Success Modal
-            $('#cancelSuccessMsg').text(res.message);
-            const successModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('cancelSuccessModal'));
-            successModal.show();
+            // Show Success Snackbar
+            window.showToast(res.message, 'success');
 
             setTimeout(function () { location.reload(); }, 1200);
         }).fail(function (xhr) {
-            alert(xhr.responseJSON?.message || 'Could not cancel request.');
+            window.showToast(xhr.responseJSON?.message || 'Could not cancel request.', 'danger');
         });
     });
 });

@@ -24,7 +24,7 @@
                 <ul class="dropdown-menu dropdown-menu-end shadow border border-secondary bg-dark text-white p-2" style="min-width: 320px; max-height: 400px; overflow-y: auto;" id="notification-list">
                     <li class="dropdown-header d-flex justify-content-between align-items-center text-white opacity-75">
                         Notifications
-                        <button type="button" class="btn btn-link btn-sm p-0 text-white-50 text-decoration-none" id="mark-all-read">Mark all read</button>
+                        <button type="button" class="btn btn-link btn-sm p-0 text-white-50 text-decoration-underline" id="mark-all-read" style="text-underline-offset: 3px; font-weight: 500;">Mark all read</button>
                     </li>
                     <li><hr class="dropdown-divider border-secondary my-1.5"></li>
                     <li class="px-3 py-2 text-white-50 small text-center" id="notification-empty">No notifications</li>

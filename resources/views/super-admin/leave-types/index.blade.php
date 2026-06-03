@@ -1,137 +1,143 @@
 <x-app-layout>
     <x-slot name="header">Leave Types</x-slot>
     
-    <div class="row g-4">
-        <!-- Add / Edit Form -->
-        <div class="col-lg-4">
-            <div class="card shadow-sm position-sticky" style="top: 20px;">
-                <div class="card-header fw-bold" id="formCardHeader">Add Leave Type</div>
-                <div class="card-body">
-                    <form method="POST" action="{{ route('super-admin.leave-types.store') }}" id="leaveTypeForm">
-                        @csrf
-                        <input type="hidden" name="_method" id="formMethod" value="PATCH" disabled>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Name <i class="bi bi-info-circle ms-1 text-muted" data-bs-toggle="tooltip" title="The name of the leave type (e.g. Annual Leave, Sick Leave)"></i></label>
-                            <input type="text" name="name" id="lt_name" class="form-control" placeholder="e.g. Annual Leave" required>
-                            <div class="form-text small">Identifier for this leave type.</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Max days/year <i class="bi bi-info-circle ms-1 text-muted" data-bs-toggle="tooltip" title="The absolute hard limit of days any employee can take in a single year for this leave."></i></label>
-                            <input type="number" name="max_days_per_year" id="lt_max_days" class="form-control" placeholder="e.g. 30" required min="0">
-                            <div class="form-text small">Ceiling limit for taken leaves per year.</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Default entitled <i class="bi bi-info-circle ms-1 text-muted" data-bs-toggle="tooltip" title="The standard starting balance given to employees at the beginning of the year."></i></label>
-                            <input type="number" name="default_entitled" id="lt_default" class="form-control" placeholder="e.g. 20" required min="0">
-                            <div class="form-text small">Default starting balance for new cycles.</div>
-                        </div>
-                        
-                        <div class="mb-3 p-3 border rounded bg-light">
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" name="allow_carry_forward" value="1" id="lt_allow_cf">
-                                <label class="form-check-label fw-semibold" for="lt_allow_cf">
-                                    Allow carry forward <i class="bi bi-info-circle ms-1 text-muted" data-bs-toggle="tooltip" title="If checked, employees can roll over unused days to the next year."></i>
-                                </label>
-                            </div>
-                            <div class="form-text small mb-2">Enable rolling over unused balances.</div>
-                            
-                            <label class="form-label fw-semibold small">Max carry forward <i class="bi bi-info-circle ms-1 text-muted" data-bs-toggle="tooltip" title="Maximum number of unused days that can be rolled over."></i></label>
-                            <input type="number" name="max_carry_forward_days" id="lt_max_cf" class="form-control form-control-sm" placeholder="e.g. 5" value="0" disabled>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100" id="formSubmitBtn">Add Leave Type</button>
-                        <button type="button" class="btn btn-outline-secondary w-100 mt-2 d-none" id="formCancelBtn" onclick="resetForm()">Cancel Edit</button>
-                    </form>
-                </div>
-            </div>
+    <!-- Full Width Add/Edit Form -->
+    <div class="spotify-card mb-4">
+        <div class="card-header-area px-4 pt-4">
+            <h6 class="text-uppercase text-white fw-semibold small mb-2 opacity-75" style="letter-spacing: 0.05em;" id="formCardHeader">Add Leave Type</h6>
+            <div class="grid-separator"></div>
         </div>
-        
-        <!-- List of Leave Types -->
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header">Existing Leave Types</div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0 align-middle">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Max/yr</th>
-                                <th>Default</th>
-                                <th>Carry Forward</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($leaveTypes as $type)
-                                <tr>
-                                    <td class="fw-medium">{{ $type->name }}</td>
-                                    <td>{{ $type->max_days_per_year }}</td>
-                                    <td>{{ $type->settings->first()?->default_entitled ?? $type->max_days_per_year }}</td>
-                                    <td>
-                                        @if($type->allow_carry_forward)
-                                            <span class="badge bg-info text-dark">Yes (Max: {{ $type->max_carry_forward_days }})</span>
-                                        @else
-                                            <span class="text-muted small">No</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if($type->is_active)
-                                            <span class="badge bg-success">Active</span>
-                                        @else
-                                            <span class="badge bg-secondary">Disabled</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-sm btn-outline-primary me-1" 
-                                            onclick="editLeaveType({{ $type->id }}, '{{ addslashes($type->name) }}', {{ $type->max_days_per_year }}, {{ $type->settings->first()?->default_entitled ?? $type->max_days_per_year }}, {{ $type->allow_carry_forward ? 1 : 0 }}, {{ $type->max_carry_forward_days ?? 0 }})">
-                                            Edit
-                                        </button>
-                                        
-                                        <form method="POST" action="{{ route('super-admin.leave-types.toggle-status', $type) }}" class="d-inline toggle-status-form" data-pending="{{ $type->pending_requests_count }}" data-is-active="{{ $type->is_active ? 'true' : 'false' }}">
-                                            @csrf
-                                            @if($type->is_active)
-                                                <button type="button" class="btn btn-sm btn-outline-warning btn-toggle-status me-1">Disable</button>
-                                            @else
-                                                <button type="button" class="btn btn-sm btn-outline-success btn-toggle-status me-1">Enable</button>
-                                            @endif
-                                        </form>
-
-                                        <form method="POST" action="{{ route('super-admin.leave-types.destroy', $type) }}" class="d-inline delete-lt-form" data-pending="{{ $type->pending_requests_count }}">
-                                            @csrf @method('DELETE')
-                                            <button type="button" class="btn btn-sm btn-outline-danger btn-delete-lt">Delete</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="text-center py-4 text-muted">No leave types configured yet.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+        <div class="px-4 pb-4 pt-2">
+            <form method="POST" action="{{ route('super-admin.leave-types.store') }}" id="leaveTypeForm">
+                @csrf
+                <input type="hidden" name="_method" id="formMethod" value="PATCH" disabled>
+                
+                <div class="row g-4 mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label text-white opacity-75 small">Name <i class="bi bi-info-circle ms-1 text-white opacity-50" data-bs-toggle="tooltip" title="The name of the leave type (e.g. Annual Leave, Sick Leave)"></i></label>
+                        <input type="text" name="name" id="lt_name" class="form-control bg-dark border-secondary text-white" placeholder="e.g. Annual Leave" required>
+                        <div class="form-text text-white opacity-50 small mt-1" style="font-size: 0.7rem;">Identifier for this leave type.</div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label text-white opacity-75 small">Max days/year <i class="bi bi-info-circle ms-1 text-white opacity-50" data-bs-toggle="tooltip" title="The absolute hard limit of days any employee can take in a single year for this leave."></i></label>
+                        <input type="number" name="max_days_per_year" id="lt_max_days" class="form-control bg-dark border-secondary text-white" placeholder="e.g. 30" required min="0">
+                        <div class="form-text text-white opacity-50 small mt-1" style="font-size: 0.7rem;">Ceiling limit for taken leaves per year.</div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label text-white opacity-75 small">Default entitled <i class="bi bi-info-circle ms-1 text-white opacity-50" data-bs-toggle="tooltip" title="The standard starting balance given to employees at the beginning of the year."></i></label>
+                        <input type="number" name="default_entitled" id="lt_default" class="form-control bg-dark border-secondary text-white" placeholder="e.g. 20" required min="0">
+                        <div class="form-text text-white opacity-50 small mt-1" style="font-size: 0.7rem;">Default starting balance for new cycles.</div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label text-white opacity-75 small">Carry Forward <i class="bi bi-info-circle ms-1 text-white opacity-50" data-bs-toggle="tooltip" title="Enable rolling over unused balances to the next year."></i></label>
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input bg-dark border-secondary" type="checkbox" name="allow_carry_forward" value="1" id="lt_allow_cf">
+                                <label class="form-check-label text-white opacity-75 small" for="lt_allow_cf">Allow</label>
+                            </div>
+                            <input type="number" name="max_carry_forward_days" id="lt_max_cf" class="form-control form-control-sm bg-dark border-secondary text-white w-50" placeholder="Max (e.g. 5)" value="0" disabled>
+                        </div>
+                        <div class="form-text text-white opacity-50 small mt-1" style="font-size: 0.7rem;">Enable rolling over unused balances.</div>
+                    </div>
                 </div>
-            </div>
+                
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-2 border-top border-secondary border-opacity-25">
+                    <button type="button" class="row-btn d-none" id="formCancelBtn" onclick="resetForm()">Cancel Edit</button>
+                    <button type="submit" class="row-btn-blue" id="formSubmitBtn">Add Leave Type</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- List of Leave Types -->
+    <div class="spotify-card mb-4">
+        <div class="card-header-area px-4 pt-4 d-none">
+            <h6 class="text-uppercase text-white fw-semibold small mb-2 opacity-75" style="letter-spacing: 0.05em;">Existing Leave Types</h6>
+            <div class="grid-separator"></div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Name</th>
+                        <th>Max/yr</th>
+                        <th>Default</th>
+                        <th>Carry Forward</th>
+                        <th>Status</th>
+                        <th class="pe-4 text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($leaveTypes as $type)
+                        <tr>
+                            <td class="ps-4 fw-semibold text-white">{{ $type->name }}</td>
+                            <td><span class="text-white opacity-75">{{ $type->max_days_per_year }}</span></td>
+                            <td><span class="text-white opacity-75">{{ $type->settings->first()?->default_entitled ?? $type->max_days_per_year }}</span></td>
+                            <td>
+                                @if($type->allow_carry_forward)
+                                    <span class="row-badge-blue">Yes (Max: {{ $type->max_carry_forward_days }})</span>
+                                @else
+                                    <span class="text-white opacity-50 small">—</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($type->is_active)
+                                    <span class="row-badge-green"><i class="bi bi-circle-fill text-success" style="font-size: 0.5rem; margin-right: 4px;"></i> Active</span>
+                                @else
+                                    <span class="row-badge" style="background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.5); border-color: transparent;">Disabled</span>
+                                @endif
+                            </td>
+                            <td class="pe-4 text-end">
+                                <div class="d-inline-flex gap-2">
+                                    <button type="button" class="row-btn-outline-blue" 
+                                        onclick="editLeaveType({{ $type->id }}, '{{ addslashes($type->name) }}', {{ $type->max_days_per_year }}, {{ $type->settings->first()?->default_entitled ?? $type->max_days_per_year }}, {{ $type->allow_carry_forward ? 1 : 0 }}, {{ $type->max_carry_forward_days ?? 0 }})">
+                                        Edit
+                                    </button>
+                                    
+                                    <form method="POST" action="{{ route('super-admin.leave-types.toggle-status', $type) }}" class="d-inline toggle-status-form" data-pending="{{ $type->pending_requests_count }}" data-is-active="{{ $type->is_active ? 'true' : 'false' }}">
+                                        @csrf
+                                        @if($type->is_active)
+                                            <button type="button" class="row-btn-outline-warning btn-toggle-status">Disable</button>
+                                        @else
+                                            <button type="button" class="row-btn-outline-success btn-toggle-status">Enable</button>
+                                        @endif
+                                    </form>
+
+                                    <form method="POST" action="{{ route('super-admin.leave-types.destroy', $type) }}" class="d-inline delete-lt-form" data-pending="{{ $type->pending_requests_count }}">
+                                        @csrf @method('DELETE')
+                                        <button type="button" class="row-btn-outline-red btn-delete-lt">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-white opacity-50">No leave types configured yet.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 
+    @push('modals')
     <!-- Alert Modal (Cannot Delete) -->
     <div class="modal fade" id="alertModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Cannot Delete Leave Type</h5>
+                    <h5 class="modal-title fw-bold text-white fs-6"><i class="bi bi-exclamation-circle-fill me-2 text-warning"></i> Cannot Delete Leave Type</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <p>There are pending leave requests for this type.</p>
-                    <p class="mb-0 text-muted small">You cannot delete a leave type that is currently in use. You can disable it instead to prevent new requests.</p>
+                <div class="modal-body py-4">
+                    <p class="text-white fs-6">There are pending leave requests for this type.</p>
+                    <p class="mb-0 text-white opacity-50 small">You cannot delete a leave type that is currently in use. You can disable it instead to prevent new requests.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                    <button type="button" class="row-btn-blue" data-bs-dismiss="modal" style="width: 145px;">OK</button>
                 </div>
             </div>
         </div>
@@ -139,21 +145,19 @@
 
     <!-- Disable Confirmation Modal -->
     <div class="modal fade" id="disableLtModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content border-warning">
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title">Disable Leave Type</h5>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-white fs-6"><i class="bi bi-pause-circle-fill me-2 text-warning"></i> Disable Leave Type</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <p class="fs-5">Are you sure you want to disable this leave type?</p>
-                    <div class="alert alert-warning mb-0">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i> All pending leave requests of this type will be automatically rejected. Should we proceed?
-                    </div>
+                <div class="modal-body py-4">
+                    <p class="text-white fs-6">Are you sure you want to disable this leave type?</p>
+                    <p class="mb-0 text-white opacity-50 small"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> All pending leave requests of this type will be automatically rejected. Should we proceed?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-warning" id="confirmDisableLt">Yes, Proceed</button>
+                    <button type="button" class="row-btn" data-bs-dismiss="modal" style="width: 145px;">Cancel</button>
+                    <button type="button" class="row-btn-outline-warning" id="confirmDisableLt" style="width: 145px;">Yes, Proceed</button>
                 </div>
             </div>
         </div>
@@ -161,25 +165,24 @@
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteLtModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content border-danger">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">Delete Leave Type</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-white fs-6"><i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i> Delete Leave Type</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <p class="fs-5">Are you sure you want to delete this leave type?</p>
-                    <div class="alert alert-danger mb-0">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i> <strong>Warning:</strong> This will reflect changes on each user profile. Their leave balances and requests for this type will be deleted, and the records will not be maintained!
-                    </div>
+                <div class="modal-body py-4">
+                    <p class="text-white fs-6">Are you sure you want to delete this leave type?</p>
+                    <p class="mb-0 text-white opacity-50 small"><strong>Warning:</strong> This will reflect changes on each user profile. Their leave balances and requests for this type will be deleted, and the records will not be maintained!</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteLt">Yes, Delete Permanently</button>
+                    <button type="button" class="row-btn" data-bs-dismiss="modal" style="width: 145px;">Cancel</button>
+                    <button type="button" class="row-btn-red" id="confirmDeleteLt" style="width: 145px;">Confirm Delete</button>
                 </div>
             </div>
         </div>
     </div>
+    @endpush
 
     @push('scripts')
         <script>

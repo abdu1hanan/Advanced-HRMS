@@ -66,7 +66,7 @@ $(function () {
                 loadNotifications();
             })
             .fail(function () {
-                alert('Could not mark notifications as read.');
+                window.showToast('Could not mark notifications as read.', 'danger');
             });
     });
 });

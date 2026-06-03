@@ -37,7 +37,9 @@ class LeaveSettingsController extends Controller
 
     public function overrides(Request $request): View
     {
-        $users = User::orderBy('name')->get();
+        $users = User::whereHas('role', fn ($q) => $q->where('name', '!=', \App\Models\Role::SUPER_ADMIN))
+            ->orderBy('name')
+            ->get();
         $leaveTypes = LeaveType::where('is_active', true)->orderBy('name')->get();
         $year = (int) now()->year;
 

@@ -49,7 +49,7 @@ $(function () {
                 }
             })
             .fail(function () {
-                alert('Could not verify department head. Please try again.');
+                window.showToast('Could not verify department head. Please try again.', 'danger');
             });
     });
 

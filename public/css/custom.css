@@ -37,7 +37,7 @@
 /* Base Body Styles */
 body {
     background-color: #030303 !important; /* Pure modern dark background */
-    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px) !important; /* Thin barely visible white dotted grid */
+    background-image: radial-gradient(rgba(255, 255, 255, 0.095) 1px, transparent 1px) !important; /* Thin crisp white dotted grid */
     background-size: 24px 24px !important;
     color: var(--text-secondary) !important;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
@@ -122,6 +122,7 @@ h6,
     padding: 0.5rem 1.2rem !important;
     font-size: 0.9rem !important;
     transition: var(--transition-fast) !important;
+    color-scheme: dark !important; /* Force native controls (like number spinners and date pickers) to render in dark mode */
 }
 
 .form-control:focus,
@@ -149,9 +150,63 @@ h6,
     padding-right: 0 !important;
 }
 
-#sidebarMenu.collapsed .flex-grow-1,
-#sidebarMenu.collapsed .mt-auto {
+#sidebarMenu.collapsed .flex-grow-1 {
     display: none !important;
+}
+
+#sidebarMenu.collapsed .mt-auto {
+    display: block !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+#sidebarMenu.collapsed .mt-auto ul {
+    border-top: none !important;
+    padding-top: 0 !important;
+}
+
+#sidebarMenu.collapsed .mt-auto .nav-item:not(.logout-item) {
+    display: none !important;
+}
+
+#sidebarMenu.collapsed .logout-item {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 0 !important;
+}
+
+#sidebarMenu.collapsed .logout-item a {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 0.8rem 0 !important;
+}
+
+#sidebarMenu.collapsed .logout-item a .logout-text {
+    display: none !important;
+}
+
+#sidebarMenu.collapsed .logout-item a .logout-icon {
+    margin-right: 0 !important;
+    width: 38px;
+    height: 38px;
+    border-radius: 50% !important;
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+#sidebarMenu.collapsed .logout-item a:hover .logout-icon {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
 }
 
 #sidebarMenu.collapsed .collapsed-vertical-brand {
@@ -253,7 +308,22 @@ h6,
     font-weight: 900;
     font-size: 2.2rem;
     letter-spacing: -0.08em;
-    color: rgba(255, 255, 255, 0.06);
+    
+    /* Beautiful continuous color gradient representing all system colors */
+    background: linear-gradient(
+        to bottom,
+        #10b981, /* Green */
+        #3b82f6, /* Blue */
+        #f59e0b, /* Yellow */
+        #e11d48, /* Red */
+        #ffffff, /* White */
+        #10b981  /* Seamless loop back to green */
+    );
+    background-size: 100% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0.25;
+    
     /* Stunning watermark appearance */
     text-align: center;
     height: 90%;
@@ -263,6 +333,19 @@ h6,
     white-space: nowrap;
     margin: auto;
     transform: rotate(180deg);
+    
+    /* Smooth transition & animations */
+    animation: gradientShift 6s linear infinite;
+}
+
+/* Seamless gradient shifting along the vertical axis */
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 0%;
+    }
+    100% {
+        background-position: 0% -200%;
+    }
 }
 
 /* Fully Circular Buttons */
@@ -306,6 +389,23 @@ h6,
 .btn-danger {
     border-radius: 50px !important;
     font-weight: 700 !important;
+}
+
+.btn-deleted-tab {
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+    background-color: transparent !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.btn-deleted-tab:hover {
+    border-color: #e11d48 !important;
+    background-color: #e11d48 !important;
+    color: #ffffff !important;
+}
+.btn-deleted-tab.active {
+    border-color: #e11d48 !important;
+    background-color: #e11d48 !important;
+    color: #ffffff !important;
 }
 
 /* Custom Table borders and structures */
@@ -519,9 +619,9 @@ main {
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    height: 28px !important;
-    padding: 0 0.8rem !important;
-    font-size: 0.72rem !important;
+    height: 32px !important;
+    padding: 0 1.2rem !important;
+    font-size: 0.75rem !important;
     border-radius: 50px !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     background-color: transparent !important;
@@ -587,6 +687,31 @@ main {
 .notification-item .text-muted {
     font-size: 0.7rem !important;
     color: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* Custom sleek dark scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Pagination Text Readability */
+.pagination-summary,
+nav[aria-label="Pagination Navigation"] .text-muted,
+.border-top > nav > div > div > p.text-muted,
+.px-4.py-3 > nav > div > div > p.text-muted,
+.px-4.py-3 .text-muted {
+    color: rgba(255, 255, 255, 0.5) !important;
 }
 
 /* Dropdown Option stark white list text */
@@ -717,6 +842,28 @@ select.form-select option {
     color: #ffffff !important;
 }
 
+.row-btn-green {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 32px !important;
+    padding: 0 1.2rem !important;
+    font-size: 0.75rem !important;
+    border-radius: 50px !important;
+    border: 1px solid #10b981 !important;
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    transition: var(--transition-fast) !important;
+    cursor: pointer;
+}
+.row-btn-green:hover {
+    background-color: #059669 !important;
+    border-color: #059669 !important;
+    color: #ffffff !important;
+}
+
 /* Beautiful Neon Green badge outlines for Head Departments */
 .row-badge-green {
     display: inline-flex !important;
@@ -733,12 +880,141 @@ select.form-select option {
     line-height: 1 !important;
 }
 
+.row-badge-red {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 28px !important;
+    padding: 0 0.8rem !important;
+    font-size: 0.72rem !important;
+    border-radius: 50px !important;
+    background-color: rgba(220, 53, 69, 0.15) !important;
+    color: #ff6b6b !important;
+    border: 1px solid rgba(220, 53, 69, 0.3) !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+}
+
+.row-badge-blue {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 28px !important;
+    padding: 0 0.8rem !important;
+    font-size: 0.72rem !important;
+    border-radius: 50px !important;
+    background-color: rgba(13, 110, 253, 0.15) !important;
+    color: #3b82f6 !important;
+    border: 1px solid rgba(13, 110, 253, 0.3) !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+}
+
+.row-badge-warning {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 28px !important;
+    padding: 0 0.8rem !important;
+    font-size: 0.72rem !important;
+    border-radius: 50px !important;
+    background-color: rgba(245, 158, 11, 0.15) !important;
+    color: #fcd34d !important;
+    border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+}
+
+.row-badge-gray {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 28px !important;
+    padding: 0 0.8rem !important;
+    font-size: 0.72rem !important;
+    border-radius: 50px !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.75) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+}
+
 /* Spacious select widths to accommodate long descriptive texts */
 .role-select-width {
     width: 175px !important;
 }
 .dept-select-width {
     width: 185px !important;
+}
+
+/* Blue outline action buttons */
+.row-btn-outline-blue {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 32px !important;
+    padding: 0 1.2rem !important;
+    font-size: 0.75rem !important;
+    border-radius: 50px !important;
+    border: 1px solid rgba(13, 110, 253, 0.4) !important;
+    background-color: transparent !important;
+    color: #3b82f6 !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    transition: var(--transition-fast) !important;
+    cursor: pointer;
+}
+.row-btn-outline-blue:hover {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+    color: #ffffff !important;
+}
+
+/* Yellow/Warning outline action buttons */
+.row-btn-outline-warning {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 32px !important;
+    padding: 0 1.2rem !important;
+    font-size: 0.75rem !important;
+    border-radius: 50px !important;
+    border: 1px solid rgba(245, 158, 11, 0.4) !important;
+    background-color: transparent !important;
+    color: #f59e0b !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    transition: var(--transition-fast) !important;
+    cursor: pointer;
+}
+.row-btn-outline-warning:hover {
+    background-color: #f59e0b !important;
+    border-color: #f59e0b !important;
+    color: #000000 !important;
+}
+
+/* Green/Success outline action buttons */
+.row-btn-outline-success {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 32px !important;
+    padding: 0 1.2rem !important;
+    font-size: 0.75rem !important;
+    border-radius: 50px !important;
+    border: 1px solid rgba(16, 185, 129, 0.4) !important;
+    background-color: transparent !important;
+    color: #10b981 !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    transition: var(--transition-fast) !important;
+    cursor: pointer;
+}
+.row-btn-outline-success:hover {
+    background-color: #10b981 !important;
+    border-color: #10b981 !important;
+    color: #ffffff !important;
 }
 
 /* Red outline action buttons (restored for delete buttons in rows) */
@@ -764,6 +1040,29 @@ select.form-select option {
     color: #ffffff !important;
 }
 
+/* Green outline action buttons for modal confirms */
+.row-btn-outline-green {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 32px !important;
+    padding: 0 1.2rem !important;
+    font-size: 0.75rem !important;
+    border-radius: 50px !important;
+    border: 1px solid rgba(16, 185, 129, 0.4) !important;
+    background-color: transparent !important;
+    color: #10b981 !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    transition: var(--transition-fast) !important;
+    cursor: pointer;
+}
+.row-btn-outline-green:hover {
+    background-color: #10b981 !important;
+    border-color: #10b981 !important;
+    color: #ffffff !important;
+}
+
 /* Sleek floating top-centered popup alerts (standard for system) */
 .sleek-toast-container {
     position: fixed;
@@ -783,7 +1082,7 @@ select.form-select option {
     pointer-events: auto;
     background-color: rgba(10, 10, 10, 0.96) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-radius: 50px !important; /* Stark premium rounded edge capsule */
+    border-radius: var(--radius-md) !important;
     padding: 0.65rem 1.4rem !important;
     color: #ffffff !important;
     display: flex;
@@ -817,4 +1116,39 @@ select.form-select option {
         opacity: 1;
         transform: translate(-50%, 0) !important;
     }
+}
+
+/* Premium Notification mark all read hover glow link */
+#mark-all-read {
+    transition: var(--transition-fast) !important;
+}
+#mark-all-read:hover {
+    color: #ffffff !important;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+/* Premium Slim Scrollbar for Dashboards and Streams */
+.scrollable-stream {
+    max-height: 272px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    padding-right: 6px;
+}
+
+.scrollable-stream::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollable-stream::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollable-stream::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+}
+
+.scrollable-stream::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3);
 }

@@ -3,9 +3,10 @@
     
     <form class="row g-3 mb-4 align-items-center" method="GET" id="filterForm">
         <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">Status Filter</label>
-            <select name="status" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()">
-                <option value="">All Active Leaves</option>
+            <label class="form-label small text-white opacity-50 mb-1">Status Filter</label>
+            <select name="status" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()"
+                    style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #ffffff !important;">
+                <option value="" class="bg-dark text-white">All Active Leaves</option>
                 @foreach([
                     'pending' => 'Manager Approval Pending',
                     'approved_by_manager' => 'Manager Approved (CEO Pending)',
@@ -14,87 +15,93 @@
                     'rejected' => 'Rejected (by CEO)',
                     'cancelled' => 'Cancelled'
                 ] as $value => $label)
-                    <option value="{{ $value }}" @selected(request('status')==$value)>{{ $label }}</option>
+                    <option value="{{ $value }}" @selected(request('status')==$value) class="bg-dark text-white">{{ $label }}</option>
                 @endforeach
             </select>
         </div>
         <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">Department Filter</label>
-            <select name="department_id" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()">
-                <option value="">All departments</option>
+            <label class="form-label small text-white opacity-50 mb-1">Department Filter</label>
+            <select name="department_id" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()"
+                    style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #ffffff !important;">
+                <option value="" class="bg-dark text-white">All departments</option>
                 @foreach($departments as $dept)
-                    <option value="{{ $dept->id }}" @selected(request('department_id')==$dept->id)>{{ $dept->name }}</option>
+                    <option value="{{ $dept->id }}" @selected(request('department_id')==$dept->id) class="bg-dark text-white">{{ $dept->name }}</option>
                 @endforeach
             </select>
         </div>
         <div class="col-md-3">
-            <label class="form-label small text-muted mb-1">Employee Filter</label>
-            <select name="user_id" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()">
-                <option value="">All employees</option>
+            <label class="form-label small text-white opacity-50 mb-1">Employee Filter</label>
+            <select name="user_id" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()"
+                    style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #ffffff !important;">
+                <option value="" class="bg-dark text-white">All employees</option>
                 @foreach($allUsers as $u)
-                    <option value="{{ $u->id }}" @selected(request('user_id')==$u->id)>{{ $u->name }}</option>
+                    <option value="{{ $u->id }}" @selected(request('user_id')==$u->id) class="bg-dark text-white">{{ $u->name }}</option>
                 @endforeach
             </select>
         </div>
         <div class="col-md-3">
-            <label class="form-label small text-muted mb-1">Leave Type Filter</label>
-            <select name="leave_type_id" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()">
-                <option value="">All types</option>
+            <label class="form-label small text-white opacity-50 mb-1">Leave Type Filter</label>
+            <select name="leave_type_id" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()"
+                    style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #ffffff !important;">
+                <option value="" class="bg-dark text-white">All types</option>
                 @foreach($leaveTypes as $type)
-                    <option value="{{ $type->id }}" @selected(request('leave_type_id')==$type->id)>{{ $type->name }}</option>
+                    <option value="{{ $type->id }}" @selected(request('leave_type_id')==$type->id) class="bg-dark text-white">{{ $type->name }}</option>
                 @endforeach
             </select>
         </div>
         <div class="col-md-2 text-end mt-auto">
-            <a href="{{ route('admin.team.leaves') }}" class="btn btn-outline-secondary shadow-sm w-100"><i class="bi bi-x-circle me-1"></i> Clear</a>
+            <a href="{{ route('admin.team.leaves') }}" class="btn btn-outline-secondary text-white w-100 d-flex align-items-center justify-content-center gap-1.5" 
+               style="background-color: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.15); height: 38px;"><i class="bi bi-x-circle me-1"></i> Clear</a>
         </div>
     </form>
     
-    <div class="card shadow-sm border-0">
+    <div class="spotify-card mb-4">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+                <thead>
                     <tr>
-                        <th class="ps-4">Employee</th>
-                        <th>Department</th>
-                        <th>Type</th>
-                        <th>Dates</th>
-                        <th>Days</th>
-                        <th>Status</th>
-                        <th class="text-end pe-4">Actions</th>
+                        <th class="ps-4 text-white opacity-50">Employee</th>
+                        <th class="text-white opacity-50">Department</th>
+                        <th class="text-white opacity-50">Type</th>
+                        <th class="text-white opacity-50">Dates</th>
+                        <th class="text-white opacity-50">Entry On</th>
+                        <th class="text-white opacity-50">Days</th>
+                        <th class="text-white opacity-50">Status</th>
+                        <th class="text-end pe-4 text-white opacity-50">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($requests as $request)
-                        <tr class="cursor-pointer">
-                            <td class="ps-4 fw-medium">{{ $request->user->name }}</td>
-                            <td>{{ $request->user->department?->name ?? 'N/A' }}</td>
-                            <td>{{ $request->leaveType->name }}</td>
-                            <td>{{ $request->start_date->format('M d, Y') }} – {{ $request->end_date->format('M d, Y') }}</td>
-                            <td>{{ $request->days_count }}</td>
+                        <tr class="cursor-pointer hover-highlight">
+                            <td class="ps-4 fw-semibold text-white">{{ $request->user->name }}</td>
+                            <td><span class="text-white opacity-75">{{ $request->user->department?->name ?? 'N/A' }}</span></td>
+                            <td><span class="text-white opacity-75">{{ $request->leaveType->name }}</span></td>
+                            <td><span class="text-white opacity-75">{{ $request->start_date->format('M d, Y') }} – {{ $request->end_date->format('M d, Y') }}</span></td>
+                            <td><span class="text-white opacity-75">{{ $request->created_at->format('M d, Y') }}</span></td>
+                            <td class="text-white">{{ $request->days_count }}</td>
                             <td>
                                 @if($request->status === 'approved_by_manager')
-                                    <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
+                                    <span class="row-badge-green">
                                         <i class="bi bi-clock-history me-1"></i> Approved (Pending CEO)
                                     </span>
                                 @elseif($request->status === 'approved')
-                                    <span class="badge bg-success">
+                                    <span class="row-badge-green">
                                         <i class="bi bi-check-circle-fill me-1"></i> Fully Approved
                                     </span>
                                 @elseif($request->status === 'rejected')
-                                    <span class="badge bg-danger">
+                                    <span class="row-badge-red">
                                         <i class="bi bi-x-circle-fill me-1"></i> Rejected
                                     </span>
                                 @elseif($request->status === 'rejected_by_manager')
-                                    <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle">
+                                    <span class="row-badge-red">
                                         <i class="bi bi-x-circle-fill me-1"></i> Rejected by You
                                     </span>
                                 @elseif($request->status === 'cancelled')
-                                    <span class="badge bg-secondary">
-                                        <i class="bi bi-dash-circle-fill me-1"></i> Cancelled
+                                    <span class="row-badge-gray">
+                                        <i class="bi bi-x-circle me-1"></i> Cancelled
                                     </span>
                                 @else
-                                    <span class="badge bg-warning text-dark">
+                                    <span class="row-badge-warning">
                                         <i class="bi bi-clock-fill me-1"></i> Pending Manager Approval
                                     </span>
                                 @endif
@@ -102,11 +109,11 @@
                             <td class="text-end pe-4">
                                 <div class="d-inline-flex align-items-center gap-2">
                                     @if($request->comments->count() > 0)
-                                        <span class="badge bg-info-subtle text-info-emphasis rounded-pill" title="Has conversation">
+                                        <span class="row-badge-blue" title="Has conversation">
                                             <i class="bi bi-chat-text-fill"></i> {{ $request->comments->count() }}
                                         </span>
                                     @endif
-                                    <button type="button" class="btn btn-sm btn-primary" onclick="openRequestModal({{ $request->id }})">View / Action</button>
+                                    <button type="button" class="row-btn-outline-blue btn-sm px-3" onclick="openRequestModal({{ $request->id }})">View / Action</button>
                                 </div>
                             </td>
                         </tr>
@@ -127,43 +134,43 @@
                                         $isSA = $comment->user->isSuperAdmin();
                                         $isLM = $comment->user->isAdmin();
                                         
-                                        $bgColor = 'bg-light text-dark border';
+                                        $bgColor = 'bg-secondary bg-opacity-10 text-white border border-secondary border-opacity-25';
                                         $badgeText = '';
                                         $badgeClass = '';
                                         if ($isSA) {
-                                            $bgColor = 'bg-danger-subtle text-danger-emphasis border border-danger-subtle';
+                                            $bgColor = 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25';
                                             $badgeText = 'Super Admin';
-                                            $badgeClass = 'badge bg-danger';
+                                            $badgeClass = 'row-badge-red';
                                         } elseif ($isLM) {
-                                            $bgColor = 'bg-primary-subtle text-primary-emphasis border border-primary-subtle';
+                                            $bgColor = 'bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25';
                                             $badgeText = 'Line Manager';
-                                            $badgeClass = 'badge bg-primary';
+                                            $badgeClass = 'row-badge-blue';
                                         } elseif ($isEmp) {
-                                            $bgColor = 'bg-light text-dark border';
+                                            $bgColor = 'bg-secondary bg-opacity-10 text-white border border-secondary border-opacity-25';
                                             $badgeText = 'Employee';
-                                            $badgeClass = 'badge bg-secondary';
+                                            $badgeClass = 'row-badge';
                                         }
                                     @endphp
                                     <div class="mb-3 p-3 rounded {{ $bgColor }}">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <div>
-                                                <strong class="small">{{ $comment->user->name }}</strong>
+                                                <strong class="small text-white">{{ $comment->user->name }}</strong>
                                                 @if($badgeText)
                                                     <span class="{{ $badgeClass }} ms-1" style="font-size: 0.7rem;">{{ $badgeText }}</span>
                                                 @endif
                                             </div>
-                                            <small class="text-muted" style="font-size: 0.75rem;">{{ $comment->created_at->diffForHumans() }}</small>
+                                            <small class="text-white opacity-50" style="font-size: 0.75rem;">{{ $comment->created_at->diffForHumans() }}</small>
                                         </div>
-                                        <p class="mb-0 small mt-1">{{ $comment->comment }}</p>
+                                        <p class="mb-0 small mt-1 text-white opacity-75">{{ $comment->comment }}</p>
                                     </div>
                                 @empty
-                                    <p class="text-muted small mb-0 text-center fst-italic py-3">No comments yet. Start a conversation!</p>
+                                    <p class="text-white opacity-50 small mb-0 text-center fst-italic py-3">No comments yet. Start a conversation!</p>
                                 @endforelse
                             </div>
                         </div>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">
+                            <td colspan="7" class="text-center py-5 text-white opacity-50 small">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
                                 No pending leave requests.
                             </td>
@@ -173,48 +180,49 @@
             </table>
         </div>
         @if($requests->hasPages())
-            <div class="card-footer bg-white border-0 pt-3">{{ $requests->links() }}</div>
+            <div class="px-4 py-3 border-top border-secondary border-opacity-25">{{ $requests->links() }}</div>
         @endif
     </div>
 
+    @push('modals')
     <!-- View / Action Modal -->
-    <div class="modal fade" id="requestModal" tabindex="-1">
+    <div class="modal fade" id="requestModal" tabindex="-1" style="z-index: 1060;">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-light border-0">
-                    <h5 class="modal-title fw-bold">Leave Request Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-content bg-dark border-0 shadow" style="overflow: hidden; background-color: #212529 !important;">
+                <div class="modal-header bg-dark border-bottom border-secondary border-opacity-25">
+                    <h5 class="modal-title fw-bold text-white fs-6">Leave Request Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-0">
                     <div class="row g-0">
                         <!-- Left Side: Details -->
-                        <div class="col-md-5 bg-light border-end p-4">
-                            <h6 class="text-uppercase text-muted fw-bold small mb-3"><i class="bi bi-info-circle me-1"></i> Request Info</h6>
+                        <div class="col-md-5 bg-dark border-end border-secondary border-opacity-25 p-4">
+                            <h6 class="text-uppercase text-white opacity-50 fw-bold small mb-3"><i class="bi bi-info-circle me-1"></i> Request Info</h6>
                             <div class="mb-3">
-                                <label class="small text-muted mb-0">Employee</label>
-                                <div class="fw-medium" id="m_name"></div>
-                                <div class="small text-muted" id="m_dept"></div>
+                                <label class="small text-white opacity-50 mb-0">Employee</label>
+                                <div class="fw-medium text-white" id="m_name"></div>
+                                <div class="small text-white opacity-50" id="m_dept"></div>
                             </div>
                             <div class="mb-3">
-                                <label class="small text-muted mb-0">Leave Type</label>
+                                <label class="small text-white opacity-50 mb-0">Leave Type</label>
                                 <div class="fw-medium text-primary" id="m_type"></div>
                             </div>
                             <div class="mb-3">
-                                <label class="small text-muted mb-0">Duration</label>
-                                <div class="fw-medium" id="m_dates"></div>
+                                <label class="small text-white opacity-50 mb-0">Duration</label>
+                                <div class="fw-medium text-white" id="m_dates"></div>
                             </div>
                             <div class="mb-3">
-                                <label class="small text-muted mb-0">Reason Provided</label>
-                                <div class="bg-white p-3 rounded shadow-sm small mt-1 border" id="m_reason" style="min-height: 80px;"></div>
+                                <label class="small text-white opacity-50 mb-0">Reason Provided</label>
+                                <div class="bg-dark p-3 rounded shadow-sm small mt-1 border border-secondary text-white" id="m_reason" style="min-height: 80px; background-color: rgba(255,255,255,0.02);"></div>
                             </div>
                         </div>
                         
                         <!-- Right Side: Comments & Actions -->
-                        <div class="col-md-7 p-4 d-flex flex-column h-100">
-                            <h6 class="text-uppercase text-muted fw-bold small mb-3"><i class="bi bi-chat-dots me-1"></i> Conversation & Actions</h6>
+                        <div class="col-md-7 p-4 d-flex flex-column h-100 bg-dark">
+                            <h6 class="text-uppercase text-white opacity-50 fw-bold small mb-3"><i class="bi bi-chat-dots me-1"></i> Conversation & Actions</h6>
                             
                             <!-- Comments Area -->
-                            <div class="flex-grow-1 overflow-auto mb-3 pe-2" id="m_comments" style="max-height: 250px;">
+                            <div class="flex-grow-1 overflow-auto mb-3 pe-2 custom-scrollbar" id="m_comments" style="max-height: 250px;">
                                 <!-- Comments appended here -->
                             </div>
                             
@@ -223,21 +231,22 @@
                                 @csrf
                                 <div id="modal-alert-container"></div>
                                 <div class="mb-3">
-                                    <label class="form-label small fw-semibold">Add a Comment (Visible to Employee)</label>
-                                    <textarea name="comment" class="form-control" rows="2" placeholder="Type your message or reasoning to the employee..."></textarea>
+                                    <label class="form-label text-white opacity-75 small fw-semibold">Add a Comment (Visible to Employee)</label>
+                                    <textarea name="comment" class="form-control text-white" rows="2" placeholder="Type your message or reasoning to the employee..."
+                                              style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #ffffff !important;"></textarea>
                                 </div>
                                 
-                                <div id="m_super_admin_alert" class="alert alert-warning py-2 px-3 small mb-3 d-none">
+                                <div id="m_super_admin_alert" class="alert bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 py-2 px-3 small mb-3 d-none">
                                     <i class="bi bi-exclamation-triangle-fill me-1"></i> Checked and resolved by Super Admin
                                 </div>
-
+ 
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="submitAction('comment')">Just Comment</button>
+                                        <button type="button" class="row-btn" onclick="submitAction('comment')">Just Comment</button>
                                     </div>
-                                    <div id="m_action_buttons">
-                                        <button type="button" class="btn btn-danger btn-sm me-2" id="btn-reject" onclick="submitAction('reject')"><i class="bi bi-x-circle me-1"></i> Reject Leave</button>
-                                        <button type="button" class="btn btn-success btn-sm" id="btn-approve" onclick="submitAction('approve')"><i class="bi bi-check-circle me-1"></i> Approve Leave</button>
+                                    <div id="m_action_buttons" class="d-flex gap-2">
+                                        <button type="button" class="row-btn-outline-red" id="btn-reject" onclick="submitAction('reject')"><i class="bi bi-x-circle me-1"></i> Reject Leave</button>
+                                        <button type="button" class="row-btn-outline-green" id="btn-approve" onclick="submitAction('approve')"><i class="bi bi-check-circle me-1"></i> Approve Leave</button>
                                     </div>
                                 </div>
                             </form>
@@ -250,29 +259,30 @@
 
     <!-- Beautiful Custom Confirm Modal -->
     <div class="modal fade" id="confirmActionModal" tabindex="-1" style="z-index: 1060;">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
-            <div class="modal-content border-0 shadow">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="background-color: #0c0c0c !important; border: 1px solid rgba(255, 255, 255, 0.08) !important;">
                 <div class="modal-body text-center p-4">
                     <div class="text-warning mb-3">
-                        <i class="bi bi-exclamation-circle-fill fs-1"></i>
+                        <i class="bi bi-exclamation-circle-fill" style="font-size: 3rem;"></i>
                     </div>
-                    <h5 class="fw-bold mb-2" id="confirmTitle">Are you sure?</h5>
-                    <p class="text-muted small mb-4" id="confirmText">Do you really want to proceed with this action?</p>
+                    <h5 class="fw-bold mb-2 text-white" id="confirmTitle">Are you sure?</h5>
+                    <p class="text-white opacity-50 small mb-4" id="confirmText">Do you really want to proceed with this action?</p>
                     <div class="d-flex justify-content-center gap-2">
-                        <button type="button" class="btn btn-light border px-4" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary px-4" id="btnConfirmAction">Yes, Proceed</button>
+                        <button type="button" class="row-btn" data-bs-dismiss="modal" style="width: 145px;">Cancel</button>
+                        <button type="button" class="row-btn-blue" id="btnConfirmAction" style="width: 145px;">Yes, Proceed</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
+    @endpush
+ 
     @push('scripts')
         <script>
             let currentRequestId = null;
             let pendingActionType = null;
             const actionForm = document.getElementById('actionForm');
-
+ 
             window.openRequestModal = function(id) {
                 currentRequestId = id;
                 const dataDiv = document.getElementById('request-data-' + id);
@@ -319,19 +329,25 @@
                     btnApprove.classList.toggle('d-none', status === 'approved_by_manager');
                     btnReject.classList.toggle('d-none', status === 'rejected_by_manager');
                 }
-
+ 
                 // Clear inline alerts
                 const alertContainer = document.getElementById('modal-alert-container');
                 if (alertContainer) alertContainer.innerHTML = '';
-
+ 
                 // Reset form
                 actionForm.reset();
+ 
+                // Ensure modal is at body level to prevent stacking context or overflow bugs
+                const modalEl = document.getElementById('requestModal');
+                if (modalEl && modalEl.parentElement !== document.body) {
+                    document.body.appendChild(modalEl);
+                }
 
                 // Show modal
-                const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('requestModal'));
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
                 modal.show();
             };
-
+ 
             window.submitAction = function(actionType) {
                 if (!currentRequestId) return;
                 
@@ -341,7 +357,7 @@
                 // Reset inline alerts
                 const alertContainer = document.getElementById('modal-alert-container');
                 if (alertContainer) alertContainer.innerHTML = '';
-
+ 
                 // Check if comment is required for "Just Comment"
                 if (actionType === 'comment') {
                     const commentVal = actionForm.querySelector('textarea[name="comment"]').value.trim();
@@ -357,27 +373,31 @@
                     const confirmTitle = document.getElementById('confirmTitle');
                     const confirmText = document.getElementById('confirmText');
                     const btnConfirmAction = document.getElementById('btnConfirmAction');
-
+ 
                     if (actionType === 'approve') {
                         confirmTitle.textContent = 'Approve Leave Request?';
                         confirmText.textContent = 'Are you sure you want to approve this leave request? This will record your recommendation.';
-                        btnConfirmAction.className = 'btn btn-success px-4';
+                        btnConfirmAction.className = 'row-btn-green px-4';
                         btnConfirmAction.textContent = 'Yes, Approve';
                     } else if (actionType === 'reject') {
                         confirmTitle.textContent = 'Reject Leave Request?';
                         confirmText.textContent = 'Are you sure you want to reject this leave request? This will decline the request.';
-                        btnConfirmAction.className = 'btn btn-danger px-4';
+                        btnConfirmAction.className = 'row-btn-red px-4';
                         btnConfirmAction.textContent = 'Yes, Reject';
                     }
-
-                    const confirmModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmActionModal'));
+ 
+                    const confirmModalEl = document.getElementById('confirmActionModal');
+                    if (confirmModalEl && confirmModalEl.parentElement !== document.body) {
+                        document.body.appendChild(confirmModalEl);
+                    }
+                    const confirmModal = bootstrap.Modal.getOrCreateInstance(confirmModalEl);
                     confirmModal.show();
                     return;
                 }
                 
                 actionForm.submit();
             };
-
+ 
             document.getElementById('btnConfirmAction').addEventListener('click', function() {
                 if (pendingActionType) {
                     const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmActionModal'));

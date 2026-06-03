@@ -6,9 +6,9 @@ $(function () {
 
         $.post(`/admin/leave-requests/${id}/approve`, { admin_comment: comment }, function (res) {
             row.fadeOut(300, function () { $(this).remove(); });
-            showToast(res.message, 'success');
+            window.showToast(res.message, 'success');
         }).fail(function (xhr) {
-            showToast(xhr.responseJSON?.message || 'Error', 'danger');
+            window.showToast(xhr.responseJSON?.message || 'Error', 'danger');
         });
     });
 
@@ -17,7 +17,7 @@ $(function () {
         const comment = $(`#comment-${id}`).val();
 
         if (!comment || !comment.trim()) {
-            showToast('A comment is required when rejecting.', 'warning');
+            window.showToast('A comment is required when rejecting.', 'danger');
             return;
         }
 
@@ -25,15 +25,11 @@ $(function () {
 
         $.post(`/admin/leave-requests/${id}/reject`, { admin_comment: comment }, function (res) {
             row.fadeOut(300, function () { $(this).remove(); });
-            showToast(res.message, 'success');
+            window.showToast(res.message, 'success');
         }).fail(function (xhr) {
-            showToast(xhr.responseJSON?.message || 'Error', 'danger');
+            window.showToast(xhr.responseJSON?.message || 'Error', 'danger');
         });
     });
 
-    function showToast(message, type) {
-        const toast = $(`<div class="alert alert-${type} position-fixed top-0 end-0 m-3" style="z-index: 9999;">${message}</div>`);
-        $('body').append(toast);
-        setTimeout(() => toast.fadeOut(300, function () { $(this).remove(); }), 3000);
-    }
+
 });

@@ -37,9 +37,11 @@
                             <span class="text-uppercase fw-bold opacity-50" style="font-size: 0.65rem; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.7);">Active Users</span>
                             <h2 class="fw-bold text-white mt-2 mb-0" style="font-size: 2.2rem; letter-spacing: -0.04em;">{{ $stats['users'] }}</h2>
                         </div>
-                        <div class="d-flex align-items-center text-white opacity-50 small">
-                            <i class="bi bi-people-fill me-2 fs-6"></i>
-                            <span class="fw-medium" style="font-size: 0.75rem;">Portal accounts</span>
+                        <div class="d-flex align-items-center small">
+                            <div class="d-flex align-items-center justify-content-center rounded-circle me-2" style="width: 24px; height: 24px; background-color: rgba(59, 130, 246, 0.15);">
+                                <i class="bi bi-people-fill" style="color: #3b82f6; font-size: 0.85rem;"></i>
+                            </div>
+                            <span class="fw-medium text-white opacity-50" style="font-size: 0.75rem;">Portal accounts</span>
                         </div>
                     </div>
                 </div>
@@ -49,9 +51,11 @@
                             <span class="text-uppercase fw-bold opacity-50" style="font-size: 0.65rem; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.7);">Departments</span>
                             <h2 class="fw-bold text-white mt-2 mb-0" style="font-size: 2.2rem; letter-spacing: -0.04em;">{{ $stats['departments'] }}</h2>
                         </div>
-                        <div class="d-flex align-items-center text-white opacity-50 small">
-                            <i class="bi bi-diagram-3-fill me-2 fs-6"></i>
-                            <span class="fw-medium" style="font-size: 0.75rem;">Operations units</span>
+                        <div class="d-flex align-items-center small">
+                            <div class="d-flex align-items-center justify-content-center rounded-circle me-2" style="width: 24px; height: 24px; background-color: rgba(16, 185, 129, 0.15);">
+                                <i class="bi bi-diagram-3-fill" style="color: #10b981; font-size: 0.85rem;"></i>
+                            </div>
+                            <span class="fw-medium text-white opacity-50" style="font-size: 0.75rem;">Operations units</span>
                         </div>
                     </div>
                 </div>
@@ -61,9 +65,11 @@
                             <span class="text-uppercase fw-bold opacity-50" style="font-size: 0.65rem; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.7);">Pending Leaves</span>
                             <h2 class="fw-bold text-white mt-2 mb-0" style="font-size: 2.2rem; letter-spacing: -0.04em;">{{ $stats['pending_leaves'] }}</h2>
                         </div>
-                        <div class="d-flex align-items-center text-white opacity-50 small">
-                            <i class="bi bi-clock-history me-2 fs-6"></i>
-                            <span class="fw-medium" style="font-size: 0.75rem;">Requires action</span>
+                        <div class="d-flex align-items-center small">
+                            <div class="d-flex align-items-center justify-content-center rounded-circle me-2" style="width: 24px; height: 24px; background-color: rgba(225, 29, 72, 0.15);">
+                                <i class="bi bi-clock-history" style="color: #f43f5e; font-size: 0.85rem;"></i>
+                            </div>
+                            <span class="fw-medium text-white opacity-50" style="font-size: 0.75rem;">Requires action</span>
                         </div>
                     </div>
                 </div>
@@ -77,13 +83,13 @@
         <div class="grid-separator"></div>
         <div class="d-flex flex-wrap gap-3 mt-3">
             <a href="{{ route('super-admin.users.index') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
-                <i class="bi bi-people"></i> User Directory
+                <i class="bi bi-people" style="color: #3b82f6;"></i> User Directory
             </a>
             <a href="{{ route('super-admin.departments.index') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
-                <i class="bi bi-diagram-3"></i> Operations Departments
+                <i class="bi bi-diagram-3" style="color: #10b981;"></i> Operations Departments
             </a>
             <a href="{{ route('super-admin.leave-requests.index', ['status' => 'pending']) }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
-                <i class="bi bi-clock"></i> View Pending Requests
+                <i class="bi bi-clock" style="color: #f43f5e;"></i> View Pending Requests
             </a>
             <a href="{{ route('super-admin.users.index') }}" class="btn btn-primary d-flex align-items-center gap-2">
                 <i class="bi bi-person-plus-fill"></i> New Hire Registration
@@ -98,7 +104,7 @@
             <div class="grid-separator"></div>
         </div>
         
-        <div class="list-group list-group-flush">
+        <div class="list-group list-group-flush scrollable-stream">
             @forelse($recentRequests as $req)
                 <div class="list-group-item bg-transparent d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div class="d-flex align-items-center gap-3">
@@ -118,14 +124,14 @@
                         </div>
                         
                         @if($req->status === 'approved_by_manager')
-                            <span class="row-badge"><i class="bi bi-check me-1"></i> Manager Approved</span>
+                            <span class="row-badge-blue"><i class="bi bi-check me-1"></i> Manager Approved</span>
                         @elseif($req->status === 'rejected_by_manager')
-                            <span class="row-badge"><i class="bi bi-x me-1"></i> Manager Rejected</span>
+                            <span class="row-badge-red"><i class="bi bi-x me-1"></i> Manager Rejected</span>
                         @else
-                            <span class="row-badge"><i class="bi bi-clock-fill me-1"></i> Pending Manager</span>
+                            <span class="row-badge-warning"><i class="bi bi-clock-fill me-1"></i> Pending Manager</span>
                         @endif
 
-                        <a href="{{ route('super-admin.leave-requests.index', ['status' => 'pending']) }}" class="row-btn">
+                        <a href="{{ route('super-admin.leave-requests.index', ['status' => 'pending']) }}" class="row-btn-outline-blue text-decoration-none">
                             Review Request
                         </a>
                     </div>

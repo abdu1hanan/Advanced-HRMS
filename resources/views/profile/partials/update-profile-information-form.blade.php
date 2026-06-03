@@ -1,8 +1,4 @@
 <section>
-    <header>
-        <h5 class="fw-bold text-dark">Profile Information</h5>
-        <p class="text-muted small">Update your account's profile information and email address.</p>
-    </header>
 
     <form id="send-verification" method="post" action="{{ route('verification.send') }}">
         @csrf
@@ -13,16 +9,16 @@
         @method('patch')
 
         <div class="mb-3">
-            <label for="name" class="form-label small fw-medium">Name</label>
-            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name">
+            <label for="name" class="form-label small text-white opacity-75">Name</label>
+            <input type="text" class="form-control bg-dark border-secondary text-white @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name">
             @error('name')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 
         <div class="mb-3">
-            <label for="email" class="form-label small fw-medium">Email Address</label>
-            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $user->email) }}" required autocomplete="username">
+            <label for="email" class="form-label small text-white opacity-75">Email Address</label>
+            <input type="email" class="form-control bg-dark border-secondary text-white @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $user->email) }}" required autocomplete="username">
             @error('email')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
@@ -38,11 +34,11 @@
             @endif
         </div>
 
-        <div class="d-flex align-items-center gap-3 mt-4">
-            <button type="submit" class="btn btn-primary">Save Changes</button>
+        <div class="d-flex align-items-center gap-3 mt-4 pt-3 border-top border-secondary border-opacity-25">
+            <button type="submit" class="row-btn-blue">Save Changes</button>
 
             @if (session('status') === 'profile-updated')
-                <span class="text-success small fw-medium">Saved successfully.</span>
+                <span class="text-success small opacity-75">Saved successfully.</span>
             @endif
         </div>
     </form>

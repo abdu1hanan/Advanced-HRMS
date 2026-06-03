@@ -4,8 +4,8 @@
     <!-- Top Action Tabs -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex gap-2">
-            <a href="{{ route('super-admin.users.index') }}" class="{{ !$showDeleted ? 'btn btn-primary' : 'btn btn-outline-secondary' }} py-2 px-4 d-inline-flex align-items-center" style="height: 36px;">Active Users</a>
-            <a href="{{ route('super-admin.users.index', ['show' => 'deleted']) }}" class="{{ $showDeleted ? 'row-btn-red' : 'btn btn-outline-secondary' }} py-2 px-4 d-inline-flex align-items-center" style="height: 36px;">Deleted Users</a>
+            <a href="{{ route('super-admin.users.index') }}" class="btn {{ !$showDeleted ? 'btn-primary' : 'btn-outline-secondary' }} py-2 px-4 d-inline-flex align-items-center" style="height: 36px;">Active Users</a>
+            <a href="{{ route('super-admin.users.index', ['show' => 'deleted']) }}" class="btn {{ $showDeleted ? 'btn-deleted-tab active' : 'btn-deleted-tab' }} py-2 px-4 d-inline-flex align-items-center" style="height: 36px;">Deleted Users</a>
         </div>
     </div>
 
@@ -86,7 +86,7 @@
                                 @if($showDeleted)
                                     <form method="POST" action="{{ route('super-admin.users.restore', $user->id) }}" class="d-inline">
                                         @csrf
-                                        <button type="submit" class="row-btn-blue">Restore</button>
+                                        <button type="submit" class="row-btn-outline-blue">Restore</button>
                                     </form>
                                 @elseif(!$user->isSuperAdmin())
                                     <!-- Primary Form wrapper (uses HTML5 form attribute bindings to align fields into columns) -->
@@ -97,14 +97,14 @@
                                     </form>
                                     
                                     <div class="d-inline-flex gap-2">
-                                        <!-- Blue Save Button -->
-                                        <button type="submit" form="update-form-{{ $user->id }}" class="row-btn-blue btn-save-user">Save</button>
+                                        <!-- Blue Outline Save Button -->
+                                        <button type="submit" form="update-form-{{ $user->id }}" class="row-btn-outline-blue btn-save-user">Save</button>
                                         
-                                        <!-- Red Outline Delete Button (Restored) -->
-                                        <form method="POST" action="{{ route('super-admin.users.destroy', $user) }}" class="d-inline" onsubmit="return confirm('This will remove the user profile from HRMS. They can be restored later. Continue?');">
+                                        <!-- Red Outline Delete Button with Custom Modal Confirm Trigger -->
+                                        <form method="POST" action="{{ route('super-admin.users.destroy', $user) }}" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="row-btn-outline-red">Delete</button>
+                                            <button type="button" class="row-btn-outline-red btn-trigger-delete" data-user-name="{{ $user->name }}">Delete</button>
                                         </form>
                                     </div>
                                 @else
@@ -137,6 +137,7 @@
         @endif
     </div>
 
+    @push('modals')
     <!-- Hierarchy Replacement Confirmation Modal (Pop-up standard for entire system) -->
     <div class="modal fade" id="replaceHeadModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
@@ -150,21 +151,58 @@
                     <p class="mb-0 small text-white opacity-50">The previous department head will automatically report to the new line manager if they share the same department. All other employees will be linked directly to the new head.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="row-btn" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="row-btn-blue px-4" id="confirm-replace-head">Replace Manager</button>
+                    <button type="button" class="row-btn" data-bs-dismiss="modal" style="width: 145px;">Cancel</button>
+                    <button type="button" class="row-btn-blue" id="confirm-replace-head" style="width: 145px;">Replace Manager</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Sleek Custom Delete Confirmation Modal (Standard for system delete actions) -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-white fs-6"><i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i> Remove User Profile?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <p class="text-white fs-6">Are you sure you want to remove <strong id="delete-user-name" class="text-white"></strong> from HRMS?</p>
+                    <p class="mb-0 small text-white opacity-50">Their profile information and active status will be archived. You can fully restore this user profile later from the Deleted tab.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="row-btn" data-bs-dismiss="modal" style="width: 145px;">Cancel</button>
+                    <button type="button" class="row-btn-red" id="confirm-delete-user-btn" style="width: 145px;">Confirm Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @endpush
+
     @push('scripts')
         <script src="{{ asset('js/hierarchy.js') }}"></script>
-        @if(session('head_replace_prompt') && session('pending_user_id'))
-            <script>
-                $(function() {
-                    const form = $('.user-update-form').closest('tr').find('form.user-update-form').first();
+        <script>
+            $(function() {
+                let formToSubmit = null;
+
+                // Handle sleek custom delete confirmation popup
+                $('.btn-trigger-delete').on('click', function(e) {
+                    e.preventDefault();
+                    const button = $(this);
+                    const userName = button.data('user-name');
+                    formToSubmit = button.closest('form');
+
+                    $('#delete-user-name').text(userName);
+                    $('#deleteConfirmModal').modal('show');
                 });
-            </script>
-        @endif
+
+                $('#confirm-delete-user-btn').on('click', function() {
+                    if (formToSubmit) {
+                        formToSubmit.submit();
+                    }
+                });
+            });
+        </script>
     @endpush
 </x-app-layout>

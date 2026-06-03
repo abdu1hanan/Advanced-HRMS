@@ -15,44 +15,6 @@
         @include('layouts.navbar')
     @endauth
 
-    <div class="container-fluid flex-grow-1 overflow-hidden">
-        <div class="row h-100">
-            @auth
-                <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-flex flex-column sidebar collapse h-100 pt-3 overflow-y-auto">
-                    <div class="collapsed-vertical-brand">BeetleOps</div>
-                    <div class="flex-grow-1">
-                        @if(auth()->user()->isSuperAdmin())
-                            @include('layouts.nav-super-admin')
-                        @elseif(auth()->user()->isAdmin())
-                            @include('layouts.nav-admin')
-                        @else
-                            @include('layouts.nav-employee')
-                        @endif
-                    </div>
-                    
-                    <div class="mt-auto pb-4 px-2">
-                        <ul class="nav flex-column border-top border-secondary pt-2">
-                            <li class="nav-item">
-                                <a class="nav-link text-white {{ request()->routeIs('profile.edit') ? 'active' : '' }}" href="{{ route('profile.edit') }}">
-                                    <i class="bi bi-person-circle me-2"></i>Profile
-                                </a>
-                            </li>
-                            <li class="nav-item mt-1">
-                                <form method="POST" action="{{ route('logout') }}" id="sidebar-logout-form">
-                                    @csrf
-                                    <a class="nav-link text-white" href="#" onclick="event.preventDefault(); document.getElementById('sidebar-logout-form').submit();">
-                                        <i class="bi bi-box-arrow-right me-2"></i>Logout
-                                    </a>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
-                <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 h-100 overflow-y-auto animated-page main-content-area">
-            @else
-                <main class="col-12 py-4 h-100 overflow-y-auto animated-page main-content-area">
-            @endauth
-
     <!-- Sleek floating top-centered popup alerts (standard for entire system) -->
     <div class="sleek-toast-container">
         @if(session('success'))
@@ -77,6 +39,45 @@
         @endif
     </div>
 
+    <div class="container-fluid flex-grow-1 overflow-hidden">
+        <div class="row h-100">
+            @auth
+                <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-flex flex-column sidebar collapse h-100 pt-3 overflow-y-auto">
+                    <div class="collapsed-vertical-brand">BeetleOps</div>
+                    <div class="flex-grow-1">
+                        @if(auth()->user()->isSuperAdmin())
+                            @include('layouts.nav-super-admin')
+                        @elseif(auth()->user()->isAdmin())
+                            @include('layouts.nav-admin')
+                        @else
+                            @include('layouts.nav-employee')
+                        @endif
+                    </div>
+                    
+                    <div class="mt-auto pb-4 px-2">
+                        <ul class="nav flex-column border-top border-secondary pt-2">
+                            <li class="nav-item">
+                                <a class="nav-link text-white {{ request()->routeIs('profile.edit') ? 'active' : '' }}" href="{{ route('profile.edit') }}">
+                                    <i class="bi bi-person-circle me-2"></i>Profile
+                                </a>
+                            </li>
+                            <li class="nav-item mt-1 logout-item">
+                                <form method="POST" action="{{ route('logout') }}" id="sidebar-logout-form">
+                                    @csrf
+                                    <a class="nav-link text-white d-flex align-items-center" href="#" onclick="event.preventDefault(); document.getElementById('sidebar-logout-form').submit();">
+                                        <i class="bi bi-box-arrow-right me-2 logout-icon"></i><span class="logout-text">Logout</span>
+                                    </a>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+                <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 h-100 overflow-y-auto animated-page main-content-area">
+            @else
+                <main class="col-12 py-4 h-100 overflow-y-auto animated-page main-content-area">
+            @endauth
+
+
                 @isset($header)
                     <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
                         <h1 class="h3 mb-0">{{ $header }}</h1>
@@ -90,42 +91,45 @@
     </div>
 
     <!-- Beautiful Cancel Confirmation Modal Popup -->
-    <div class="modal fade" id="cancelLeaveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="cancelLeaveModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
+            <div class="modal-content border-0 shadow" style="background-color: #212529 !important;">
                 <div class="modal-body p-4 text-center">
                     <div class="mb-3 text-danger">
-                        <i class="bi bi-x-circle-fill" style="font-size: 3rem;"></i>
+                        <i class="bi bi-x-circle-fill" style="font-size: 3.5rem;"></i>
                     </div>
-                    <h5 class="fw-bold mb-2 text-dark">Are you sure you want to cancel this leave request?</h5>
-                    <p class="text-muted mb-0">
+                    <h5 class="fw-bold mb-2 text-white">Are you sure you want to cancel this leave request?</h5>
+                    <p class="text-white opacity-50 small mb-4">
                         This action will cancel your pending leave request and return your leave balance immediately.
                     </p>
-                </div>
-                <div class="modal-footer bg-light border-0 py-3 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">No, Keep It</button>
-                    <button type="button" class="btn btn-danger px-4 shadow-sm" id="confirmCancelBtn">Yes, Cancel Request</button>
+                    <div class="d-flex justify-content-center gap-2 mt-4">
+                        <button type="button" class="row-btn" data-bs-dismiss="modal" style="width: 145px;">No, Keep It</button>
+                        <button type="button" class="row-btn-red" id="confirmCancelBtn" style="width: 175px;">Yes, Cancel Request</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Beautiful Cancel Success Modal Popup -->
-    <div class="modal fade" id="cancelSuccessModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="cancelSuccessModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
+            <div class="modal-content border-0 shadow" style="background-color: #212529 !important;">
                 <div class="modal-body p-4 text-center">
                     <div class="mb-3 text-success">
                         <i class="bi bi-check-circle-fill" style="font-size: 3.5rem;"></i>
                     </div>
-                    <h4 class="fw-bold mb-2 text-dark">Cancelled Successfully</h4>
-                    <p class="text-muted mb-3" id="cancelSuccessMsg"></p>
-                    <button type="button" class="btn btn-success px-4" data-bs-dismiss="modal">OK</button>
+                    <h4 class="fw-bold mb-2 text-white">Cancelled Successfully</h4>
+                    <p class="text-white opacity-50 small mb-4" id="cancelSuccessMsg"></p>
+                    <div class="d-flex justify-content-center gap-2 mt-4">
+                        <button type="button" class="row-btn-green" data-bs-dismiss="modal" style="width: 145px;">OK</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    @stack('modals')
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/app.js') }}"></script>

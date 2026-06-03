@@ -1,108 +1,72 @@
 # BeetleOps HRMS
 
-Internal Human Resource Management System built with **Laravel**, **Blade**, **Bootstrap 5**, **jQuery/AJAX**, and **MySQL**.
+A modern, fully-featured Human Resource Management System (HRMS) built with **Laravel**, **Blade**, **Bootstrap 5**, **jQuery/AJAX**, and **MySQL**. It features an elegant dark glassmorphism dashboard, granular role-based permissions, automated department hierarchies, and dynamic leave request/approval workflows.
 
-## Requirements
+Perfect as a ready-to-use internal tool or a standout project for your resume.
 
-- PHP 8.2+ (with `pdo_mysql` extension)
-- Composer
-- MySQL 8+
-- Node.js (for Breeze assets; optional if using CDN in layout)
+---
 
-## Quick start
+## 🚀 Quick Start Guide
 
-### 1. Create MySQL database (DBeaver)
-
-Connect to your MySQL server, open an SQL script, and run:
-
+### 1. Database Setup
+Create a new MySQL database for the project (e.g., using DBeaver, phpMyAdmin, or terminal):
 ```sql
-CREATE DATABASE hrms_beetleops
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE hrms_beetleops CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-### 2. Configure Laravel
-
-Copy credentials into `.env`:
-
+### 2. Configure Environment
+Clone the repository and copy the environment template to create your `.env` file:
+```bash
+cp .env.example .env
+```
+Open `.env` and fill in your database details:
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=hrms_beetleops
 DB_USERNAME=root
-DB_PASSWORD=your_password
+DB_PASSWORD=your_mysql_password
 ```
 
-### 3. Migrate and seed
-
-```powershell
-cd "d:\BeetlEOPS(Internship)\Work Code\HRMS (BeetleOps)"
+### 3. Install & Initialize
+Run the following commands in your terminal to install dependencies, run migrations, and seed the database with initial roles, department structures, and super-admin credentials:
+```bash
+composer install
+npm install && npm run build
 php artisan migrate --seed
+```
+
+### 4. Run the Application
+Start the local development server:
+```bash
 php artisan serve
 ```
+Open your browser and navigate to: `http://127.0.0.1:8000`
 
-Open http://127.0.0.1:8000
+---
 
-### Default Super Admin
+## 🔑 Default Credentials
 
-| Field | Value |
-|-------|-------|
-| Email | `admin@company.com` |
-| Password | `admin` |
+To explore the dashboard, log in with the default seeded credentials:
 
-**Change this password before production deployment.**
+* **Email:** `admin@company.com`
+* **Password:** `admin`
 
-### Grant Super Admin manually (database only)
+---
 
-Super Admin cannot be assigned from the User Management UI. To promote a user via DBeaver:
+## 🎨 Customizing the Company Logo
 
-```sql
-SELECT id FROM roles WHERE name = 'super_admin';
--- Then update the user (replace USER_ID and ROLE_ID):
-UPDATE users SET role_id = ROLE_ID WHERE id = USER_ID;
-```
+To make this HRMS your own, swap the default branding logo with your company logo:
 
-## Soft delete
+1. Place your custom logo in `public/images/logo.png`.
+2. **Recommended Size:** The logo should be **65x65 pixels** (or a square aspect ratio) so it matches the navbar toggle layout and doesn't break the responsive side menu container.
 
-Users and departments are **soft-deleted** by default. Use **Active / Deleted** filters on User Management and Departments to restore records.
+---
 
-```powershell
-php artisan hrms:sync-hierarchy
-```
+## ✨ Features
 
-Re-links all employees to their department line managers after bulk head changes.
-
-## Roles
-
-| Role | Access |
-|------|--------|
-| Super Admin | Users, departments, leave types, global leave settings, all leave history |
-| Admin (Line Manager) | Team members, approve/reject leave requests |
-| Employee | Own dashboard, apply for leave (AJAX), view balances |
-
-New registrations default to **Employee** and must select a department. If that department has an Admin head assigned, they become the employee's line manager automatically.
-
-## Leave defaults (seeded)
-
-| Type | Days/year | Carry forward |
-|------|-----------|---------------|
-| Annual | 5 | Yes (max 2) |
-| Casual | 10 | No |
-| Sick | 5 | No |
-
-Super Admin can edit types, apply defaults to all employees, or set per-employee overrides under **Leave Settings**.
-
-## Year-end rollover
-
-```powershell
-php artisan hrms:rollover-leave 2026 2027
-```
-
-## Tech stack
-
-- PHP / Laravel 13
-- Blade templates
-- Bootstrap 5.3 (CDN)
-- jQuery 3.7 + AJAX
-- MySQL only
+- **Dashboard Role Parity**: Custom UI panels tailored specifically for Super Admins, Admin/Line Managers, and Employees.
+- **Dynamic Leave System**: Full workflow from application (AJAX form) to manager approval and history tracking.
+- **Manager-Employee Hierarchy**: Automatic linking of line managers to department employees.
+- **Interactive Data Tables**: Dynamic server-side pagination, filters, and records.

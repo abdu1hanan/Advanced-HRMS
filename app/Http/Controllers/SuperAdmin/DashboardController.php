@@ -21,7 +21,7 @@ class DashboardController extends Controller
         $recentRequests = LeaveRequest::with(['user.department', 'leaveType'])
             ->whereIn('status', [LeaveRequest::STATUS_PENDING, 'approved_by_manager', 'rejected_by_manager'])
             ->latest()
-            ->limit(5)
+            ->limit(15)
             ->get();
 
         return view('super-admin.dashboard', compact('stats', 'recentRequests'));
