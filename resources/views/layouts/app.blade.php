@@ -8,6 +8,54 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+    <style>
+        .custom-sidebar-tooltip {
+            position: absolute;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-size: 0.76rem;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(0.92);
+            transition: opacity 0.08s ease-out, transform 0.08s ease-out;
+            z-index: 9999;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
+            white-space: pre-wrap;
+            max-width: 450px;
+        }
+        .custom-sidebar-tooltip.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .custom-sidebar-tooltip.arrow-left::before {
+            content: '';
+            position: absolute;
+            left: -5px;
+            top: 50%;
+            transform: translateY(-50%) rotate(45deg);
+            width: 8px;
+            height: 8px;
+            background-color: #1a1a1a;
+            border-left: 1px solid rgba(255, 255, 255, 0.12);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        .custom-sidebar-tooltip.arrow-bottom::before {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 8px;
+            height: 8px;
+            background-color: #1a1a1a;
+            border-right: 1px solid rgba(255, 255, 255, 0.12);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        }
+    </style>
     @stack('styles')
 </head>
 <body class="d-flex flex-column vh-100 overflow-hidden">
@@ -65,7 +113,7 @@
                                 <form method="POST" action="{{ route('logout') }}" id="sidebar-logout-form">
                                     @csrf
                                     <a class="nav-link text-white d-flex align-items-center" href="#" onclick="event.preventDefault(); document.getElementById('sidebar-logout-form').submit();">
-                                        <i class="bi bi-box-arrow-right me-2 logout-icon"></i><span class="logout-text">Logout</span>
+                                        <i class="bi bi-box-arrow-right me-2 logout-icon" data-custom-tooltip="Logout" data-tooltip-placement="right"></i><span class="logout-text">Logout</span>
                                     </a>
                                 </form>
                             </li>
@@ -140,6 +188,70 @@
         $(document).ready(function() {
             var sidebar = $('#sidebarMenu');
 
+            // Custom Tooltip Implementation
+            var customTooltip = $('<div class="custom-sidebar-tooltip"></div>').appendTo('body');
+
+            function showTooltip(target, text, placement) {
+                if (!text) return;
+                customTooltip.text(text);
+                
+                var offset = target.offset();
+                var targetWidth = target.outerWidth();
+                var targetHeight = target.outerHeight();
+                
+                // Temporarily show to calculate outer width/height correctly
+                customTooltip.css({ top: '-9999px', left: '-9999px' }).addClass('show');
+                var tooltipWidth = customTooltip.outerWidth();
+                var tooltipHeight = customTooltip.outerHeight();
+                customTooltip.removeClass('show');
+
+                var top, left;
+                if (placement === 'right') {
+                    top = offset.top + (targetHeight - tooltipHeight) / 2;
+                    left = offset.left + targetWidth + 10;
+                    customTooltip.addClass('arrow-left');
+                } else if (placement === 'top') {
+                    top = offset.top - tooltipHeight - 10;
+                    left = offset.left + (targetWidth - tooltipWidth) / 2;
+                    customTooltip.addClass('arrow-bottom');
+                }
+                
+                customTooltip.css({
+                    top: top + 'px',
+                    left: left + 'px'
+                }).addClass('show');
+            }
+
+            function hideTooltip() {
+                customTooltip.removeClass('show arrow-left arrow-bottom');
+            }
+
+            function updateSidebarTooltips() {
+                if (sidebar.hasClass('collapsed')) {
+                    $('#desktopSidebarToggle').attr('data-custom-tooltip', 'Open sidebar');
+                } else {
+                    $('#desktopSidebarToggle').attr('data-custom-tooltip', 'Close sidebar');
+                }
+            }
+
+            updateSidebarTooltips();
+
+            // Hover trigger listeners for data-custom-tooltip
+            $(document).on('mouseenter', '[data-custom-tooltip]', function() {
+                var target = $(this);
+                // For logout icon, only show tooltip if the sidebar is closed
+                if (target.hasClass('logout-icon') && !sidebar.hasClass('collapsed')) {
+                    return;
+                }
+                var text = target.attr('data-custom-tooltip');
+                var placement = target.data('tooltip-placement') || 'right';
+                showTooltip(target, text, placement);
+            });
+
+            $(document).on('mouseleave click', '[data-custom-tooltip]', function() {
+                hideTooltip();
+            });
+
             $('#desktopSidebarToggle').on('click', function() {
                 var main = $('main');
 
@@ -155,6 +267,8 @@
                     sidebar.addClass('col-md-3 col-lg-2').css('width', '');
                     main.addClass('col-md-9 col-lg-10').css('width', '');
                 }
+
+                updateSidebarTooltips();
             });
 
             // Automatically slide up and dismiss sleek toast notification bars after 4 seconds

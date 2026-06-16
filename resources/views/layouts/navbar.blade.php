@@ -4,7 +4,7 @@
         <!-- Left Side: Brand Logo (acts as menu toggle trigger) -->
         <div class="d-flex align-items-center" style="width: 65px; justify-content: center;">
             <!-- Company Logo Icon (triggers toggle menu directly) -->
-            <img src="{{ asset('images/logo.png') }}" id="desktopSidebarToggle" alt="Logo" style="height: 65px; width: 65px; object-fit: contain; cursor: pointer; user-select: none;" onerror="this.onerror=null; this.src='https://placehold.co/65x48/ffffff/000000?text=C';">
+            <img src="{{ asset('images/logo.png') }}" id="desktopSidebarToggle" alt="Logo" data-custom-tooltip="Close sidebar" data-tooltip-placement="right" style="height: 65px; width: 65px; object-fit: contain; cursor: pointer; user-select: none;" onerror="this.onerror=null; this.src='https://placehold.co/65x48/ffffff/000000?text=C';">
         </div>
 
         <!-- Center: Centered Title -> HRMS Only -->

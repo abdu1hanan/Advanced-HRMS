@@ -96,7 +96,14 @@
                                         <input type="hidden" name="confirm_head_replace" value="0" class="confirm-head-replace-input">
                                     </form>
                                     
-                                    <div class="d-inline-flex gap-2">
+                                    <div class="d-inline-flex gap-2 align-items-center">
+                                        <!-- Gray Profile Icon Edit Button -->
+                                        <a href="{{ route('super-admin.users.edit', $user) }}" class="btn-circle-gray d-inline-flex align-items-center justify-content-center" 
+                                            data-custom-tooltip="Edit profile" 
+                                            data-tooltip-placement="top">
+                                            <i class="bi bi-person-fill"></i>
+                                        </a>
+
                                         <!-- Blue Outline Save Button -->
                                         <button type="submit" form="update-form-{{ $user->id }}" class="row-btn-outline-blue btn-save-user">Save</button>
                                         
@@ -177,7 +184,6 @@
             </div>
         </div>
     </div>
-
     @endpush
 
     @push('scripts')

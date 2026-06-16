@@ -25,6 +25,8 @@ Route::get('/dashboard', DashboardController::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::post('/webhook/slack', [App\Http\Controllers\SlackWebhookController::class, 'handle']);
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -54,6 +56,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:super_admin')->prefix('super-admin')->name('super-admin.')->group(function () {
         Route::get('/dashboard', SuperAdminDashboardController::class)->name('dashboard');
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::get('/users/check-head-replace', [UserController::class, 'checkHeadReplace'])->name('users.check-head-replace');
         Route::patch('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
@@ -78,6 +81,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/leave-requests/{leaveRequest}/approve', [SuperAdminLeaveRequestController::class, 'approve'])->name('leave-requests.approve');
         Route::post('/leave-requests/{leaveRequest}/reject', [SuperAdminLeaveRequestController::class, 'reject'])->name('leave-requests.reject');
         Route::get('/leave-requests/history', [SuperAdminLeaveRequestController::class, 'history'])->name('leave-requests.history');
+
+        Route::get('/session-management', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'index'])->name('session-management.index');
+        Route::get('/session-management/overrides', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'overrides'])->name('session-management.overrides');
+        Route::get('/session-management/mappings', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'mappings'])->name('session-management.mappings');
+        Route::post('/session-management/mappings/save-mapping', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'saveMapping'])->name('session-management.save-mapping');
+        Route::post('/session-management/mappings/toggle-auto-connect', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'toggleAutoConnect'])->name('session-management.toggle-auto-connect');
+        Route::get('/session-management/track-record', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'trackRecord'])->name('session-management.track-record');
+        Route::get('/session-management/track-record/api/report', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'getTrackRecordApi'])->name('session-management.track-record.report');
+        Route::get('/session-management/track-record/export', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'exportTrackRecord'])->name('session-management.track-record.export');
+        Route::get('/session-management/api/messages', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'getMessagesApi'])->name('session-management.api.messages');
+        Route::post('/session-management/messages/{message}/approve', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'approveOverride'])->name('session-management.messages.approve');
+        Route::post('/session-management/messages/{message}/reject', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'rejectOverride'])->name('session-management.messages.reject');
+        Route::post('/session-management/messages/{message}/reset', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'resetOverride'])->name('session-management.messages.reset');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -86,3 +102,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+

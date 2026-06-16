@@ -22,6 +22,9 @@ use Illuminate\Notifications\Notifiable;
     'employee_code',
     'phone',
     'join_date',
+    'expected_salary_amount',
+    'expected_hour_per_day',
+    'expected_hours_per_week',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -36,6 +39,11 @@ class User extends Authenticatable
             'password' => 'hashed',
             'join_date' => 'date',
         ];
+    }
+
+    public function slackMapping(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(SlackUserMapping::class);
     }
 
     public function role(): BelongsTo

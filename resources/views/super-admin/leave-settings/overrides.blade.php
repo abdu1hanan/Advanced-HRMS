@@ -1,5 +1,19 @@
 <x-app-layout>
-    <x-slot name="header">Per-Employee Leave Overrides</x-slot>
+    <x-slot name="header">
+        <div class="d-flex justify-content-between align-items-center w-100">
+            <span>Per-Employee Leave Overrides</span>
+            <a href="{{ route('super-admin.leave-settings.index') }}" class="row-btn text-decoration-none d-inline-flex align-items-center gap-2" style="font-size: 0.85rem; font-weight: normal; text-transform: none; line-height: 24px; padding: 6px 16px;">
+                <i class="bi bi-arrow-left"></i> Back to Leave Settings
+            </a>
+        </div>
+    </x-slot>
+
+    <!-- Custom CSS styles to make the header span 100% width -->
+    <style>
+        .main-content-area h1.h3 {
+            width: 100%;
+        }
+    </style>
 
     <!-- Add/Update Form -->
     <div class="spotify-card mb-4">
@@ -143,10 +157,7 @@
         @endif
     </div>
 
-    <!-- Back Button -->
-    <div class="mb-4">
-        <a href="{{ route('super-admin.leave-settings.index') }}" class="row-btn text-decoration-none"><i class="bi bi-arrow-left me-1"></i> Back to Leave Settings</a>
-    </div>
+
 
     @push('modals')
     <!-- Delete Confirmation Modal Popup -->

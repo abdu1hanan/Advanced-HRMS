@@ -321,6 +321,7 @@ h6,
     );
     background-size: 100% 200%;
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     opacity: 0.25;
     
@@ -1151,4 +1152,118 @@ select.form-select option {
 
 .scrollable-stream::-webkit-scrollbar-thumb:hover {
     background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Sidebar tree branch submenu navigation */
+.session-tree-submenu {
+    position: relative;
+    padding-left: 20px !important;
+    margin-left: 14px !important;
+    border-left: none !important;
+}
+
+.session-tree-submenu .nav-item {
+    position: relative;
+    border-bottom: none !important; /* Remove individual item borders inside submenu */
+}
+
+/* The vertical trunk segment for each item */
+.session-tree-submenu .nav-item::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* For the first item, extend the vertical trunk upwards to connect cleanly to the parent tab */
+.session-tree-submenu .nav-item:first-child::before {
+    top: -15px;
+}
+
+/* For the last item, the vertical trunk stops at the horizontal branch (middle of the item) */
+.session-tree-submenu .nav-item:last-child::before {
+    bottom: 50%;
+}
+
+/* The horizontal branch segment for each item */
+.session-tree-submenu .nav-item::after {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    width: 18px; /* Extends to align/touch the left edge of the icon */
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Circular Action Buttons */
+.btn-circle-blue {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid #3b82f6;
+    background: transparent;
+    color: #3b82f6;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+.btn-circle-blue:hover {
+    background: #3b82f6;
+    color: #fff;
+    border-color: #3b82f6;
+}
+
+.btn-circle-red {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid #ef4444;
+    background: #ef4444;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+.btn-circle-red:hover {
+    background: #dc2626;
+    color: #ffffff;
+    border-color: #dc2626;
+}
+
+.btn-circle-gray {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+.btn-circle-gray:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Ensure modals always appear on top of dropdowns and navbars */
+.modal {
+    z-index: 2050 !important;
+}
+.modal-backdrop {
+    z-index: 2040 !important;
 }
