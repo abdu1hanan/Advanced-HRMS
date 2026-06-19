@@ -21,14 +21,36 @@
                     <!-- Clean notification Dot instead of numbers -->
                     <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none" id="notification-badge" style="width: 8px; height: 8px;"></span>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow border border-secondary bg-dark text-white p-2" style="min-width: 320px; max-height: 400px; overflow-y: auto;" id="notification-list">
-                    <li class="dropdown-header d-flex justify-content-between align-items-center text-white opacity-75">
-                        Notifications
-                        <button type="button" class="btn btn-link btn-sm p-0 text-white-50 text-decoration-underline" id="mark-all-read" style="text-underline-offset: 3px; font-weight: 500;">Mark all read</button>
-                    </li>
-                    <li><hr class="dropdown-divider border-secondary my-1.5"></li>
-                    <li class="px-3 py-2 text-white-50 small text-center" id="notification-empty">No notifications</li>
-                </ul>
+                <div class="dropdown-menu dropdown-menu-end shadow border border-secondary bg-dark text-white p-3 custom-notification-dropdown" style="width: 380px; max-height: 480px; overflow: hidden; border-radius: 12px;" id="notification-container">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="m-0 fw-bold text-white fs-6">Notifications</h5>
+                        <button type="button" class="btn-circle-gray" id="mark-all-read" data-custom-tooltip="Mark all read">
+                            <i class="bi bi-check-all" style="font-size: 1.1rem; line-height: 1;"></i>
+                        </button>
+                    </div>
+
+                    <!-- Filter pills -->
+                    <div class="d-flex gap-2 mb-2">
+                        <button type="button" class="filter-pill active" id="filter-all-btn">All</button>
+                        <button type="button" class="filter-pill" id="filter-unread-btn">Unread</button>
+                    </div>
+
+                    <div class="dropdown-divider border-secondary my-2"></div>
+
+                    <!-- New / See all section -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-semibold text-white-50" style="font-size: 0.78rem; margin-left: 0.35rem; line-height: 1;">New</span>
+                        <a href="{{ route('activity-log') }}" id="see-all-notifications" style="line-height: 1;">See all</a>
+                    </div>
+
+                    <!-- Notifications List container with custom scrollbar -->
+                    <div class="custom-notification-list-scroll" style="max-height: 280px; overflow-y: auto; margin-left: -0.3rem; margin-right: -0.3rem;">
+                        <ul class="list-unstyled mb-0" id="notification-list">
+                            <!-- JS will populate notifications here -->
+                            <li class="py-4 text-white-50 small text-center" id="notification-empty">No notifications</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
 
             <!-- Sleek Circular User Badge -->

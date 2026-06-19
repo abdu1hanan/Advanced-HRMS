@@ -195,6 +195,7 @@ class SlackWebhookController extends Controller
                                     ->delete();
 
                                 // Regenerate auto-appends and recalculate break exceeded flags
+                                \Illuminate\Support\Facades\Cache::forget("healed_{$slackUserId}_{$dateStr}");
                                 SlackMessage::ensureDayAutoAppends($slackUserId, $dateStr, false);
                                 SlackMessage::recalculateBreakExceeded($slackUserId, $dateStr);
                             }
@@ -254,6 +255,11 @@ class SlackWebhookController extends Controller
                                         $this->checkBreakExceeded($originalRecord);
                                         $this->autoAppendSignOutIfForgotten($originalRecord);
 
+                                        $tz = 'Asia/Karachi';
+                                        $dateStr = $originalRecord->message_at->timezone($tz)->format('Y-m-d');
+                                        \Illuminate\Support\Facades\Cache::forget("healed_{$originalRecord->slack_user_id}_{$dateStr}");
+                                        \App\Models\SlackMessage::ensureDayAutoAppends($originalRecord->slack_user_id, $dateStr, true);
+
                                         // Write to edit history log
                                         SlackMessageEdit::create([
                                             'slack_message_id' => $originalRecord->id,
@@ -301,6 +307,11 @@ class SlackWebhookController extends Controller
                                     $this->processOverrideApproval($newMessage);
                                     $this->checkBreakExceeded($newMessage);
                                     $this->autoAppendSignOutIfForgotten($newMessage);
+
+                                    $tz = 'Asia/Karachi';
+                                    $dateStr = $newMessage->message_at->timezone($tz)->format('Y-m-d');
+                                    \Illuminate\Support\Facades\Cache::forget("healed_{$slackUserId}_{$dateStr}");
+                                    \App\Models\SlackMessage::ensureDayAutoAppends($slackUserId, $dateStr, true);
                                     return response()->json(['status' => 'new_message_from_edit']);
                                 }
                             }
@@ -342,6 +353,11 @@ class SlackWebhookController extends Controller
                     $this->processOverrideApproval($newMessage);
                     $this->checkBreakExceeded($newMessage);
                     $this->autoAppendSignOutIfForgotten($newMessage);
+
+                    $tz = 'Asia/Karachi';
+                    $dateStr = $newMessage->message_at->timezone($tz)->format('Y-m-d');
+                    \Illuminate\Support\Facades\Cache::forget("healed_{$slackUserId}_{$dateStr}");
+                    \App\Models\SlackMessage::ensureDayAutoAppends($slackUserId, $dateStr, true);
 
                     return response()->json(['status' => 'success']);
                 }
@@ -510,7 +526,28 @@ class SlackWebhookController extends Controller
             })->get();
 
             foreach ($superAdmins as $admin) {
-                $admin->notify(new \App\Notifications\SlackOverrideAwaitingApproval($message, $employeeName));
+                $existingNotification = \Illuminate\Support\Facades\DB::table('notifications')
+                    ->where('notifiable_id', $admin->id)
+                    ->where('notifiable_type', get_class($admin))
+                    ->where('data->slack_message_id', $message->id)
+                    ->first();
+
+                if ($existingNotification) {
+                    $currentData = json_decode($existingNotification->data, true);
+                    $textToShow = $message->approval_status === 'pending_edit' ? $message->pending_message_text : $message->message_text;
+                    $currentData['message_text'] = $textToShow;
+                    $currentData['message'] = "[Session Override] {$employeeName}: \"Requested override: {$textToShow}\"";
+
+                    \Illuminate\Support\Facades\DB::table('notifications')
+                        ->where('id', $existingNotification->id)
+                        ->update([
+                            'data' => json_encode($currentData),
+                            'read_at' => null, // Reset to unread so they see the edit
+                            'updated_at' => now(),
+                        ]);
+                } else {
+                    $admin->notify(new \App\Notifications\SlackOverrideAwaitingApproval($message, $employeeName));
+                }
             }
         }
     }
@@ -554,6 +591,7 @@ class SlackWebhookController extends Controller
             $newDate = $newSignIn->message_at->timezone($tz)->format('Y-m-d');
 
             if ($prevDate !== $newDate) {
+                \Illuminate\Support\Facades\Cache::forget("healed_{$newSignIn->slack_user_id}_{$prevDate}");
                 SlackMessage::ensureDayAutoAppends($newSignIn->slack_user_id, $prevDate, true);
             }
         }

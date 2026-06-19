@@ -25,7 +25,7 @@ class ForgotToSignOutNotification extends Notification
             'employee_name' => $this->employeeName,
             'message_text' => $this->slackMessage->message_text,
             'message' => $this->notificationMsg,
-            'url' => route('super-admin.session-management.overrides', [], false),
+            'url' => route('super-admin.session-management.track-record', [], false),
         ];
     }
 }

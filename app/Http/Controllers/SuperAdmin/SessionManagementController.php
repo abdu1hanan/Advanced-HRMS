@@ -27,7 +27,14 @@ class SessionManagementController extends Controller
     public function overrides(Request $request): View
     {
         $messages = SlackMessage::with(['edits', 'mapping.user'])
-            ->where('message_at', '>=', now()->subDays(7))
+            ->where('message_at', '>=', now()->subDays(90))
+            ->where(function ($query) {
+                $query->where('is_auto_appended', false)
+                      ->orWhere(function ($sub) {
+                          $sub->where('is_auto_appended', true)
+                              ->whereIn('message_text', ['signout', 'sign out']);
+                      });
+            })
             ->latest('message_at')
             ->get();
         
@@ -54,6 +61,9 @@ class SessionManagementController extends Controller
                 'break_exceeded' => (bool) $msg->break_exceeded,
                 'is_auto_appended' => (bool) $msg->is_auto_appended,
                 'pending_message_text' => $msg->pending_message_text ? e($msg->pending_message_text) : null,
+                'user_id' => $msg->mapping ? $msg->mapping->user_id : null,
+                'month' => $msg->message_at->timezone('Asia/Karachi')->month,
+                'year' => $msg->message_at->timezone('Asia/Karachi')->year,
                 'edits' => $msg->edits->map(function ($edit) {
                     return [
                         'id' => $edit->id,
@@ -354,6 +364,19 @@ class SessionManagementController extends Controller
         $queryStartDate = $startDate->copy()->subDays(2)->timezone('UTC');
         $queryEndDate = $endDate->copy()->timezone('UTC');
 
+        // Lazy-heal any dates in the queried range that are before today and have subsequent check-ins, but are not yet cached as healed.
+        $checkDate = $startDate->copy();
+        while ($checkDate->lte($endDate)) {
+            $dateStr = $checkDate->format('Y-m-d');
+            if ($checkDate->lt($today->copy()->startOfDay())) {
+                $cacheKey = "healed_{$mapping->slack_user_id}_{$dateStr}";
+                if (!\Illuminate\Support\Facades\Cache::has($cacheKey)) {
+                    SlackMessage::ensureDayAutoAppends($mapping->slack_user_id, $dateStr, false);
+                }
+            }
+            $checkDate->addDay();
+        }
+
         // Query all messages for the mapped slack user ID
         $messages = SlackMessage::where('slack_user_id', $mapping->slack_user_id)
             ->whereBetween('message_at', [$queryStartDate, $queryEndDate])
@@ -443,6 +466,7 @@ class SessionManagementController extends Controller
                     'day_of_week' => $today->dayOfWeekIso,
                     'is_weekend' => ($today->dayOfWeekIso === 6 || $today->dayOfWeekIso === 7),
                     'weekly_summary_diff_seconds' => 0,
+                    'raw_date_string' => $today->format('Y-m-d'),
                 ]
             ];
 
@@ -619,6 +643,7 @@ class SessionManagementController extends Controller
                     'day_of_week' => $dayOfWeek,
                     'is_weekend' => ($dayOfWeek === 6 || $dayOfWeek === 7),
                     'weekly_summary_diff_seconds' => ($dayOfWeek === 7) ? $weekDifferenceSeconds : 0,
+                    'raw_date_string' => $isFiller ? '' : $day['raw_date']->format('Y-m-d'),
                 ];
             }
         }
@@ -678,7 +703,14 @@ class SessionManagementController extends Controller
     public function getMessagesApi(Request $request): JsonResponse
     {
         $messages = SlackMessage::with(['edits', 'mapping.user'])
-            ->where('message_at', '>=', now()->subDays(7))
+            ->where('message_at', '>=', now()->subDays(90))
+            ->where(function ($query) {
+                $query->where('is_auto_appended', false)
+                      ->orWhere(function ($sub) {
+                          $sub->where('is_auto_appended', true)
+                              ->whereIn('message_text', ['signout', 'sign out']);
+                      });
+            })
             ->latest('message_at')
             ->get()
             ->map(function ($msg) {
@@ -704,6 +736,9 @@ class SessionManagementController extends Controller
                     'break_exceeded' => (bool) $msg->break_exceeded,
                     'is_auto_appended' => (bool) $msg->is_auto_appended,
                     'pending_message_text' => $msg->pending_message_text ? e($msg->pending_message_text) : null,
+                    'user_id' => $msg->mapping ? $msg->mapping->user_id : null,
+                    'month' => $msg->message_at->timezone('Asia/Karachi')->month,
+                    'year' => $msg->message_at->timezone('Asia/Karachi')->year,
                     'edits' => $msg->edits->map(function ($edit) {
                         return [
                             'id' => $edit->id,
@@ -790,9 +825,15 @@ class SessionManagementController extends Controller
 
             $tz = 'Asia/Karachi';
             $dateStr = $message->message_at->timezone($tz)->format('Y-m-d');
+            \Illuminate\Support\Facades\Cache::forget("healed_{$message->slack_user_id}_{$dateStr}");
             SlackMessage::ensureDayAutoAppends($message->slack_user_id, $dateStr, false);
             SlackMessage::recalculateBreakExceeded($message->slack_user_id, $dateStr);
         }
+
+        // Mark associated notifications as read
+        \Illuminate\Support\Facades\DB::table('notifications')
+            ->where('data->slack_message_id', $message->id)
+            ->update(['read_at' => now(), 'updated_at' => now()]);
 
         return response()->json([
             'status' => 'success',
@@ -824,9 +865,15 @@ class SessionManagementController extends Controller
         $refTime = $message->override_at ?: $message->message_at;
         if ($refTime) {
             $dateStr = $refTime->timezone($tz)->format('Y-m-d');
+            \Illuminate\Support\Facades\Cache::forget("healed_{$message->slack_user_id}_{$dateStr}");
             SlackMessage::ensureDayAutoAppends($message->slack_user_id, $dateStr, false);
             SlackMessage::recalculateBreakExceeded($message->slack_user_id, $dateStr);
         }
+
+        // Mark associated notifications as read
+        \Illuminate\Support\Facades\DB::table('notifications')
+            ->where('data->slack_message_id', $message->id)
+            ->update(['read_at' => now(), 'updated_at' => now()]);
 
         return response()->json([
             'status' => 'success',
@@ -879,9 +926,15 @@ class SessionManagementController extends Controller
                 ->delete();
 
             // Regenerate auto-appends and recalculate break exceeded flags
+            \Illuminate\Support\Facades\Cache::forget("healed_{$message->slack_user_id}_{$dateStr}");
             SlackMessage::ensureDayAutoAppends($message->slack_user_id, $dateStr, false);
             SlackMessage::recalculateBreakExceeded($message->slack_user_id, $dateStr);
         }
+
+        // Reset associated notifications to unread
+        \Illuminate\Support\Facades\DB::table('notifications')
+            ->where('data->slack_message_id', $message->id)
+            ->update(['read_at' => null, 'updated_at' => now()]);
 
         return response()->json([
             'status' => 'success',
@@ -947,6 +1000,19 @@ class SessionManagementController extends Controller
 
         $queryStartDate = $startDate->copy()->subDays(2)->timezone('UTC');
         $queryEndDate = $endDate->copy()->timezone('UTC');
+
+        // Lazy-heal any dates in the queried range that are before today and have subsequent check-ins, but are not yet cached as healed.
+        $checkDate = $startDate->copy();
+        while ($checkDate->lte($endDate)) {
+            $dateStr = $checkDate->format('Y-m-d');
+            if ($checkDate->lt($today->copy()->startOfDay())) {
+                $cacheKey = "healed_{$mapping->slack_user_id}_{$dateStr}";
+                if (!\Illuminate\Support\Facades\Cache::has($cacheKey)) {
+                    SlackMessage::ensureDayAutoAppends($mapping->slack_user_id, $dateStr, false);
+                }
+            }
+            $checkDate->addDay();
+        }
 
         // Query all messages for the mapped slack user ID
         $messages = SlackMessage::where('slack_user_id', $mapping->slack_user_id)
@@ -1769,28 +1835,33 @@ class SessionManagementController extends Controller
                 }
 
                 if ($nextBack) {
-                    $diffInSeconds = abs($nextBack->message_at->diffInSeconds($msg->message_at));
-                    if ($diffInSeconds <= 600) { // <= 10 minutes (600 seconds)
-                        // Only treat as short break if there is a check-in before this break on the same day
-                        $msgDate = $msg->message_at->timezone($tz)->format('Y-m-d');
-                        $hasCheckInBefore = false;
-                        for ($k = $i - 1; $k >= 0; $k--) {
-                            $prevMsg = $messagesArray[$k];
-                            $prevDate = $prevMsg->message_at->timezone($tz)->format('Y-m-d');
-                            if ($prevDate !== $msgDate) {
-                                break;
-                            }
-                            $prevText = strtolower(trim($prevMsg->message_text));
-                            $isPrevCheckIn = (str_contains($prevText, 'signin') || str_contains($prevText, 'sign in') || preg_match('/^back\b/i', $prevText));
-                            if ($isPrevCheckIn) {
-                                $hasCheckInBefore = true;
-                                break;
-                            }
-                        }
+                    $isAutoAppendedMsg = (bool)($msg->is_auto_appended ?? false);
+                    $isAutoAppendedNext = (bool)($nextBack->is_auto_appended ?? false);
 
-                        if ($hasCheckInBefore) {
-                            $shortBreaks[$msg->id] = true;
-                            $shortBreaks[$nextBack->id] = true;
+                    if (!$isAutoAppendedMsg && !$isAutoAppendedNext) {
+                        $diffInSeconds = abs($nextBack->message_at->diffInSeconds($msg->message_at));
+                        if ($diffInSeconds <= 600) { // <= 10 minutes (600 seconds)
+                            // Only treat as short break if there is a check-in before this break on the same day
+                            $msgDate = $msg->message_at->timezone($tz)->format('Y-m-d');
+                            $hasCheckInBefore = false;
+                            for ($k = $i - 1; $k >= 0; $k--) {
+                                $prevMsg = $messagesArray[$k];
+                                $prevDate = $prevMsg->message_at->timezone($tz)->format('Y-m-d');
+                                if ($prevDate !== $msgDate) {
+                                    break;
+                                }
+                                $prevText = strtolower(trim($prevMsg->message_text));
+                                $isPrevCheckIn = (str_contains($prevText, 'signin') || str_contains($prevText, 'sign in') || preg_match('/^back\b/i', $prevText));
+                                if ($isPrevCheckIn) {
+                                    $hasCheckInBefore = true;
+                                    break;
+                                }
+                            }
+
+                            if ($hasCheckInBefore) {
+                                $shortBreaks[$msg->id] = true;
+                                $shortBreaks[$nextBack->id] = true;
+                            }
                         }
                     }
                 }
@@ -1837,7 +1908,7 @@ class SessionManagementController extends Controller
                     // Transition to new check-in
                     $activeCheckIn = $parsedTime;
                     $activeCheckInIsVirtual = (bool)($msg->is_auto_appended ?? false);
-                    $activeCheckInReason = $activeCheckInIsVirtual ? 'Auto-Appended Sign In' : '';
+                    $activeCheckInReason = $activeCheckInIsVirtual ? (preg_match('/^back/i', $text) ? 'Auto-Appended Back' : 'Auto-Appended Sign In') : '';
                 } else {
                     // Valid check-in
                     if (empty($sessionsByDate[$msgLocalDateStr]) && preg_match('/^back\b/i', $text)) {
@@ -1863,11 +1934,11 @@ class SessionManagementController extends Controller
 
                     $activeCheckIn = $parsedTime;
                     $activeCheckInIsVirtual = (bool)($msg->is_auto_appended ?? false);
-                    $activeCheckInReason = $activeCheckInIsVirtual ? 'Auto-Appended Sign In' : '';
+                    $activeCheckInReason = $activeCheckInIsVirtual ? (preg_match('/^back/i', $text) ? 'Auto-Appended Back' : 'Auto-Appended Sign In') : '';
                 }
             } elseif ($isCheckOut) {
                 $outIsVirtual = (bool) $msg->is_auto_appended;
-                $outVirtualReason = $outIsVirtual ? 'Auto-Appended Sign Out' : '';
+                $outVirtualReason = $outIsVirtual ? (preg_match('/^(break|brb)/i', $text) ? 'Auto-Appended Break' : 'Auto-Appended Sign Out') : '';
 
                 if ($activeCheckIn) {
                     // Valid checkout
@@ -2029,5 +2100,226 @@ class SessionManagementController extends Controller
                 $isFirst = false;
             }
         }
+    }
+
+    public function saveOverrides(Request $request): JsonResponse
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'date_entries' => 'required|array',
+        ]);
+
+        $user = User::findOrFail($request->user_id);
+        $slackUserId = $user->slackMapping?->slack_user_id;
+
+        if (!$slackUserId) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'The selected user is not mapped to any Slack User ID.'
+            ], 422);
+        }
+
+        $tz = 'Asia/Karachi';
+
+        // Validate time formats, chronological order, and completeness before modifying database
+        foreach ($request->date_entries as $dateStr => $sessions) {
+            $timeline = [];
+            foreach ($sessions as $index => $session) {
+                $inTimeStr = $session['in'] ?? '';
+                $outTimeStr = $session['out'] ?? '';
+
+                if (!empty($inTimeStr)) {
+                    try {
+                        $inLocal = Carbon::createFromFormat('Y-m-d h:i A', $dateStr . ' ' . $inTimeStr, $tz);
+                        $timeline[] = [
+                            'label' => "Sign In " . ($index + 1),
+                            'time' => $inLocal,
+                            'str' => $inTimeStr
+                        ];
+                    } catch (\Exception $e) {
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => "Invalid time format for Sign In " . ($index + 1) . " on {$dateStr}."
+                        ], 422);
+                    }
+                }
+
+                if (!empty($outTimeStr)) {
+                    try {
+                        $outLocal = Carbon::createFromFormat('Y-m-d h:i A', $dateStr . ' ' . $outTimeStr, $tz);
+                        $timeline[] = [
+                            'label' => "Sign Out " . ($index + 1),
+                            'time' => $outLocal,
+                            'str' => $outTimeStr
+                        ];
+                    } catch (\Exception $e) {
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => "Invalid time format for Sign Out " . ($index + 1) . " on {$dateStr}."
+                        ], 422);
+                    }
+                }
+
+                if (!empty($outTimeStr) && empty($inTimeStr)) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Validation Error on {$dateStr}: Sign Out " . ($index + 1) . " is provided without a corresponding Sign In."
+                    ], 422);
+                }
+            }
+
+            for ($i = 0; $i < count($timeline) - 1; $i++) {
+                $current = $timeline[$i];
+                $next = $timeline[$i + 1];
+                if ($current['time']->greaterThanOrEqualTo($next['time'])) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Chronological Error on {$dateStr}: {$next['label']} ({$next['str']}) must be strictly after {$current['label']} ({$current['str']})."
+                    ], 422);
+                }
+            }
+        }
+
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($slackUserId, $request, $tz) {
+                foreach ($request->date_entries as $dateStr => $sessions) {
+                    $dateObj = Carbon::createFromFormat('Y-m-d', $dateStr, $tz)->startOfDay();
+
+                    // Calculate local day start and end in UTC
+                    $dayStartUtc = $dateObj->copy()->startOfDay()->timezone('UTC');
+                    $dayEndUtc = $dateObj->copy()->endOfDay()->timezone('UTC');
+
+                    // Forget the healed cache tag
+                    \Illuminate\Support\Facades\Cache::forget("healed_{$slackUserId}_{$dateStr}");
+
+                    // First delete all auto-appended records for this day so they don't get mixed in the matching
+                    SlackMessage::where('slack_user_id', $slackUserId)
+                        ->whereBetween('message_at', [$dayStartUtc, $dayEndUtc])
+                        ->where('is_auto_appended', true)
+                        ->delete();
+
+                    // Gather all submitted non-virtual inputs sequentially
+                    $submittedEvents = [];
+                    $checkInCount = 0;
+                    foreach ($sessions as $index => $session) {
+                        $inTimeStr = $session['in'] ?? '';
+                        $outTimeStr = $session['out'] ?? '';
+                        $inIsVirtual = filter_var($session['in_is_virtual'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                        $outIsVirtual = filter_var($session['out_is_virtual'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+                        if (!empty($inTimeStr) && !$inIsVirtual) {
+                            $inLocal = Carbon::createFromFormat('Y-m-d h:i A', $dateStr . ' ' . $inTimeStr, $tz);
+                            $inUtc = $inLocal->copy()->timezone('UTC');
+                            $type = ($checkInCount === 0) ? 'signin' : 'back';
+                            $submittedEvents[] = [
+                                'type' => $type,
+                                'time_utc' => $inUtc,
+                            ];
+                            $checkInCount++;
+                        }
+
+                        if (!empty($outTimeStr) && !$outIsVirtual) {
+                            $outLocal = Carbon::createFromFormat('Y-m-d h:i A', $dateStr . ' ' . $outTimeStr, $tz);
+                            $outUtc = $outLocal->copy()->timezone('UTC');
+                            
+                            // Check if a subsequent check-in is present in the submitted array
+                            $isBreak = false;
+                            for ($nextIdx = $index + 1; $nextIdx < count($sessions); $nextIdx++) {
+                                if (isset($sessions[$nextIdx])) {
+                                    $nextIn = $sessions[$nextIdx]['in'] ?? '';
+                                    $nextInIsVirtual = filter_var($sessions[$nextIdx]['in_is_virtual'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                                    if (!empty($nextIn) && !$nextInIsVirtual) {
+                                        $isBreak = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            $type = $isBreak ? 'break' : 'signout';
+                            $submittedEvents[] = [
+                                'type' => $type,
+                                'time_utc' => $outUtc,
+                            ];
+                        }
+                    }
+
+                    // Get existing real (non-auto-appended) records
+                    $existingRealMessages = SlackMessage::where('slack_user_id', $slackUserId)
+                        ->whereBetween('message_at', [$dayStartUtc, $dayEndUtc])
+                        ->where('is_auto_appended', false)
+                        ->orderBy('message_at', 'asc')
+                        ->get();
+
+                    $existingCount = $existingRealMessages->count();
+                    $submittedCount = count($submittedEvents);
+
+                    for ($i = 0; $i < max($existingCount, $submittedCount); $i++) {
+                        if ($i < $submittedCount && $i < $existingCount) {
+                            // Match and patch
+                            $dbMsg = $existingRealMessages[$i];
+                            $submitted = $submittedEvents[$i];
+
+                            $dbTimeUtc = $dbMsg->message_at;
+                            $dbType = strtolower(trim($dbMsg->message_text));
+                            $subType = $submitted['type'];
+                            
+                            $normalize = function($t) {
+                                $t = strtolower(trim($t));
+                                if ($t === 'sign in') return 'signin';
+                                if ($t === 'sign out') return 'signout';
+                                return $t;
+                            };
+
+                            $typeChanged = ($normalize($dbType) !== $normalize($subType));
+                            $timeChanged = ($dbTimeUtc->timestamp !== $submitted['time_utc']->timestamp);
+
+                            if ($typeChanged || $timeChanged) {
+                                $dbMsg->update([
+                                    'channel_id' => 'manual_override',
+                                    'message_text' => $subType,
+                                    'message_at' => $submitted['time_utc'],
+                                    'override_at' => $submitted['time_utc'],
+                                    'approval_status' => 'approved',
+                                    'is_auto_appended' => false,
+                                ]);
+                            }
+                        } elseif ($i < $submittedCount) {
+                            // Create new manual override record
+                            $submitted = $submittedEvents[$i];
+                            $inEventId = 'manual_' . $submitted['type'] . '_' . $dateStr . '_' . $i . '_' . uniqid();
+                            SlackMessage::create([
+                                'slack_user_id' => $slackUserId,
+                                'channel_id' => 'manual_override',
+                                'event_id' => $inEventId,
+                                'slack_ts' => 'manual_ts_' . uniqid(),
+                                'message_text' => $submitted['type'],
+                                'message_at' => $submitted['time_utc'],
+                                'override_at' => $submitted['time_utc'],
+                                'approval_status' => 'approved',
+                                'is_auto_appended' => false,
+                            ]);
+                        } elseif ($i < $existingCount) {
+                            // Delete unmatched real records
+                            $dbMsg = $existingRealMessages[$i];
+                            $dbMsg->delete();
+                        }
+                    }
+
+                    // Run healing triggers for the target date
+                    SlackMessage::ensureDayAutoAppends($slackUserId, $dateStr, false);
+                    SlackMessage::recalculateBreakExceeded($slackUserId, $dateStr);
+                }
+            });
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error saving overrides: ' . $e->getMessage()
+            ], 422);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Timesheet manual overrides saved successfully!'
+        ]);
     }
 }

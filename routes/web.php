@@ -31,7 +31,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/{id}/toggle-read', [NotificationController::class, 'toggleRead'])->name('notifications.toggle-read');
+    Route::post('/notifications/{id}/toggle-mark', [NotificationController::class, 'toggleMark'])->name('notifications.toggle-mark');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::post('/notifications/bulk', [NotificationController::class, 'bulkAction'])->name('notifications.bulk');
+    Route::get('/activity-log', [NotificationController::class, 'activityLog'])->name('activity-log');
 
     Route::middleware('role:employee,admin')->prefix('employee')->name('employee.')->group(function () {
         Route::get('/dashboard', EmployeeDashboardController::class)->name('dashboard');
@@ -90,6 +95,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/session-management/track-record', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'trackRecord'])->name('session-management.track-record');
         Route::get('/session-management/track-record/api/report', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'getTrackRecordApi'])->name('session-management.track-record.report');
         Route::get('/session-management/track-record/export', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'exportTrackRecord'])->name('session-management.track-record.export');
+        Route::post('/session-management/track-record/save-overrides', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'saveOverrides'])->name('session-management.track-record.save-overrides');
         Route::get('/session-management/api/messages', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'getMessagesApi'])->name('session-management.api.messages');
         Route::post('/session-management/messages/{message}/approve', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'approveOverride'])->name('session-management.messages.approve');
         Route::post('/session-management/messages/{message}/reject', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'rejectOverride'])->name('session-management.messages.reject');

@@ -24,7 +24,7 @@ class SlackOverrideAwaitingApproval extends Notification
             'slack_message_id' => $this->slackMessage->id,
             'employee_name' => $this->employeeName,
             'message_text' => $this->slackMessage->message_text,
-            'message' => "{$this->employeeName} requested a session override: \"{$this->slackMessage->message_text}\".",
+            'message' => "[Session Override] {$this->employeeName}: \"Requested override: {$this->slackMessage->message_text}\"",
             'url' => route('super-admin.session-management.overrides', [], false),
         ];
     }

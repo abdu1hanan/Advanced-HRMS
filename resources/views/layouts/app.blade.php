@@ -55,6 +55,18 @@
             border-right: 1px solid rgba(255, 255, 255, 0.12);
             border-bottom: 1px solid rgba(255, 255, 255, 0.12);
         }
+        .custom-sidebar-tooltip.arrow-right::before {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%) rotate(45deg);
+            width: 8px;
+            height: 8px;
+            background-color: #1a1a1a;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            border-right: 1px solid rgba(255, 255, 255, 0.12);
+        }
     </style>
     @stack('styles')
 </head>
@@ -214,6 +226,10 @@
                     top = offset.top - tooltipHeight - 10;
                     left = offset.left + (targetWidth - tooltipWidth) / 2;
                     customTooltip.addClass('arrow-bottom');
+                } else if (placement === 'left') {
+                    top = offset.top + (targetHeight - tooltipHeight) / 2;
+                    left = offset.left - tooltipWidth - 10;
+                    customTooltip.addClass('arrow-right');
                 }
                 
                 customTooltip.css({
@@ -223,7 +239,7 @@
             }
 
             function hideTooltip() {
-                customTooltip.removeClass('show arrow-left arrow-bottom');
+                customTooltip.removeClass('show arrow-left arrow-bottom arrow-right');
             }
 
             function updateSidebarTooltips() {

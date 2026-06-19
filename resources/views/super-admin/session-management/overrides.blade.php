@@ -86,7 +86,25 @@
                             <td><code class="text-white opacity-75 px-3 py-1 rounded-pill bg-dark border border-secondary border-opacity-25" style="border-radius: 50px !important; font-size: 0.8rem; display: inline-block;">{{ $msg->channel_id }}</code></td>
                             <td class="text-muted">{{ $msg->message_at->timezone('Asia/Karachi')->format('M d, Y h:i A') }}</td>
                             <td class="text-center">
-                                @if($msg->approval_status === 'pending' || $msg->approval_status === 'pending_edit')
+                                @if($msg->channel_id === 'manual_override')
+                                    @if($msg->mapping && $msg->mapping->user_id)
+                                        @php
+                                            $localTime = $msg->message_at->timezone('Asia/Karachi');
+                                            $fixUrl = route('super-admin.session-management.track-record', [
+                                                'user_id' => $msg->mapping->user_id,
+                                                'period' => 'month',
+                                                'month' => $localTime->month,
+                                                'year' => $localTime->year,
+                                                'edit' => 'true'
+                                            ]);
+                                        @endphp
+                                        <a href="{{ $fixUrl }}" class="row-btn-blue d-inline-flex align-items-center justify-content-center" style="height: 24px !important; font-size: 0.72rem !important; padding: 0 0.8rem !important; border-radius: 50px !important; text-decoration: none;">
+                                            Fix
+                                        </a>
+                                    @else
+                                        <span class="text-white opacity-50 small">—</span>
+                                    @endif
+                                @elseif($msg->approval_status === 'pending' || $msg->approval_status === 'pending_edit')
                                     <div class="d-inline-flex gap-2 align-items-center approval-cell-container justify-content-center">
                                         <button type="button" class="btn-circle-blue btn-approve-override" data-message-id="{{ $msg->id }}" data-custom-tooltip="Approve" data-tooltip-placement="top">
                                             <i class="bi bi-check-lg"></i>
@@ -104,7 +122,7 @@
                                         Rejected
                                     </span>
                                 @else
-                                    <span class="text-white opacity-50 small">—</span>
+                                    <!-- Unmodified real Slack message shows empty cell -->
                                 @endif
                             </td>
                         </tr>
@@ -328,7 +346,18 @@
                                 }
 
                                 let approvalCell = '';
-                                if (msg.approval_status === 'pending' || msg.approval_status === 'pending_edit') {
+                                if (msg.channel_id === 'manual_override') {
+                                    if (msg.user_id) {
+                                        const fixUrl = `/super-admin/session-management/track-record?user_id=${msg.user_id}&period=month&month=${msg.month}&year=${msg.year}&edit=true`;
+                                        approvalCell = `
+                                            <a href="${fixUrl}" class="row-btn-blue d-inline-flex align-items-center justify-content-center" style="height: 24px !important; font-size: 0.72rem !important; padding: 0 0.8rem !important; border-radius: 50px !important; text-decoration: none;">
+                                                Fix
+                                            </a>
+                                        `;
+                                    } else {
+                                        approvalCell = '';
+                                    }
+                                } else if (msg.approval_status === 'pending' || msg.approval_status === 'pending_edit') {
                                     approvalCell = `
                                         <div class="d-inline-flex gap-2 align-items-center approval-cell-container justify-content-center">
                                             <button type="button" class="btn-circle-blue btn-approve-override" data-message-id="${msg.id}" data-custom-tooltip="Approve" data-tooltip-placement="top">
@@ -352,7 +381,7 @@
                                         </span>
                                     `;
                                 } else {
-                                    approvalCell = `<span class="text-white opacity-50 small">—</span>`;
+                                    approvalCell = '';
                                 }
 
                                 let breakExceededIndicator = '';

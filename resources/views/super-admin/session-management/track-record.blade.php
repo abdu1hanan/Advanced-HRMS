@@ -169,7 +169,7 @@
             color: #0f172a !important; /* Dark slate */
         }
         .table-light-theme #dynamic-tbody td.text-total-positive {
-            color: #166534 !important; /* Rich green-800 */
+            color: #16a34a !important; /* Premium bright green */
             font-weight: 700 !important;
         }
         .table-light-theme #dynamic-tbody td.text-total-zero {
@@ -238,6 +238,48 @@
             font-weight: 700 !important;
             border: 1px solid #15803d !important;
         }
+        
+        /* Light mode text-warning override for high contrast on white background */
+        .table-light-theme .text-warning,
+        .table-light-theme .text-warning i {
+            color: #ffc400b4 !important; 
+        }
+
+        /* Light mode input overrides in edit mode to ensure high readability and premium aesthetic */
+        .table-light-theme .edit-time-input {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border-color: #cbd5e1 !important;
+        }
+        .table-light-theme .edit-time-input:focus {
+            background-color: #ffffff !important;
+            border-color: #16a34a !important;
+            box-shadow: 0 0 5px rgba(22, 163, 74, 0.4) !important;
+        }
+        
+        /* Light mode virtual entry bubble/glow override (dark yellow bubble) */
+        .table-light-theme .edit-time-input-virtual {
+            background-color: #fffbeb !important;
+            border-color: #d97706 !important;
+            color: #b45309 !important;
+            box-shadow: 0 0 5px rgba(217, 119, 6, 0.35) !important;
+        }
+
+        /* Light mode active session bubble/glow override (blue bubble) */
+        .table-light-theme .edit-time-input-active {
+            background-color: #eff6ff !important;
+            border-color: #2563eb !important;
+            color: #1e40af !important;
+            box-shadow: 0 0 5px rgba(37, 99, 235, 0.35) !important;
+        }
+
+        /* Light mode error validation highlight override (red bubble) */
+        .table-light-theme .edit-time-input.border-danger {
+            background-color: #fef2f2 !important;
+            border-color: #ef4444 !important;
+            color: #991b1b !important;
+            box-shadow: 0 0 5px rgba(239, 68, 68, 0.4) !important;
+        }
 
         /* --- Pill Theme Toggle Switch --- */
         .theme-switch-wrapper {
@@ -304,6 +346,46 @@
         }
         .table-light-theme #table-theme-toggle .moon-icon {
             color: #64748b !important; /* Muted moon icon */
+        }
+        .edit-time-input {
+            transition: all 0.2s ease-in-out;
+        }
+        .edit-time-input:focus {
+            background-color: #1a1a1a !important;
+            border-color: #1db954 !important;
+            box-shadow: 0 0 5px rgba(29, 185, 84, 0.4) !important;
+        }
+        .tr-dirty {
+            background-color: rgba(29, 185, 84, 0.08) !important;
+            border-left: 3px solid #1db954 !important;
+        }
+        .table-light-theme .tr-dirty {
+            background-color: rgba(22, 163, 74, 0.1) !important;
+            border-left: 3px solid #16a34a !important;
+        }
+        .border-warning-glow {
+            border: 1.5px solid #f59e0b !important;
+        }
+        .border-warning-glow:focus {
+            box-shadow: 0 0 5px rgba(245, 158, 11, 0.5) !important;
+        }
+        .edit-time-input-virtual {
+            border-color: #f59e0b !important;
+            box-shadow: 0 0 5px rgba(245, 158, 11, 0.35) !important;
+        }
+        .edit-time-input-active {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 5px rgba(59, 130, 246, 0.35) !important;
+        }
+        .edit-time-input.border-danger {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 5px rgba(239, 68, 68, 0.4) !important;
+        }
+        #dynamic-tbody td {
+            height: 46px;
+            vertical-align: middle !important;
+            padding-top: 4px !important;
+            padding-bottom: 4px !important;
         }
     </style>
 
@@ -384,8 +466,22 @@
     <div id="results-card" class="spotify-card mb-4 d-none">
         <div class="card-header-area px-4 pt-4">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="text-uppercase text-white fw-semibold small mb-0 opacity-75" style="letter-spacing: 0.05em;" id="report-title">Employee Timesheet Summary</h6>
+                <div class="d-flex align-items-center gap-1">
+                    <h6 class="text-uppercase text-white fw-semibold small mb-0 opacity-75" style="letter-spacing: 0.05em;" id="report-title">Employee Timesheet Summary</h6>
+                    <button type="button" class="btn btn-sm btn-link text-white p-0 d-none" id="edit-sheet-btn" data-custom-tooltip="Edit Timesheet" data-tooltip-placement="top" style="border: none; background: transparent; outline: none; box-shadow: none; padding: 0 !important; margin-left: 6px !important;">
+                        <i class="bi bi-pencil text-secondary fs-6"></i>
+                    </button>
+                </div>
                 <div class="d-flex align-items-center gap-3">
+                    <!-- Save / Cancel buttons (hidden initially) -->
+                    <div id="edit-actions" class="d-none d-flex align-items-center gap-2">
+                        <button type="button" class="row-btn-outline-blue" id="save-sheet-btn">
+                            <i class="bi bi-check-lg me-1"></i>Save
+                        </button>
+                        <button type="button" class="row-btn-outline-red" id="cancel-sheet-btn">
+                            Cancel
+                        </button>
+                    </div>
                     <!-- Theme Toggle Switch -->
                     <div class="theme-switch-wrapper">
                         <div class="theme-switch-pill" id="table-theme-toggle" data-custom-tooltip="Light Mode" data-tooltip-placement="top">
@@ -400,7 +496,7 @@
             <div class="grid-separator"></div>
         </div>
         
-        <div class="table-responsive" style="max-height: 70vh; overflow-y: auto; overflow-x: auto;">
+        <div class="table-responsive" style="max-height: 74vh; min-height: 61vh; overflow-y: auto; overflow-x: auto;">
             <table class="table table-hover mb-0 align-middle" id="dynamic-table" style="table-layout: fixed;">
                 <colgroup id="dynamic-colgroup">
                     <!-- Column widths generated dynamically -->
@@ -494,6 +590,45 @@
                 // Make the main header h1 full-width to allow the button to stick to the right
                 $('main h1').addClass('w-100');
 
+                let isEditMode = false;
+                let rawReportData = null;
+                let originalReportData = null;
+
+                function cleanTimeStr(val) {
+                    if (!val || val === '-' || val === 'Incomplete' || val === 'Active') return '';
+                    return val.replace(/\s*\(.*?\)/g, '').trim();
+                }
+
+                function validateTimeFormat(timeStr) {
+                    if (!timeStr) return true;
+                    const regex = /^(0?[1-9]|1[0-2]):([0-5][0-9])(:[0-5][0-9])?\s*(AM|PM)$/i;
+                    return regex.test(timeStr.trim());
+                }
+
+                function parseTimeToSeconds(timeStr) {
+                    if (!timeStr) return null;
+                    timeStr = timeStr.trim().toUpperCase();
+                    const match = timeStr.match(/^(0?[1-9]|1[0-2]):([0-5][0-9])(?::([0-5][0-9]))?\s*(AM|PM)$/i);
+                    if (!match) return null;
+                    
+                    let hours = parseInt(match[1]);
+                    const minutes = parseInt(match[2]);
+                    const seconds = match[3] ? parseInt(match[3]) : 0;
+                    const ampm = match[4];
+                    
+                    if (hours < 1 || hours > 12 || minutes < 0 || minutes > 59 || seconds < 0 || seconds > 59) {
+                        return null;
+                    }
+                    
+                    if (ampm === 'PM' && hours !== 12) {
+                        hours += 12;
+                    } else if (ampm === 'AM' && hours === 12) {
+                        hours = 0;
+                    }
+                    
+                    return hours * 3600 + minutes * 60 + seconds;
+                }
+
                 function showError(message) {
                     if (window.showToast) {
                         window.showToast(message, 'danger');
@@ -543,7 +678,7 @@
                 });
 
                 // Auto-fetch function when filters are updated
-                function fetchReport() {
+                function fetchReport(autoEdit = false) {
                     const userId = $('#employee-select').val();
                     const period = $('#period-select').val();
 
@@ -555,6 +690,8 @@
                         $('#placeholder-card').removeClass('d-none');
                         $('#results-card').addClass('d-none');
                         $('#summary-dashboard-card').addClass('d-none');
+                        $('#edit-sheet-btn').addClass('d-none');
+                        $('#edit-actions').addClass('d-none');
                         return;
                     }
 
@@ -578,6 +715,21 @@
                             end_date: endDate
                         },
                         success: function(response) {
+                             rawReportData = response;
+                             originalReportData = JSON.parse(JSON.stringify(response));
+                             isEditMode = autoEdit;
+                            if (isEditMode) {
+                                $('#edit-sheet-btn').addClass('d-none');
+                                $('#edit-actions').removeClass('d-none');
+                            } else {
+                                $('#edit-actions').addClass('d-none');
+                                if (userId && userId !== 'all') {
+                                    $('#edit-sheet-btn').removeClass('d-none');
+                                } else {
+                                    $('#edit-sheet-btn').addClass('d-none');
+                                }
+                            }
+
                             // Swap View states
                             $('#placeholder-card').addClass('d-none');
                             $('#results-card').removeClass('d-none');
@@ -637,7 +789,7 @@
                     if (typeof hideTooltip === 'function') {
                         hideTooltip();
                     } else if (window.customTooltip) {
-                        window.customTooltip.removeClass('show arrow-left arrow-bottom');
+                        window.customTooltip.removeClass('show arrow-left arrow-bottom arrow-right');
                     }
                     
                     if (resultsCard.hasClass('table-light-theme')) {
@@ -692,8 +844,426 @@
                     window.location.href = url.toString();
                 });
 
-                // Initial run
+                // Toggle Edit Mode
+                $('#edit-sheet-btn').on('click', function() {
+                    isEditMode = true;
+                    $('#edit-sheet-btn').addClass('d-none');
+                    $('#edit-actions').removeClass('d-none');
+                    renderTable(rawReportData);
+                });
+
+                // Cancel Edit Mode
+                $('#cancel-sheet-btn').on('click', function() {
+                    isEditMode = false;
+                    $('#edit-actions').addClass('d-none');
+                    $('#edit-sheet-btn').removeClass('d-none');
+                    rawReportData = JSON.parse(JSON.stringify(originalReportData));
+                    renderTable(rawReportData);
+                });
+
+                // Highlight Row on input
+                $(document).on('input change', '.edit-time-input', function() {
+                    const row = $(this).closest('tr');
+                    row.addClass('tr-dirty');
+                    
+                    const dateStr = row.data('date');
+                    const type = $(this).data('type'); // 'in' or 'out'
+                    const idx = parseInt($(this).data('session-index'));
+                    const val = $(this).val().trim();
+
+                    // Sync into rawReportData
+                    if (rawReportData && rawReportData.records) {
+                        const rec = rawReportData.records.find(r => r.raw_date_string === dateStr);
+                        if (rec) {
+                            rec.is_dirty = true;
+                            if (!rec.sessions) rec.sessions = [];
+                            while (rec.sessions.length <= idx) {
+                                rec.sessions.push({ in: '', out: '', is_virtual_in: false, is_virtual_out: false });
+                            }
+                            rec.sessions[idx][type] = val;
+                            
+                            // If user typed a change, it is no longer virtual
+                            const originalValue = $(this).attr('data-original-value') || '';
+                            if (val !== originalValue) {
+                                rec.sessions[idx]['is_virtual_' + type] = false;
+                                rec.sessions[idx][type + '_is_virtual'] = false;
+                            }
+                        }
+                    }
+
+                    if ($(this).attr('data-custom-tooltip') && $(this).attr('data-custom-tooltip').startsWith('Active -')) {
+                        $(this).attr('data-custom-tooltip', 'Active - ' + val);
+                    }
+
+                    // Virtual to Real transition
+                    const originalValue = $(this).attr('data-original-value') || '';
+                    if (val !== originalValue) {
+                        $(this).attr('data-is-virtual', 'false');
+                        $(this).removeClass('edit-time-input-virtual');
+                        $(this).removeAttr('data-custom-tooltip');
+                    }
+
+                    let displaySessions = Math.max(2, rawReportData.max_sessions || 2);
+                    if (isEditMode) {
+                        displaySessions = Math.min(9, displaySessions + 1);
+                    }
+                    if (type === 'out' && idx === displaySessions - 1 && val.length > 0) {
+                        const maxAllowed = 9; // Allow up to 9 sessions (Sign In 9 & Sign Out 9)
+                        if (displaySessions < maxAllowed) {
+                            rawReportData.max_sessions = displaySessions;
+
+                            // Save focus state to restore after rendering
+                            const activeElement = document.activeElement;
+                            let focusDate = null, focusType = null, focusIdx = null, selStart = 0, selEnd = 0;
+                            if (activeElement && $(activeElement).hasClass('edit-time-input')) {
+                                focusDate = $(activeElement).closest('tr').data('date');
+                                focusType = $(activeElement).data('type');
+                                focusIdx = $(activeElement).data('session-index');
+                                try {
+                                    selStart = activeElement.selectionStart;
+                                    selEnd = activeElement.selectionEnd;
+                                } catch(e) {}
+                            }
+
+                            // Re-render table with new columns
+                            renderTable(rawReportData);
+
+                            // Restore focus and selection
+                            if (focusDate !== null) {
+                                const targetInput = $(`tr[data-date="${focusDate}"]`).find(`.edit-time-input[data-type="${focusType}"][data-session-index="${focusIdx}"]`);
+                                if (targetInput.length > 0) {
+                                    targetInput.focus();
+                                    try {
+                                        targetInput[0].setSelectionRange(selStart, selEnd);
+                                    } catch(e) {}
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Validate and format time input on blur
+                $(document).on('blur', '.edit-time-input', function() {
+                    let val = $(this).val().trim();
+                    if (!val) {
+                        $(this).removeClass('border-danger');
+                        return;
+                    }
+                    
+                    // 1. Standardize AM/PM spacing and casing (e.g. 08:00am -> 08:00 AM)
+                    val = val.replace(/\s*(AM|PM|am|pm)/i, ' $1').toUpperCase();
+                    
+                    // 2. Pad hour and append missing seconds if needed
+                    const parts = val.split(/\s+/);
+                    if (parts.length === 2) {
+                        let timePart = parts[0];
+                        const ampm = parts[1];
+                        
+                        const timeSubParts = timePart.split(':');
+                        if (timeSubParts.length >= 2) {
+                            let hour = timeSubParts[0].trim();
+                            let minute = timeSubParts[1].trim();
+                            let second = '00';
+                            
+                            if (timeSubParts.length === 3) {
+                                second = timeSubParts[2].trim();
+                            }
+                            
+                            // Pad hour if single digit
+                            if (hour.length === 1) {
+                                hour = '0' + hour;
+                            }
+                            
+                            // Reassemble with seconds
+                            val = `${hour}:${minute}:${second} ${ampm}`;
+                        }
+                    }
+                    
+                    $(this).val(val);
+
+                    // Sync formatted/sanitized time back into rawReportData
+                    const row = $(this).closest('tr');
+                    const dateStr = row.data('date');
+                    const type = $(this).data('type');
+                    const idx = parseInt($(this).data('session-index'));
+
+                    if (rawReportData && rawReportData.records) {
+                        const rec = rawReportData.records.find(r => r.raw_date_string === dateStr);
+                        if (rec) {
+                            if (!rec.sessions) rec.sessions = [];
+                            while (rec.sessions.length <= idx) {
+                                rec.sessions.push({ in: '', out: '', is_virtual_in: false, is_virtual_out: false });
+                            }
+                            rec.sessions[idx][type] = val;
+                        }
+                    }
+
+                    if ($(this).attr('data-custom-tooltip') && $(this).attr('data-custom-tooltip').startsWith('Active -')) {
+                        $(this).attr('data-custom-tooltip', 'Active - ' + val);
+                    }
+
+                    if (!validateTimeFormat(val)) {
+                        $(this).addClass('border-danger');
+                        showError('Invalid time format. Please use hh:mm AM/PM or hh:mm:ss AM/PM.');
+                    } else {
+                        $(this).removeClass('border-danger');
+                    }
+                });
+
+                // Save Edits
+                $('#save-sheet-btn').on('click', function() {
+                    $('.edit-time-input').trigger('blur');
+                    
+                    let dateEntries = {};
+                    let hasValidationError = false;
+
+                    // Clear previous input validation borders
+                    $('.edit-time-input').removeClass('border-danger');
+
+                    $('#dynamic-tbody tr[data-date].tr-dirty').each(function() {
+                        const row = $(this);
+                        const dateStr = row.data('date');
+                        if (!dateStr) return;
+
+                        let inputs = [];
+                        row.find('.edit-time-input').each(function() {
+                            const type = $(this).data('type');
+                            const idx = parseInt($(this).data('session-index'));
+                            const val = $(this).val().trim();
+                            const isVirtual = $(this).attr('data-is-virtual') === 'true';
+                            inputs.push({
+                                type: type,
+                                idx: idx,
+                                val: val,
+                                isVirtual: isVirtual,
+                                element: $(this)
+                            });
+                        });
+
+                        let sessions = [];
+                        inputs.forEach(inp => {
+                            if (!sessions[inp.idx]) {
+                                sessions[inp.idx] = { in: null, out: null };
+                            }
+                            sessions[inp.idx][inp.type] = inp;
+                        });
+
+                        let timeline = [];
+                        let formatError = false;
+
+                        for (let i = 0; i < sessions.length; i++) {
+                            const sess = sessions[i];
+                            if (!sess) continue;
+
+                            const inInp = sess.in;
+                            const outInp = sess.out;
+
+                            if (inInp && inInp.val) {
+                                if (!validateTimeFormat(inInp.val)) {
+                                    inInp.element.addClass('border-danger');
+                                    hasValidationError = true;
+                                    formatError = true;
+                                } else {
+                                    const secs = parseTimeToSeconds(inInp.val);
+                                    timeline.push({
+                                        type: 'in',
+                                        sessionIndex: i,
+                                        val: inInp.val,
+                                        seconds: secs,
+                                        element: inInp.element
+                                    });
+                                }
+                            }
+
+                            if (outInp && outInp.val) {
+                                if (!validateTimeFormat(outInp.val)) {
+                                    outInp.element.addClass('border-danger');
+                                    hasValidationError = true;
+                                    formatError = true;
+                                } else {
+                                    const secs = parseTimeToSeconds(outInp.val);
+                                    timeline.push({
+                                        type: 'out',
+                                        sessionIndex: i,
+                                        val: outInp.val,
+                                        seconds: secs,
+                                        element: outInp.element
+                                    });
+                                }
+                            }
+                        }
+
+                        if (formatError) {
+                            return; // Skip rest of this row, go to next row
+                        }
+
+                        // Missing Sign In check
+                        let missingSignInError = false;
+                        for (let i = 0; i < sessions.length; i++) {
+                            const sess = sessions[i];
+                            if (!sess) continue;
+                            const inVal = sess.in ? sess.in.val : '';
+                            const outVal = sess.out ? sess.out.val : '';
+
+                            if (outVal && !inVal) {
+                                if (sess.out) sess.out.element.addClass('border-danger');
+                                if (sess.in) sess.in.element.addClass('border-danger');
+                                hasValidationError = true;
+                                missingSignInError = true;
+                            }
+                        }
+
+                        if (missingSignInError) {
+                            return; // Skip rest of this row, go to next row
+                        }
+
+                        // Check for session gaps before the last filled session
+                        let maxFilledIndex = -1;
+                        for (let i = 0; i < sessions.length; i++) {
+                            const sess = sessions[i];
+                            if (!sess) continue;
+                            if ((sess.in && sess.in.val) || (sess.out && sess.out.val)) {
+                                maxFilledIndex = i;
+                            }
+                        }
+
+                        let sessionGapError = false;
+                        for (let i = 0; i < maxFilledIndex; i++) {
+                            const sess = sessions[i];
+                            const inVal = (sess && sess.in) ? sess.in.val : '';
+                            const outVal = (sess && sess.out) ? sess.out.val : '';
+
+                            if (!inVal || !outVal) {
+                                if (sess) {
+                                    if (sess.in && !inVal) sess.in.element.addClass('border-danger');
+                                    if (sess.out && !outVal) sess.out.element.addClass('border-danger');
+                                }
+                                hasValidationError = true;
+                                sessionGapError = true;
+                            }
+                        }
+
+                        if (sessionGapError) {
+                            return; // Skip rest of this row, go to next row
+                        }
+
+                        // Chronological alignment check
+                        let chronologyError = false;
+                        for (let k = 0; k < timeline.length - 1; k++) {
+                            const currentEvent = timeline[k];
+                            const nextEvent = timeline[k + 1];
+
+                            if (currentEvent.seconds >= nextEvent.seconds) {
+                                currentEvent.element.addClass('border-danger');
+                                nextEvent.element.addClass('border-danger');
+                                hasValidationError = true;
+                                chronologyError = true;
+                            }
+                        }
+
+                        if (chronologyError) {
+                            return; // Skip rest of this row, go to next row
+                        }
+
+                        // Clean data structure construction
+                        let cleanSessions = [];
+                        for (let i = 0; i < sessions.length; i++) {
+                            const sess = sessions[i];
+                            if (!sess) continue;
+                            const inVal = sess.in ? sess.in.val : '';
+                            const outVal = sess.out ? sess.out.val : '';
+                            const inIsVirtual = sess.in ? sess.in.isVirtual : false;
+                            const outIsVirtual = sess.out ? sess.out.isVirtual : false;
+
+                            if (inVal || outVal) {
+                                cleanSessions.push({
+                                    in: inVal,
+                                    out: outVal,
+                                    in_is_virtual: inIsVirtual,
+                                    out_is_virtual: outIsVirtual
+                                });
+                            }
+                        }
+
+                        dateEntries[dateStr] = cleanSessions;
+                    });
+
+                    if (hasValidationError) {
+                        showError('Validation Error: Please fix all highlighted inputs in red before saving.');
+                        return;
+                    }
+
+                    const userId = $('#employee-select').val();
+                    if (!userId) return;
+
+                    // Disable actions
+                    $('#save-sheet-btn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Saving...');
+                    $('#cancel-sheet-btn').prop('disabled', true);
+
+                    $.ajax({
+                        url: "{{ route('super-admin.session-management.track-record.save-overrides') }}",
+                        method: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            user_id: userId,
+                            date_entries: dateEntries
+                        },
+                        success: function(response) {
+                            if (window.showToast) {
+                                window.showToast(response.message || 'Timesheet manual overrides saved successfully!', 'success');
+                            } else {
+                                alert(response.message || 'Timesheet manual overrides saved successfully!');
+                            }
+                            isEditMode = false;
+                            $('#edit-actions').addClass('d-none');
+                            $('#edit-sheet-btn').removeClass('d-none');
+                            fetchReport();
+                        },
+                        error: function(err) {
+                            let msg = 'Failed to save timesheet overrides.';
+                            if (err.responseJSON && err.responseJSON.message) {
+                                msg = err.responseJSON.message;
+                            }
+                            showError(msg);
+                        },
+                        complete: function() {
+                            $('#save-sheet-btn').prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i>Save');
+                            $('#cancel-sheet-btn').prop('disabled', false);
+                        }
+                    });
+                });
+
+                // Initial run - parse URL query parameters to auto-fill searches or trigger edit mode
+                const urlParams = new URLSearchParams(window.location.search);
+                const paramUserId = urlParams.get('user_id');
+                const paramPeriod = urlParams.get('period');
+                const paramMonth = urlParams.get('month');
+                const paramYear = urlParams.get('year');
+                const paramEdit = urlParams.get('edit');
+
+                let autoEditTrigger = false;
+
+                if (paramUserId) {
+                    $('#employee-select').val(paramUserId);
+                }
+                if (paramPeriod) {
+                    $('#period-select').val(paramPeriod).trigger('change');
+                }
+                if (paramMonth) {
+                    $('#custom-month-select').val(paramMonth);
+                }
+                if (paramYear) {
+                    $('#custom-year-select').val(paramYear);
+                }
+                if (paramEdit === 'true' || paramEdit === '1') {
+                    autoEditTrigger = true;
+                }
+
                 updateExportButtonVisibility();
+
+                if (paramUserId) {
+                    fetchReport(autoEditTrigger);
+                }
 
                 // Render Table dynamically matching Excel template layout
                 function renderTable(data) {
@@ -736,14 +1306,29 @@
                     const isToday = (period === 'today');
                     const isAll = (employeeId === 'all');
 
-                    const displaySessions = Math.max(2, maxSessions);
+                    let displaySessions = Math.max(2, maxSessions);
+                    if (isEditMode) {
+                        displaySessions = Math.min(9, displaySessions + 1);
+                    }
                     
                     let tableWidth = '100%';
                     let tableMinWidth = 1000;
-                    if (displaySessions > 2) {
-                        tableWidth = `calc(100% + ${(displaySessions - 2) * 230}px)`;
-                        tableMinWidth += (displaySessions - 2) * 230;
+                    let sessColWidth = '10%';
+
+                    if (isToday) {
+                        sessColWidth = '15.5%';
+                        if (displaySessions > 2) {
+                            tableWidth = (100 + (displaySessions - 2) * 31) + '%';
+                            tableMinWidth += (displaySessions - 2) * 310;
+                        }
+                    } else {
+                        sessColWidth = '10%';
+                        if (displaySessions > 2) {
+                            tableWidth = (100 + (displaySessions - 2) * 20) + '%';
+                            tableMinWidth += (displaySessions - 2) * 200;
+                        }
                     }
+
                     $('#dynamic-table').css('width', tableWidth);
                     $('#dynamic-table').css('min-width', tableMinWidth + 'px');
 
@@ -754,15 +1339,11 @@
                             <col style="width: 8%;">
                             <col style="width: 8%;">
                             <col style="width: 12%;">
-                            <col style="width: 15.5%;">
-                            <col style="width: 15.5%;">
-                            <col style="width: 15.5%;">
-                            <col style="width: 15.5%;">
                         `;
-                        for (let i = 3; i <= displaySessions; i++) {
+                        for (let i = 1; i <= displaySessions; i++) {
                             colgroupHtml += `
-                                <col style="width: 115px;">
-                                <col style="width: 115px;">
+                                <col style="width: ${sessColWidth};">
+                                <col style="width: ${sessColWidth};">
                             `;
                         }
                     } else {
@@ -773,15 +1354,11 @@
                             <col style="width: 10%;">
                             <col style="width: 8%;">
                             <col style="width: 12%;">
-                            <col style="width: 10%;">
-                            <col style="width: 10%;">
-                            <col style="width: 10%;">
-                            <col style="width: 10%;">
                         `;
-                        for (let i = 3; i <= displaySessions; i++) {
+                        for (let i = 1; i <= displaySessions; i++) {
                             colgroupHtml += `
-                                <col style="width: 115px;">
-                                <col style="width: 115px;">
+                                <col style="width: ${sessColWidth};">
+                                <col style="width: ${sessColWidth};">
                             `;
                         }
                     }
@@ -824,13 +1401,22 @@
                     }
 
                     let bodyHtml = '';
+                    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' });
                     records.forEach(function(rec) {
+                        const isCurrentDay = (rec.raw_date_string === todayStr);
                         let rowStyle = '';
-                        let rowClass = '';
+                        let rowAttr = '';
                         if (rec.is_weekend) {
                             rowStyle = 'style="background-color: rgba(230, 47, 47, 0.13) !important;"';
                         }
-                        bodyHtml += `<tr ${rowStyle}>`;
+                        if (rec.raw_date_string) {
+                            rowAttr = `data-date="${rec.raw_date_string}"`;
+                        }
+                        let rowClass = '';
+                        if (rec.is_dirty) {
+                            rowClass = 'tr-dirty';
+                        }
+                        bodyHtml += `<tr ${rowStyle} ${rowAttr} class="${rowClass}">`;
                         
                         // Date/Employee name column
                         if (isAll) {
@@ -898,34 +1484,179 @@
                                 cellStyle = 'style="opacity: 0.35;"';
                             }
  
-                            if (session) {
-                                let inVal = session.in || '-';
-                                let outVal = session.out || '-';
- 
-                                let inClass = session.in ? 'text-white' : 'text-muted';
-                                let outClass = '';
+                            if (isEditMode && !rec.is_filler) {
+                                let inRaw = '';
+                                let outRaw = '';
+                                let isVirtualIn = false;
+                                let isVirtualOut = false;
+                                let virtualInReason = '';
+                                let virtualOutReason = '';
 
-                                if (session.is_virtual_in) {
-                                    inVal = `<span class="text-warning" data-custom-tooltip="${session.virtual_in_reason || 'Virtual Entry'}">${session.in} <i class="bi bi-exclamation-triangle-fill text-warning ms-1" style="font-size: 0.82rem;"></i></span>`;
+                                if (session) {
+                                    inRaw = cleanTimeStr(session.in);
+                                    outRaw = cleanTimeStr(session.out);
+                                    isVirtualIn = !!session.is_virtual_in;
+                                    isVirtualOut = !!session.is_virtual_out;
+                                    virtualInReason = session.virtual_in_reason || 'Auto-appended';
+                                    virtualOutReason = session.virtual_out_reason || 'Auto-appended';
                                 }
 
-                                if (session.out === 'Incomplete') {
-                                    outVal = `<span class="badge rounded-pill px-2 py-0.5 badge-session-incomplete" style="font-size: 0.7rem; font-weight: 500;">Incomplete</span>`;
-                                } else if (session.out && session.out.includes('(Active)')) {
-                                    outVal = `<span class="badge rounded-pill px-2 py-0.5 badge-session-active" style="font-size: 0.7rem; font-weight: 500;">Active</span>`;
-                                } else if (session.is_virtual_out) {
-                                    outVal = `<span class="text-warning" data-custom-tooltip="${session.virtual_out_reason || 'Virtual Entry'}">${session.out} <i class="bi bi-exclamation-triangle-fill text-warning ms-1" style="font-size: 0.82rem;"></i></span>`;
-                                } else if (session.out) {
-                                    outClass = 'text-white';
+                                // Render Sign In input
+                                let inInputHtml = '';
+                                let inTdAttrs = '';
+                                if (isCurrentDay) {
+                                    const inTooltipAttr = isVirtualIn ? `data-custom-tooltip="${virtualInReason}" data-tooltip-placement="top"` : '';
+                                    inTdAttrs = `${inTooltipAttr}`;
+                                    
+                                    inInputHtml = `
+                                        <input type="text" 
+                                               class="form-control form-control-sm text-center font-monospace bg-dark text-white edit-time-input ${isVirtualIn ? 'edit-time-input-virtual' : 'border-secondary'}" 
+                                               value="${inRaw}" 
+                                               placeholder="hh:mm AM/PM" 
+                                               data-session-index="${i}" 
+                                               data-type="in"
+                                               data-is-virtual="${isVirtualIn}"
+                                               data-original-value="${inRaw}"
+                                               tabindex="-1"
+                                               readonly
+                                               style="font-size: 0.85rem !important; height: 28px; border-radius: 4px; opacity: 0.6; cursor: not-allowed; user-select: none; pointer-events: none;">
+                                    `;
                                 } else {
-                                    outClass = 'text-muted';
+                                    if (isVirtualIn) {
+                                        inInputHtml = `
+                                            <input type="text" 
+                                                   class="form-control form-control-sm text-center font-monospace bg-dark text-white edit-time-input edit-time-input-virtual" 
+                                                   value="${inRaw}" 
+                                                   placeholder="hh:mm AM/PM" 
+                                                   data-session-index="${i}" 
+                                                   data-type="in"
+                                                   data-custom-tooltip="${virtualInReason}"
+                                                   data-tooltip-placement="top"
+                                                   data-is-virtual="true"
+                                                   data-original-value="${inRaw}"
+                                                   style="font-size: 0.85rem !important; height: 28px; border-radius: 4px;">
+                                        `;
+                                    } else {
+                                        inInputHtml = `
+                                            <input type="text" 
+                                                   class="form-control form-control-sm text-center font-monospace bg-dark text-white border-secondary edit-time-input" 
+                                                   value="${inRaw}" 
+                                                   placeholder="hh:mm AM/PM" 
+                                                   data-session-index="${i}" 
+                                                   data-type="in"
+                                                   data-is-virtual="false"
+                                                   data-original-value="${inRaw}"
+                                                   style="font-size: 0.85rem !important; height: 28px; border-radius: 4px;">
+                                        `;
+                                    }
                                 }
- 
-                                bodyHtml += `<td class="text-center font-monospace ${inClass}" ${cellStyle}>${inVal}</td>`;
-                                bodyHtml += `<td class="text-center font-monospace ${outClass}" ${cellStyle}>${outVal}</td>`;
+
+                                // Render Sign Out input
+                                let outInputHtml = '';
+                                let outTdAttrs = '';
+                                const isActiveOut = session && session.out && session.out.includes('(Active)');
+
+                                if (isCurrentDay) {
+                                    let outTooltipAttr = '';
+                                    const placement = (i === displaySessions - 1) ? 'left' : 'top';
+                                    if (isActiveOut) {
+                                        outTooltipAttr = `data-custom-tooltip="active time" data-tooltip-placement="${placement}"`;
+                                    } else if (isVirtualOut) {
+                                        outTooltipAttr = `data-custom-tooltip="${virtualOutReason}" data-tooltip-placement="${placement}"`;
+                                    }
+                                    outTdAttrs = `${outTooltipAttr}`;
+                                    
+                                    outInputHtml = `
+                                        <input type="text" 
+                                               class="form-control form-control-sm text-center font-monospace bg-dark text-white edit-time-input ${isActiveOut ? 'edit-time-input-active' : (isVirtualOut ? 'edit-time-input-virtual' : 'border-secondary')}" 
+                                               value="${outRaw}" 
+                                               placeholder="hh:mm AM/PM" 
+                                               data-session-index="${i}" 
+                                               data-type="out"
+                                               data-is-virtual="${isVirtualOut}"
+                                               data-original-value="${outRaw}"
+                                               tabindex="-1"
+                                               readonly
+                                               style="font-size: 0.85rem !important; height: 28px; border-radius: 4px; opacity: 0.6; cursor: not-allowed; user-select: none; pointer-events: none;">
+                                    `;
+                                } else {
+                                    const placement = (i === displaySessions - 1) ? 'left' : 'top';
+                                    if (isActiveOut) {
+                                        outInputHtml = `
+                                            <input type="text" 
+                                                   class="form-control form-control-sm text-center font-monospace bg-dark text-white edit-time-input edit-time-input-active" 
+                                                   value="${outRaw}" 
+                                                   placeholder="hh:mm AM/PM" 
+                                                   data-session-index="${i}" 
+                                                   data-type="out"
+                                                   data-custom-tooltip="Active - ${outRaw}"
+                                                   data-tooltip-placement="${placement}"
+                                                   data-is-virtual="false"
+                                                   data-original-value="${outRaw}"
+                                                   style="font-size: 0.85rem !important; height: 28px; border-radius: 4px;">
+                                        `;
+                                    } else if (isVirtualOut) {
+                                        outInputHtml = `
+                                            <input type="text" 
+                                                   class="form-control form-control-sm text-center font-monospace bg-dark text-white edit-time-input edit-time-input-virtual" 
+                                                   value="${outRaw}" 
+                                                   placeholder="hh:mm AM/PM" 
+                                                   data-session-index="${i}" 
+                                                   data-type="out"
+                                                   data-custom-tooltip="${virtualOutReason}"
+                                                   data-tooltip-placement="${placement}"
+                                                   data-is-virtual="true"
+                                                   data-original-value="${outRaw}"
+                                                   style="font-size: 0.85rem !important; height: 28px; border-radius: 4px;">
+                                        `;
+                                    } else {
+                                        outInputHtml = `
+                                            <input type="text" 
+                                                   class="form-control form-control-sm text-center font-monospace bg-dark text-white border-secondary edit-time-input" 
+                                                   value="${outRaw}" 
+                                                   placeholder="hh:mm AM/PM" 
+                                                   data-session-index="${i}" 
+                                                   data-type="out"
+                                                   data-is-virtual="false"
+                                                   data-original-value="${outRaw}"
+                                                   style="font-size: 0.85rem !important; height: 28px; border-radius: 4px;">
+                                        `;
+                                    }
+                                }
+
+                                bodyHtml += `<td class="text-center font-monospace px-1" ${cellStyle} ${inTdAttrs}>${inInputHtml}</td>`;
+                                bodyHtml += `<td class="text-center font-monospace px-1" ${cellStyle} ${outTdAttrs}>${outInputHtml}</td>`;
                             } else {
-                                bodyHtml += `<td class="text-center text-muted opacity-25 font-monospace" ${cellStyle}>-</td>`;
-                                bodyHtml += `<td class="text-center text-muted opacity-25 font-monospace" ${cellStyle}>-</td>`;
+                                if (session) {
+                                    let inVal = session.in || '-';
+                                    let outVal = session.out || '-';
+     
+                                    let inClass = session.in ? 'text-white' : 'text-muted';
+                                    let outClass = '';
+    
+                                    if (session.is_virtual_in) {
+                                        inVal = `<span class="text-warning" data-custom-tooltip="${session.virtual_in_reason || 'Virtual Entry'}">${session.in} <i class="bi bi-exclamation-triangle-fill text-warning ms-1" style="font-size: 0.82rem;"></i></span>`;
+                                    }
+    
+                                    if (session.out === 'Incomplete') {
+                                        outVal = `<span class="badge rounded-pill px-2 py-0.5 badge-session-incomplete" style="font-size: 0.7rem; font-weight: 500;">Incomplete</span>`;
+                                    } else if (session.out && session.out.includes('(Active)')) {
+                                        outVal = `<span class="badge rounded-pill px-2 py-0.5 badge-session-active" style="font-size: 0.7rem; font-weight: 500;">Active</span>`;
+                                    } else if (session.is_virtual_out) {
+                                        const placement = (i === displaySessions - 1) ? 'left' : 'top';
+                                        outVal = `<span class="text-warning" data-custom-tooltip="${session.virtual_out_reason || 'Virtual Entry'}" data-tooltip-placement="${placement}">${session.out} <i class="bi bi-exclamation-triangle-fill text-warning ms-1" style="font-size: 0.82rem;"></i></span>`;
+                                    } else if (session.out) {
+                                        outClass = 'text-white';
+                                    } else {
+                                        outClass = 'text-muted';
+                                    }
+     
+                                    bodyHtml += `<td class="text-center font-monospace ${inClass}" ${cellStyle}>${inVal}</td>`;
+                                    bodyHtml += `<td class="text-center font-monospace ${outClass}" ${cellStyle}>${outVal}</td>`;
+                                } else {
+                                    bodyHtml += `<td class="text-center text-muted opacity-25 font-monospace" ${cellStyle}>-</td>`;
+                                    bodyHtml += `<td class="text-center text-muted opacity-25 font-monospace" ${cellStyle}>-</td>`;
+                                }
                             }
                         }
                         bodyHtml += '</tr>';
