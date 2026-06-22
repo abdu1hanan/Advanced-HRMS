@@ -33,6 +33,9 @@
             border-color: #cbd5e1 !important;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05) !important;
         }
+        .table-light-theme.spotify-card:hover {
+            background-color: #f1f5f9 !important;
+        }
         .table-light-theme .card-header-area {
             background-color: #e2e8f0 !important; /* Soft slate gray for card header */
             border-bottom: 1px solid #cbd5e1 !important;
@@ -65,15 +68,25 @@
         .table-light-theme #dynamic-tbody tr:nth-child(even) td {
             background-color: #f1f5f9 !important; /* Alternating row soft gray */
         }
+        /* Row hover highlights in light mode */
+        .table-light-theme #dynamic-tbody tr:hover td {
+            background-color: #e2e8f0 !important; /* Elegant hover highlight in light mode */
+        }
+        .table-light-theme #dynamic-tbody tr[style*="rgba(255, 0, 0"]:hover td {
+            background-color: #fecaca !important; /* Slightly darker rose red for weekend hover */
+        }
+        .table-light-theme #dynamic-tbody tr.tr-dirty:hover td {
+            background-color: rgba(22, 163, 74, 0.18) !important;
+        }
         /* Weekend rows */
-        .table-light-theme #dynamic-tbody tr[style*="rgba(230, 47, 47"] td,
-        .table-light-theme #dynamic-tbody tr[style*="rgba(230, 47, 47"] {
+        .table-light-theme #dynamic-tbody tr[style*="rgba(255, 0, 0"] td,
+        .table-light-theme #dynamic-tbody tr[style*="rgba(255, 0, 0"] {
             background-color: #fee2e2 !important; /* Soft rose red background */
             color: #7f1d1d !important; /* Darker red-900 for high-contrast weekend text */
             font-weight: 600 !important;
             border-color: #fca5a5 !important;
         }
-        .table-light-theme #dynamic-tbody tr[style*="rgba(230, 47, 47"] td:nth-child(2) {
+        .table-light-theme #dynamic-tbody tr[style*="rgba(255, 0, 0"] td:nth-child(2) {
             color: #991b1b !important; /* Richer red-800 day name */
             font-weight: 700 !important;
         }
@@ -281,6 +294,64 @@
             box-shadow: 0 0 5px rgba(239, 68, 68, 0.4) !important;
         }
 
+        /* Leave day row styling in Light Mode */
+        .table-light-theme #dynamic-tbody tr.tr-leave td,
+        .table-light-theme #dynamic-tbody tr[style*="rgba(217, 119, 6"] td {
+            background-color: #fef08a !important; /* Brighter premium yellow */
+            color: #713f12 !important; /* Dark brown text for contrast */
+        }
+        .table-light-theme #dynamic-tbody tr.tr-leave td span,
+        .table-light-theme #dynamic-tbody tr[style*="rgba(217, 119, 6"] td span {
+            color: #713f12 !important;
+        }
+        .table-light-theme #dynamic-tbody tr.tr-leave td.text-total-zero,
+        .table-light-theme #dynamic-tbody tr[style*="rgba(217, 119, 6"] td.text-total-zero {
+            color: #a16207 !important;
+        }
+        /* Leave inputs in light mode edit mode */
+        .table-light-theme #dynamic-tbody tr.tr-leave .edit-time-input:not(.edit-time-input-virtual):not(.edit-time-input-active) {
+            background-color: #fefef0 !important;
+            color: #713f12 !important;
+            border-color: #fde047 !important;
+        }
+        
+        
+        /* Current day percentage badge styling for high readability and premium look */
+        tr.tr-current .badge-percentage {
+            background-color: #2563eb !important; /* Premium blue background */
+            color: #ffffff !important; /* High contrast white text */
+        }
+        .table-light-theme tr.tr-current .badge-percentage {
+            background-color: #2563eb !important; /* Premium blue background */
+            color: #ffffff !important; /* High contrast white text */
+        }
+        
+        /* Ensure percentage badge on leave rows looks like other rows, not blue */
+        .table-light-theme #dynamic-tbody tr.tr-leave td span.badge-percentage,
+        .table-light-theme #dynamic-tbody tr[style*="rgba(217, 119, 6"] td span.badge-percentage {
+            background-color: #334155 !important;
+            color: #ffffff !important;
+        }
+        #dynamic-tbody tr.tr-leave td span.badge-percentage,
+        #dynamic-tbody tr[style*="rgba(217, 119, 6"] td span.badge-percentage {
+            background-color: #ffffffee !important;
+            color: #000000 !important;
+        }
+        
+        /* Leave day row styling in Dark Mode */
+        #dynamic-tbody tr.tr-leave td {
+            color: rgba(255, 255, 255, 0.95) !important;
+        }
+        #dynamic-tbody tr.tr-leave td.text-total-zero {
+            color: rgba(245, 158, 11, 0.75) !important; /* Brighter yellow text for total zero */
+        }
+        /* Leave inputs in dark mode edit mode */
+        #dynamic-tbody tr.tr-leave .edit-time-input:not(.edit-time-input-virtual):not(.edit-time-input-active) {
+            background-color: rgba(245, 158, 11, 0.15) !important;
+            color: #fbbf24 !important;
+            border-color: rgba(245, 158, 11, 0.4) !important;
+        }
+
         /* --- Pill Theme Toggle Switch --- */
         .theme-switch-wrapper {
             display: inline-flex;
@@ -435,14 +506,12 @@
             <!-- Custom Year Select -->
             <div class="col-md-2" id="custom-year-wrapper">
                 <label class="form-label text-white opacity-75 small fw-semibold">Year</label>
-                <select class="form-select form-select-sm text-white" id="custom-year-select" style="height: 32px !important; border-radius: 50px !important; padding: 0 1rem !important; font-size: 0.85rem !important;">
-                    <!-- Will be populated dynamically -->
-                </select>
+                <input type="number" class="form-control form-control-sm text-white" id="custom-year-select" style="height: 32px !important; border-radius: 50px !important; padding: 0 1rem !important; font-size: 0.85rem !important; background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15) !important;">
             </div>
 
             <!-- Clear Filter Button -->
             <div class="col-md-2 d-flex align-items-end">
-                <a href="{{ route('super-admin.session-management.track-record') }}" class="btn btn-outline-secondary w-100 text-decoration-none d-flex align-items-center justify-content-center gap-1.5" style="height: 32px !important; border-radius: 50px !important; padding: 0 !important; font-size: 0.85rem !important;">
+                <a href="{{ route('super-admin.session-management.track-record') }}" class="row-btn w-100 text-decoration-none justify-content-center" style="height: 32px !important;">
                     <i class="bi bi-x-circle me-1"></i> Clear Filters
                 </a>
             </div>
@@ -475,10 +544,10 @@
                 <div class="d-flex align-items-center gap-3">
                     <!-- Save / Cancel buttons (hidden initially) -->
                     <div id="edit-actions" class="d-none d-flex align-items-center gap-2">
-                        <button type="button" class="row-btn-outline-blue" id="save-sheet-btn">
-                            <i class="bi bi-check-lg me-1"></i>Save
+                        <button type="button" class="row-btn-outline-blue" id="save-sheet-btn" style="height: 28px !important; padding: 0 12px !important; font-size: 0.75rem !important; display: inline-flex !important; align-items: center !important;">
+                            Save
                         </button>
-                        <button type="button" class="row-btn-outline-red" id="cancel-sheet-btn">
+                        <button type="button" class="row-btn-outline-red" id="cancel-sheet-btn" style="height: 28px !important; padding: 0 12px !important; font-size: 0.75rem !important; display: inline-flex !important; align-items: center !important;">
                             Cancel
                         </button>
                     </div>
@@ -645,14 +714,8 @@
                     }
                 }
 
-                // Populate custom year select from current year down to 2010
-                const currentYear = new Date().getFullYear();
-                const yearSelect = $('#custom-year-select');
-                for (let y = currentYear; y >= 2010; y--) {
-                    yearSelect.append(new Option(y, y));
-                }
-
                 // Set initial default selections for month/year select
+                const currentYear = new Date().getFullYear();
                 const currentMonth = new Date().getMonth() + 1; // 1-12
                 $('#custom-month-select').val(currentMonth);
                 $('#custom-year-select').val(currentYear);
@@ -1196,40 +1259,49 @@
                     const userId = $('#employee-select').val();
                     if (!userId) return;
 
-                    // Disable actions
-                    $('#save-sheet-btn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Saving...');
-                    $('#cancel-sheet-btn').prop('disabled', true);
+                    // Show reconfirmation modal
+                    const confirmModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmActionModal'));
+                    confirmModal.show();
 
-                    $.ajax({
-                        url: "{{ route('super-admin.session-management.track-record.save-overrides') }}",
-                        method: "POST",
-                        data: {
-                            _token: "{{ csrf_token() }}",
-                            user_id: userId,
-                            date_entries: dateEntries
-                        },
-                        success: function(response) {
-                            if (window.showToast) {
-                                window.showToast(response.message || 'Timesheet manual overrides saved successfully!', 'success');
-                            } else {
-                                alert(response.message || 'Timesheet manual overrides saved successfully!');
+                    // Bind click to confirm action button
+                    $('#btnConfirmAction').off('click').on('click', function() {
+                        confirmModal.hide();
+                        
+                        // Disable actions
+                        $('#save-sheet-btn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Saving...');
+                        $('#cancel-sheet-btn').prop('disabled', true);
+
+                        $.ajax({
+                            url: "{{ route('super-admin.session-management.track-record.save-overrides') }}",
+                            method: "POST",
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                user_id: userId,
+                                date_entries: dateEntries
+                            },
+                            success: function(response) {
+                                if (window.showToast) {
+                                    window.showToast(response.message || 'Timesheet manual overrides saved successfully!', 'success');
+                                } else {
+                                    alert(response.message || 'Timesheet manual overrides saved successfully!');
+                                }
+                                isEditMode = false;
+                                $('#edit-actions').addClass('d-none');
+                                $('#edit-sheet-btn').removeClass('d-none');
+                                fetchReport();
+                            },
+                            error: function(err) {
+                                let msg = 'Failed to save timesheet overrides.';
+                                if (err.responseJSON && err.responseJSON.message) {
+                                    msg = err.responseJSON.message;
+                                }
+                                showError(msg);
+                            },
+                            complete: function() {
+                                $('#save-sheet-btn').prop('disabled', false).html('Save');
+                                $('#cancel-sheet-btn').prop('disabled', false);
                             }
-                            isEditMode = false;
-                            $('#edit-actions').addClass('d-none');
-                            $('#edit-sheet-btn').removeClass('d-none');
-                            fetchReport();
-                        },
-                        error: function(err) {
-                            let msg = 'Failed to save timesheet overrides.';
-                            if (err.responseJSON && err.responseJSON.message) {
-                                msg = err.responseJSON.message;
-                            }
-                            showError(msg);
-                        },
-                        complete: function() {
-                            $('#save-sheet-btn').prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i>Save');
-                            $('#cancel-sheet-btn').prop('disabled', false);
-                        }
+                        });
                     });
                 });
 
@@ -1406,15 +1478,21 @@
                         const isCurrentDay = (rec.raw_date_string === todayStr);
                         let rowStyle = '';
                         let rowAttr = '';
-                        if (rec.is_weekend) {
-                            rowStyle = 'style="background-color: rgba(230, 47, 47, 0.13) !important;"';
+                        let rowClass = '';
+                        if (rec.is_leave) {
+                            rowStyle = 'style="background-color: rgba(217, 119, 6, 0.18) !important;"';
+                            rowClass = 'tr-leave';
+                        } else if (rec.is_weekend) {
+                            rowStyle = 'style="background-color: rgba(255, 0, 0, 0.18) !important;"';
+                        }
+                        if (isCurrentDay) {
+                            rowClass += (rowClass ? ' ' : '') + 'tr-current';
                         }
                         if (rec.raw_date_string) {
                             rowAttr = `data-date="${rec.raw_date_string}"`;
                         }
-                        let rowClass = '';
                         if (rec.is_dirty) {
-                            rowClass = 'tr-dirty';
+                            rowClass += (rowClass ? ' ' : '') + 'tr-dirty';
                         }
                         bodyHtml += `<tr ${rowStyle} ${rowAttr} class="${rowClass}">`;
                         
@@ -1423,7 +1501,7 @@
                             bodyHtml += `<td class="ps-4 text-start fw-semibold text-white">${rec.employee_name || '-'}</td>`;
                         } else {
                             if (rec.is_filler) {
-                                bodyHtml += `<td class="ps-4 text-start text-white font-monospace opacity-25">-</td>`;
+                                bodyHtml += `<td class="ps-4 text-start text-white font-monospace"><span class="opacity-25">-</span></td>`;
                             } else {
                                 bodyHtml += `<td class="ps-4 text-start fw-semibold text-white font-monospace">${rec.date || '-'}</td>`;
                             }
@@ -1431,10 +1509,11 @@
                         
                         // Day column
                         let dayClass = rec.is_weekend ? 'text-weekend-day' : 'text-normal-day';
+                        let dayInnerClass = '';
                         if (rec.is_filler) {
-                            dayClass += ' opacity-35 fst-italic';
+                            dayInnerClass = 'opacity-35 fst-italic';
                         }
-                        bodyHtml += `<td class="text-center ${dayClass}">${rec.day_name}</td>`;
+                        bodyHtml += `<td class="text-center ${dayClass}"><span class="${dayInnerClass}">${rec.day_name}</span></td>`;
                         
                         // Weekly Summary Column (colspan="2")
                         if (!isToday) {
@@ -1471,10 +1550,11 @@
                         
                         // Total Session Time
                         let totalClass = rec.total_seconds > 0 ? 'text-total-positive' : 'text-total-zero';
+                        let totalInnerClass = '';
                         if (rec.is_filler) {
-                            totalClass += ' opacity-35';
+                            totalInnerClass = 'opacity-35';
                         }
-                        bodyHtml += `<td class="text-center font-monospace ${totalClass}">${rec.total_formatted}</td>`;
+                        bodyHtml += `<td class="text-center font-monospace ${totalClass}"><span class="${totalInnerClass}">${rec.total_formatted}</span></td>`;
  
                         // Fill in dynamic session slots
                         for (let i = 0; i < displaySessions; i++) {
@@ -1624,8 +1704,8 @@
                                     }
                                 }
 
-                                bodyHtml += `<td class="text-center font-monospace px-1" ${cellStyle} ${inTdAttrs}>${inInputHtml}</td>`;
-                                bodyHtml += `<td class="text-center font-monospace px-1" ${cellStyle} ${outTdAttrs}>${outInputHtml}</td>`;
+                                bodyHtml += `<td class="text-center font-monospace px-1" ${inTdAttrs}>${inInputHtml}</td>`;
+                                bodyHtml += `<td class="text-center font-monospace px-1" ${outTdAttrs}>${outInputHtml}</td>`;
                             } else {
                                 if (session) {
                                     let inVal = session.in || '-';
@@ -1651,11 +1731,21 @@
                                         outClass = 'text-muted';
                                     }
      
-                                    bodyHtml += `<td class="text-center font-monospace ${inClass}" ${cellStyle}>${inVal}</td>`;
-                                    bodyHtml += `<td class="text-center font-monospace ${outClass}" ${cellStyle}>${outVal}</td>`;
+                                    let cellInnerStyle = '';
+                                    if (rec.is_filler) {
+                                        cellInnerStyle = 'style="opacity: 0.35;"';
+                                    }
+                                    bodyHtml += `<td class="text-center font-monospace ${inClass}"><span ${cellInnerStyle}>${inVal}</span></td>`;
+                                    bodyHtml += `<td class="text-center font-monospace ${outClass}"><span ${cellInnerStyle}>${outVal}</span></td>`;
                                 } else {
-                                    bodyHtml += `<td class="text-center text-muted opacity-25 font-monospace" ${cellStyle}>-</td>`;
-                                    bodyHtml += `<td class="text-center text-muted opacity-25 font-monospace" ${cellStyle}>-</td>`;
+                                    let dashClass = 'opacity-25';
+                                    let dashStyle = '';
+                                    if (rec.is_filler) {
+                                        dashClass = '';
+                                        dashStyle = 'style="opacity: 0.15;"';
+                                    }
+                                    bodyHtml += `<td class="text-center text-muted font-monospace"><span class="${dashClass}" ${dashStyle}>-</span></td>`;
+                                    bodyHtml += `<td class="text-center text-muted font-monospace"><span class="${dashClass}" ${dashStyle}>-</span></td>`;
                                 }
                             }
                         }
@@ -1665,5 +1755,26 @@
                 }
             });
         </script>
+    @endpush
+
+    @push('modals')
+    <!-- Beautiful Custom Confirm Modal -->
+    <div class="modal fade" id="confirmActionModal" tabindex="-1" style="z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="background-color: #0c0c0c !important; border: 1px solid rgba(255, 255, 255, 0.08) !important;">
+                <div class="modal-body text-center p-4">
+                    <div class="text-warning mb-3">
+                        <i class="bi bi-exclamation-circle-fill" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2 text-white" id="confirmTitle">Save Override Changes?</h5>
+                    <p class="text-white opacity-50 small mb-4" id="confirmText">Are you sure you want to save the manual overrides for this timesheet?</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="row-btn" data-bs-dismiss="modal" style="width: 145px;">Cancel</button>
+                        <button type="button" class="row-btn-blue" id="btnConfirmAction" style="width: 145px;">Yes, Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     @endpush
 </x-app-layout>

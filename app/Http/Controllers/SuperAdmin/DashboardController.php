@@ -15,11 +15,17 @@ class DashboardController extends Controller
         $stats = [
             'users' => User::count(),
             'departments' => Department::count(),
-            'pending_leaves' => LeaveRequest::whereIn('status', [LeaveRequest::STATUS_PENDING, 'approved_by_manager', 'rejected_by_manager'])->count(),
+            'pending_leaves' => LeaveRequest::where(function($q) {
+                $q->whereIn('status', [LeaveRequest::STATUS_PENDING, 'approved_by_manager', 'rejected_by_manager'])
+                  ->orWhereIn('change_request_status', ['pending', 'approved_by_manager', 'rejected_by_manager']);
+            })->count(),
         ];
 
         $recentRequests = LeaveRequest::with(['user.department', 'leaveType'])
-            ->whereIn('status', [LeaveRequest::STATUS_PENDING, 'approved_by_manager', 'rejected_by_manager'])
+            ->where(function($q) {
+                $q->whereIn('status', [LeaveRequest::STATUS_PENDING, 'approved_by_manager', 'rejected_by_manager'])
+                  ->orWhereIn('change_request_status', ['pending', 'approved_by_manager', 'rejected_by_manager']);
+            })
             ->latest()
             ->limit(15)
             ->get();

@@ -286,7 +286,7 @@
     </div>
 
     <!-- Beautiful Custom Confirm Modal -->
-    <div class="modal fade" id="confirmActionModal" tabindex="-1" style="z-index: 1060;">
+    <div class="modal fade" id="confirmActionModal" tabindex="-1" data-bs-backdrop="false" style="z-index: 1070; background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(2px);">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow" style="background-color: #0c0c0c !important; border: 1px solid rgba(255, 255, 255, 0.08) !important;">
                 <div class="modal-body text-center p-4">

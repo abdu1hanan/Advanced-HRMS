@@ -60,17 +60,18 @@ $(function () {
 
         $.post(window.leaveCancelUrl + '/' + cancelRequestId + '/cancel', function (res) {
             const id = cancelRequestId;
-            const badgeEl = $('#leave-row-' + id).find('.row-badge-warning, .row-badge-blue, .row-badge-green, .row-badge-red, .row-badge-gray, .badge');
+            const row = $('#leave-row-' + id);
+            
+            const badgeEl = row.find('.row-badge-warning, .row-badge-blue, .row-badge-green, .row-badge-red, .row-badge-gray, .badge');
             badgeEl.removeClass()
                 .addClass('row-badge-gray')
                 .html('<i class="bi bi-x-circle me-1"></i> Cancelled');
-            $('#leave-row-' + id).find('.btn-cancel-leave').remove();
+            row.find('.btn-cancel-leave').remove();
+            row.find('.btn-circle-gray').remove();
+            row.find('.row-badge-purple').closest('.mt-1').remove();
             updateBalanceCards(res.balances);
             
-            // Show Success Snackbar
             window.showToast(res.message, 'success');
-
-            setTimeout(function () { location.reload(); }, 1200);
         }).fail(function (xhr) {
             window.showToast(xhr.responseJSON?.message || 'Could not cancel request.', 'danger');
         });

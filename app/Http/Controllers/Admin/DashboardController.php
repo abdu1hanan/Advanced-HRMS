@@ -21,10 +21,13 @@ class DashboardController extends Controller
         // Subordinate Count
         $teamCount = count($subordinateIds);
 
-        // Pending Leaves
+        // Pending Leaves (including pending change requests)
         $pendingLeaves = LeaveRequest::query()
-            ->where('status', LeaveRequest::STATUS_PENDING)
             ->whereIn('user_id', $subordinateIds)
+            ->where(function($q) {
+                $q->where('status', LeaveRequest::STATUS_PENDING)
+                  ->orWhere('change_request_status', 'pending');
+            })
             ->count();
 
         // Who's Out Today

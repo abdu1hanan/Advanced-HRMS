@@ -67,6 +67,18 @@
             border-top: 1px solid rgba(255, 255, 255, 0.12);
             border-right: 1px solid rgba(255, 255, 255, 0.12);
         }
+        .custom-sidebar-tooltip.arrow-top::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 8px;
+            height: 8px;
+            background-color: #1a1a1a;
+            border-left: 1px solid rgba(255, 255, 255, 0.12);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+        }
     </style>
     @stack('styles')
 </head>
@@ -153,7 +165,7 @@
     <!-- Beautiful Cancel Confirmation Modal Popup -->
     <div class="modal fade" id="cancelLeaveModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow" style="background-color: #212529 !important;">
+            <div class="modal-content border-0 shadow" style="background-color: #0c0c0c !important; border: 1px solid rgba(255, 255, 255, 0.08) !important;">
                 <div class="modal-body p-4 text-center">
                     <div class="mb-3 text-danger">
                         <i class="bi bi-x-circle-fill" style="font-size: 3.5rem;"></i>
@@ -217,6 +229,8 @@
                 var tooltipHeight = customTooltip.outerHeight();
                 customTooltip.removeClass('show');
 
+                customTooltip.removeClass('arrow-left arrow-bottom arrow-right arrow-top');
+
                 var top, left;
                 if (placement === 'right') {
                     top = offset.top + (targetHeight - tooltipHeight) / 2;
@@ -230,6 +244,10 @@
                     top = offset.top + (targetHeight - tooltipHeight) / 2;
                     left = offset.left - tooltipWidth - 10;
                     customTooltip.addClass('arrow-right');
+                } else if (placement === 'bottom') {
+                    top = offset.top + targetHeight + 10;
+                    left = offset.left + (targetWidth - tooltipWidth) / 2;
+                    customTooltip.addClass('arrow-top');
                 }
                 
                 customTooltip.css({
@@ -239,7 +257,7 @@
             }
 
             function hideTooltip() {
-                customTooltip.removeClass('show arrow-left arrow-bottom arrow-right');
+                customTooltip.removeClass('show arrow-left arrow-bottom arrow-right arrow-top');
             }
 
             function updateSidebarTooltips() {

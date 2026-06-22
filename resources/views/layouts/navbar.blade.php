@@ -16,7 +16,7 @@
         <div class="d-flex align-items-center gap-3">
             <!-- Sleek Circular Bell Dropdown with Glow Dot badge -->
             <div class="dropdown">
-                <button class="navbar-circle-btn position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <button class="navbar-circle-btn position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-custom-tooltip="Notifications" data-tooltip-placement="left">
                     <i class="bi bi-bell-fill fs-6"></i>
                     <!-- Clean notification Dot instead of numbers -->
                     <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none" id="notification-badge" style="width: 8px; height: 8px;"></span>
@@ -24,7 +24,7 @@
                 <div class="dropdown-menu dropdown-menu-end shadow border border-secondary bg-dark text-white p-3 custom-notification-dropdown" style="width: 380px; max-height: 480px; overflow: hidden; border-radius: 12px;" id="notification-container">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="m-0 fw-bold text-white fs-6">Notifications</h5>
-                        <button type="button" class="btn-circle-gray" id="mark-all-read" data-custom-tooltip="Mark all read">
+                        <button type="button" class="btn-circle-gray" id="mark-all-read" data-custom-tooltip="Mark all read" data-tooltip-placement="top">
                             <i class="bi bi-check-all" style="font-size: 1.1rem; line-height: 1;"></i>
                         </button>
                     </div>

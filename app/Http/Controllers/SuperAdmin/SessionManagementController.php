@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\SlackMessage;
 use App\Models\SlackUserMapping;
 use App\Models\User;
+use App\Models\LeaveRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -55,6 +56,7 @@ class SessionManagementController extends Controller
                 'display_name' => e($displayName),
                 'channel_id' => e($msg->channel_id),
                 'formatted_time' => $msg->message_at->timezone('Asia/Karachi')->format('M d, Y h:i A'),
+                'formatted_original_time' => ($msg->original_message_at ?? $msg->message_at)->timezone('Asia/Karachi')->format('M d, Y h:i A'),
                 'formatted_date' => $msg->message_at->timezone('Asia/Karachi')->format('F d, Y'),
                 'is_edited' => (bool) $msg->is_edited,
                 'approval_status' => $msg->approval_status,
@@ -64,6 +66,7 @@ class SessionManagementController extends Controller
                 'user_id' => $msg->mapping ? $msg->mapping->user_id : null,
                 'month' => $msg->message_at->timezone('Asia/Karachi')->month,
                 'year' => $msg->message_at->timezone('Asia/Karachi')->year,
+                'message_at_raw' => $msg->message_at->timezone('Asia/Karachi')->toIso8601String(),
                 'edits' => $msg->edits->map(function ($edit) {
                     return [
                         'id' => $edit->id,
@@ -220,6 +223,21 @@ class SessionManagementController extends Controller
                 $queryStartDate = $startDate->copy()->subDays(2)->timezone('UTC');
                 $queryEndDate = $endDate->copy()->timezone('UTC');
 
+                $empLeaves = LeaveRequest::where('user_id', $emp->id)
+                    ->where('status', LeaveRequest::STATUS_APPROVED)
+                    ->where('start_date', '<=', $endDate)
+                    ->where('end_date', '>=', $startDate)
+                    ->get();
+                
+                $isTodayLeave = false;
+                $todayDateStr = $today->format('Y-m-d');
+                foreach ($empLeaves as $leave) {
+                    if ($leave->start_date->format('Y-m-d') <= $todayDateStr && $leave->end_date->format('Y-m-d') >= $todayDateStr) {
+                        $isTodayLeave = true;
+                        break;
+                    }
+                }
+
                 $dayMessages = SlackMessage::where('slack_user_id', $mapping->slack_user_id)
                     ->whereBetween('message_at', [$queryStartDate, $queryEndDate])
                     ->orderBy('message_at', 'asc')
@@ -256,7 +274,7 @@ class SessionManagementController extends Controller
                 }
 
                 $expectedHoursPerDay = $emp->expected_hour_per_day ?? 8.0;
-                $dailyExpectedSeconds = (int)round($expectedHoursPerDay * 3600);
+                $dailyExpectedSeconds = $isTodayLeave ? 0 : (int)round($expectedHoursPerDay * 3600);
                 $pct = 0.0;
                 if ($dailyExpectedSeconds > 0) {
                     $pct = $dailySeconds / $dailyExpectedSeconds;
@@ -281,6 +299,7 @@ class SessionManagementController extends Controller
                     'day_of_week' => $today->dayOfWeekIso,
                     'is_weekend' => ($today->dayOfWeekIso === 6 || $today->dayOfWeekIso === 7),
                     'weekly_summary_diff_seconds' => 0,
+                    'is_leave' => $isTodayLeave,
                 ];
             }
 
@@ -347,6 +366,12 @@ class SessionManagementController extends Controller
             $startDate = Carbon::parse($request->start_date, $tz)->startOfDay();
             $endDate = Carbon::parse($request->end_date, $tz)->endOfDay();
         }
+
+        $leaves = LeaveRequest::where('user_id', $userId)
+            ->where('status', LeaveRequest::STATUS_APPROVED)
+            ->where('start_date', '<=', $endDate)
+            ->where('end_date', '>=', $startDate)
+            ->get();
 
         // Generate full chronological dates in the range
         $periodDates = [];
@@ -417,18 +442,36 @@ class SessionManagementController extends Controller
                 ];
             }
 
+            $isLeave = false;
+            foreach ($leaves as $leave) {
+                if ($leave->start_date->format('Y-m-d') <= $dateString && $leave->end_date->format('Y-m-d') >= $dateString) {
+                    $isLeave = true;
+                    break;
+                }
+            }
+
             $records[$dateString] = [
                 'date' => $dayData['date_formatted'],
                 'day_name' => $dayData['day_name'],
                 'raw_date' => $rawDate,
                 'sessions' => $formattedSessions,
                 'total_seconds' => $dailySeconds,
+                'is_leave' => $isLeave,
             ];
         }
 
         if ($period === 'today') {
+            $isTodayLeave = false;
+            $todayDateStr = $today->format('Y-m-d');
+            foreach ($leaves as $leave) {
+                if ($leave->start_date->format('Y-m-d') <= $todayDateStr && $leave->end_date->format('Y-m-d') >= $todayDateStr) {
+                    $isTodayLeave = true;
+                    break;
+                }
+            }
+
             $expectedHoursPerDay = $user->expected_hour_per_day ?? 8.0;
-            $dailyExpectedSeconds = ($today->dayOfWeekIso >= 1 && $today->dayOfWeekIso <= 5) ? (int)round($expectedHoursPerDay * 3600) : 0;
+            $dailyExpectedSeconds = ($today->dayOfWeekIso >= 1 && $today->dayOfWeekIso <= 5 && !$isTodayLeave) ? (int)round($expectedHoursPerDay * 3600) : 0;
             
             $todayKey = $today->format('Y-m-d');
             $todayRecord = $records[$todayKey] ?? null;
@@ -467,6 +510,7 @@ class SessionManagementController extends Controller
                     'is_weekend' => ($today->dayOfWeekIso === 6 || $today->dayOfWeekIso === 7),
                     'weekly_summary_diff_seconds' => 0,
                     'raw_date_string' => $today->format('Y-m-d'),
+                    'is_leave' => $isTodayLeave,
                 ]
             ];
 
@@ -517,6 +561,7 @@ class SessionManagementController extends Controller
                         'sessions' => [],
                         'total_seconds' => 0,
                         'is_filler' => true,
+                        'is_leave' => false,
                     ];
                 }
             }
@@ -549,11 +594,17 @@ class SessionManagementController extends Controller
 
             foreach ($weekDays as $day) {
                 $dayOfWeek = $day['raw_date']->dayOfWeekIso;
+                $isDayLeave = $day['is_leave'] ?? false;
                 if ($dayOfWeek >= 1 && $dayOfWeek <= 5) {
-                    $weekExpectedSeconds += $expectedHoursPerDay * 3600;
+                    if (!$isDayLeave) {
+                        $weekExpectedSeconds += $expectedHoursPerDay * 3600;
+                    }
                 }
                 if (!$day['is_filler']) {
                     $weekTimeGivenSeconds += $day['total_seconds'];
+                }
+                if ($isDayLeave && !$day['is_filler']) {
+                    $weeklyLeaves++;
                 }
             }
 
@@ -562,10 +613,13 @@ class SessionManagementController extends Controller
             // Accumulate grand totals
             $totalExpectedSeconds += $weekExpectedSeconds;
             $totalTimeGivenSeconds += $weekTimeGivenSeconds;
+            $totalLeaves += $weeklyLeaves;
+            $totalAbsents += $weeklyAbsents;
 
             foreach ($weekDays as $day) {
                 $dayOfWeek = $day['raw_date']->dayOfWeekIso;
                 $isFiller = $day['is_filler'];
+                $isDayLeave = $day['is_leave'] ?? false;
 
                 $isBeforeFirstMonday = ($firstMondayDate && $day['raw_date']->lt($firstMondayDate));
 
@@ -601,7 +655,7 @@ class SessionManagementController extends Controller
                     }
 
                     if ($dayOfWeek >= 1 && $dayOfWeek <= 5) {
-                        $dailyExpected = ($expectedHoursPerDay * 3600);
+                        $dailyExpected = $isDayLeave ? 0 : ($expectedHoursPerDay * 3600);
                         if ($dailyExpected > 0) {
                             $pct = ($day['total_seconds'] ?? 0) / $dailyExpected;
                         }
@@ -616,14 +670,14 @@ class SessionManagementController extends Controller
                     }
                 } else {
                     if ($dayOfWeek >= 1 && $dayOfWeek <= 5) {
-                        $dailyExpected = ($expectedHoursPerDay * 3600);
+                        $dailyExpected = $isDayLeave ? 0 : ($expectedHoursPerDay * 3600);
                         if ($dailyExpected > 0) {
                             $pct = ($day['total_seconds'] ?? 0) / $dailyExpected;
                         }
                     }
                 }
 
-                $dailyExpectedSeconds = ($dayOfWeek >= 1 && $dayOfWeek <= 5) ? (int)round($expectedHoursPerDay * 3600) : 0;
+                $dailyExpectedSeconds = ($dayOfWeek >= 1 && $dayOfWeek <= 5 && !$isDayLeave) ? (int)round($expectedHoursPerDay * 3600) : 0;
 
                 $maxSessions = max($maxSessions, count($day['sessions']));
 
@@ -644,6 +698,7 @@ class SessionManagementController extends Controller
                     'is_weekend' => ($dayOfWeek === 6 || $dayOfWeek === 7),
                     'weekly_summary_diff_seconds' => ($dayOfWeek === 7) ? $weekDifferenceSeconds : 0,
                     'raw_date_string' => $isFiller ? '' : $day['raw_date']->format('Y-m-d'),
+                    'is_leave' => $isDayLeave,
                 ];
             }
         }
@@ -730,6 +785,7 @@ class SessionManagementController extends Controller
                     'display_name' => e($displayName),
                     'channel_id' => e($msg->channel_id),
                     'formatted_time' => $msg->message_at->timezone('Asia/Karachi')->format('M d, Y h:i A'),
+                    'formatted_original_time' => ($msg->original_message_at ?? $msg->message_at)->timezone('Asia/Karachi')->format('M d, Y h:i A'),
                     'formatted_date' => $msg->message_at->timezone('Asia/Karachi')->format('F d, Y'),
                     'is_edited' => (bool) $msg->is_edited,
                     'approval_status' => $msg->approval_status,
@@ -739,6 +795,7 @@ class SessionManagementController extends Controller
                     'user_id' => $msg->mapping ? $msg->mapping->user_id : null,
                     'month' => $msg->message_at->timezone('Asia/Karachi')->month,
                     'year' => $msg->message_at->timezone('Asia/Karachi')->year,
+                    'message_at_raw' => $msg->message_at->timezone('Asia/Karachi')->toIso8601String(),
                     'edits' => $msg->edits->map(function ($edit) {
                         return [
                             'id' => $edit->id,
@@ -768,10 +825,16 @@ class SessionManagementController extends Controller
                 'pending_override_at' => null,
                 'approval_status' => 'approved',
             ];
+            if (!$message->original_message_at) {
+                $updateData['original_message_at'] = $message->message_at;
+            }
         } else {
             $updateData = ['approval_status' => 'approved'];
             if ($message->override_at) {
                 $updateData['message_at'] = $message->override_at;
+                if (!$message->original_message_at) {
+                    $updateData['original_message_at'] = $message->message_at;
+                }
             }
         }
         $message->update($updateData);
@@ -1022,6 +1085,12 @@ class SessionManagementController extends Controller
 
         $sessionsByDate = $this->reconstructSessions($messages, $startDate, $endDate, $tz);
 
+        $leaves = LeaveRequest::where('user_id', $userId)
+            ->where('status', LeaveRequest::STATUS_APPROVED)
+            ->where('start_date', '<=', $endDate)
+            ->where('end_date', '>=', $startDate)
+            ->get();
+
         $records = [];
         foreach ($periodDates as $dateString => $dayData) {
             $rawDate = $dayData['raw_date'];
@@ -1032,18 +1101,10 @@ class SessionManagementController extends Controller
 
             foreach ($daySessions as $session) {
                 $inStr = $session['in']->format('h:i:00 A');
-                if (!empty($session['is_virtual_in'])) {
-                    $inStr .= ' (Assumed)';
-                }
                 $outStr = '';
 
                 if ($session['out']) {
                     $outStr = $session['out']->format('h:i:00 A');
-                    if ($session['is_active']) {
-                        $outStr .= ' (Active)';
-                    } elseif (!empty($session['is_virtual_out'])) {
-                        $outStr .= ' (Assumed)';
-                    }
                     $dailySeconds += ($session['out']->timestamp - $session['in']->timestamp);
                 } else {
                     $outStr = 'Incomplete';
@@ -1059,12 +1120,21 @@ class SessionManagementController extends Controller
                 ];
             }
 
+            $isLeave = false;
+            foreach ($leaves as $leave) {
+                if ($leave->start_date->format('Y-m-d') <= $dateString && $leave->end_date->format('Y-m-d') >= $dateString) {
+                    $isLeave = true;
+                    break;
+                }
+            }
+
             $records[$dateString] = [
                 'date' => $dayData['date_formatted'],
                 'day_name' => $dayData['day_name'],
                 'raw_date' => $rawDate,
                 'sessions' => $formattedSessions,
                 'total_seconds' => $dailySeconds,
+                'is_leave' => $isLeave,
             ];
         }
 
@@ -1095,6 +1165,7 @@ class SessionManagementController extends Controller
                         'sessions' => [],
                         'total_seconds' => 0,
                         'is_filler' => true,
+                        'is_leave' => false,
                     ];
                 }
             }
@@ -1201,11 +1272,17 @@ class SessionManagementController extends Controller
 
             foreach ($weekDays as $day) {
                 $dayOfWeek = $day['raw_date']->dayOfWeekIso;
+                $isDayLeave = $day['is_leave'] ?? false;
                 if ($dayOfWeek >= 1 && $dayOfWeek <= 5) {
-                    $weekExpectedSeconds += $expectedHoursPerDay * 3600;
+                    if (!$isDayLeave) {
+                        $weekExpectedSeconds += $expectedHoursPerDay * 3600;
+                    }
                 }
                 if (!$day['is_filler']) {
                     $weekTimeGivenSeconds += $day['total_seconds'];
+                }
+                if ($isDayLeave && !$day['is_filler']) {
+                    $weeklyLeaves++;
                 }
             }
 
@@ -1214,10 +1291,13 @@ class SessionManagementController extends Controller
             // Accumulate grand totals
             $totalExpectedSeconds += $weekExpectedSeconds;
             $totalTimeGivenSeconds += $weekTimeGivenSeconds;
+            $totalLeaves += $weeklyLeaves;
+            $totalAbsents += $weeklyAbsents;
 
             foreach ($weekDays as $day) {
                 $dayOfWeek = $day['raw_date']->dayOfWeekIso;
                 $isFiller = $day['is_filler'];
+                $isDayLeave = $day['is_leave'] ?? false;
 
                 $sheet->setCellValue('B' . $rowNum, $isFiller ? '' : $day['date']);
                 $sheet->setCellValue('C' . $rowNum, $day['day_name']);
@@ -1256,7 +1336,7 @@ class SessionManagementController extends Controller
                     }
 
                     if ($dayOfWeek >= 1 && $dayOfWeek <= 5) {
-                        $dailyExpected = ($expectedHoursPerDay * 3600);
+                        $dailyExpected = $isDayLeave ? 0 : ($expectedHoursPerDay * 3600);
                         if ($dailyExpected > 0) {
                             $pct = ($day['total_seconds'] ?? 0) / $dailyExpected;
                         }
@@ -1271,7 +1351,7 @@ class SessionManagementController extends Controller
                     }
                 } else {
                     if ($dayOfWeek >= 1 && $dayOfWeek <= 5) {
-                        $dailyExpected = ($expectedHoursPerDay * 3600);
+                        $dailyExpected = $isDayLeave ? 0 : ($expectedHoursPerDay * 3600);
                         if ($dailyExpected > 0) {
                             $pct = ($day['total_seconds'] ?? 0) / $dailyExpected;
                         }
@@ -1322,9 +1402,9 @@ class SessionManagementController extends Controller
                     ],
                 ]);
 
-                // Day column C: weekdays #FFFFFF, weekends #EA4335
+                // Day column C: weekdays #FFFFFF, weekends #EA4335, leaves #FFFF00
                 $isWeekend = ($dayOfWeek === 6 || $dayOfWeek === 7);
-                $dayBgColor = $isWeekend ? 'EA4335' : 'FFFFFF';
+                $dayBgColor = $isWeekend ? 'EA4335' : ($isDayLeave ? 'FFFF00' : 'FFFFFF');
                 $dayFontColor = $isWeekend ? 'FFFFFF' : '000000';
                 $sheet->getStyle('C' . $rowNum)->applyFromArray([
                     'fill' => [
@@ -1361,12 +1441,8 @@ class SessionManagementController extends Controller
                         'bold' => $sumBold,
                         'color' => ['rgb' => $sumFontColor],
                     ],
-                    // 'alignment' => [
-                    //     'horizontal' => ($dayOfWeek >= 4) ? Alignment::HORIZONTAL_RIGHT : Alignment::HORIZONTAL_LEFT,
-                    //     'vertical' => Alignment::VERTICAL_CENTER,
-                    // ],
                     'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_LEFT, // Left aligns everything cleanly
+                        'horizontal' => Alignment::HORIZONTAL_LEFT,
                         'vertical' => Alignment::VERTICAL_CENTER,
                     ],
                 ]);
@@ -1381,7 +1457,10 @@ class SessionManagementController extends Controller
                 // Percentage F: dynamic colors
                 $pctColor = 'FFFFFF';
                 $pctFontColor = '000000';
-                if ($dayOfWeek === 7) {
+                if ($isDayLeave) {
+                    $pctColor = 'FFFF00';
+                    $pctFontColor = '000000';
+                } elseif ($dayOfWeek === 7) {
                     $pctColor = ($pct >= 0) ? '38761D' : 'EA4335';
                     $pctFontColor = 'FFFFFF';
                 } elseif ($dayOfWeek === 6) {
@@ -1417,8 +1496,8 @@ class SessionManagementController extends Controller
                     ],
                 ]);
 
-                // Total time G and Session columns H-Y: Weekdays: #FFFFFF, Weekends: #EA4335
-                $rowBgColor = $isWeekend ? 'EA4335' : 'FFFFFF';
+                // Total time G and Session columns H-Y: Weekdays: #FFFFFF, Weekends: #EA4335, Leaves: #FFFF00
+                $rowBgColor = $isWeekend ? 'EA4335' : ($isDayLeave ? 'FFFF00' : 'FFFFFF');
                 $rowFontColor = $isWeekend ? 'FFFFFF' : '000000';
 
                 $sheet->getStyle('G' . $rowNum . ':Y' . $rowNum)->applyFromArray([
@@ -2088,7 +2167,7 @@ class SessionManagementController extends Controller
                 if (isset($sessionsByDate[$currentInDateStr])) {
                     $sessionsByDate[$currentInDateStr][] = [
                         'in' => $currentIn,
-                        'out' => $nextMidnight,
+                        'out' => $nextMidnight->copy()->subSecond(),
                         'is_active' => false,
                         'is_virtual_in' => $isFirst ? $inIsVirtual : false,
                         'virtual_in_reason' => $isFirst ? $inVirtualReason : '',

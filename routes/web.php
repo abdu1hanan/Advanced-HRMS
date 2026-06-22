@@ -44,6 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/leave-requests', [EmployeeLeaveRequestController::class, 'store'])->name('leave-requests.store');
         Route::post('/leave-requests/{leaveRequest}/cancel', [EmployeeLeaveRequestController::class, 'cancel'])->name('leave-requests.cancel');
         Route::post('/leave-requests/{leaveRequest}/comment', [EmployeeLeaveRequestController::class, 'comment'])->name('leave-requests.comment');
+        Route::post('/leave-requests/{leaveRequest}/change-request', [EmployeeLeaveRequestController::class, 'changeRequest'])->name('leave-requests.change-request');
     });
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
@@ -56,6 +57,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/leave-requests/{leaveRequest}/approve', [TeamLeaveController::class, 'approve'])->name('leave-requests.approve');
         Route::post('/leave-requests/{leaveRequest}/reject', [TeamLeaveController::class, 'reject'])->name('leave-requests.reject');
         Route::post('/leave-requests/{leaveRequest}/comment', [TeamLeaveController::class, 'comment'])->name('leave-requests.comment');
+        Route::post('/leave-requests/{leaveRequest}/approve-change', [TeamLeaveController::class, 'approveChange'])->name('leave-requests.approve-change');
+        Route::post('/leave-requests/{leaveRequest}/reject-change', [TeamLeaveController::class, 'rejectChange'])->name('leave-requests.reject-change');
     });
 
     Route::middleware('role:super_admin')->prefix('super-admin')->name('super-admin.')->group(function () {
@@ -85,6 +88,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/leave-requests/{leaveRequest}/comment', [SuperAdminLeaveRequestController::class, 'comment'])->name('leave-requests.comment');
         Route::post('/leave-requests/{leaveRequest}/approve', [SuperAdminLeaveRequestController::class, 'approve'])->name('leave-requests.approve');
         Route::post('/leave-requests/{leaveRequest}/reject', [SuperAdminLeaveRequestController::class, 'reject'])->name('leave-requests.reject');
+        Route::post('/leave-requests/{leaveRequest}/approve-change', [SuperAdminLeaveRequestController::class, 'approveChange'])->name('leave-requests.approve-change');
+        Route::post('/leave-requests/{leaveRequest}/reject-change', [SuperAdminLeaveRequestController::class, 'rejectChange'])->name('leave-requests.reject-change');
         Route::get('/leave-requests/history', [SuperAdminLeaveRequestController::class, 'history'])->name('leave-requests.history');
 
         Route::get('/session-management', [App\Http\Controllers\SuperAdmin\SessionManagementController::class, 'index'])->name('session-management.index');

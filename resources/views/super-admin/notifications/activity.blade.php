@@ -170,7 +170,8 @@
                                     <button type="button" 
                                             class="btn-circle-gray action-toggle-read" 
                                             data-id="{{ $n->id }}" 
-                                            data-custom-tooltip="{{ $isRead ? 'Mark as Unread' : 'Mark as Read' }}">
+                                            data-custom-tooltip="{{ $isRead ? 'Mark as Unread' : 'Mark as Read' }}"
+                                            data-tooltip-placement="top">
                                         @if($isRead)
                                             <i class="bi bi-envelope text-success"></i>
                                         @else
@@ -183,6 +184,7 @@
                                             class="btn-circle-gray action-toggle-mark" 
                                             data-id="{{ $n->id }}" 
                                             data-custom-tooltip="{{ $isMarked ? 'Unmark Highlighted' : 'Mark Highlighted' }}"
+                                            data-tooltip-placement="top"
                                             id="btn-mark-{{ $n->id }}">
                                         @if($isMarked)
                                             <i class="bi bi-bookmark-fill" style="color: #3b82f6 !important;"></i>
@@ -200,12 +202,21 @@
                         @endforelse
                     </div>
 
-                    <!-- Pagination -->
-                    @if($notifications->hasPages())
-                        <div class="px-4 py-3 border-top" style="border-color: rgba(255, 255, 255, 0.08) !important; background-color: rgba(0, 0, 0, 0.2);">
+                    <!-- Pagination & Per Page Dropdown -->
+                    <div class="px-4 py-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-3 pagination-container-row position-relative" style="border-color: rgba(255, 255, 255, 0.08) !important; background-color: rgba(0, 0, 0, 0.2);">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-white-50 small">Show rows:</span>
+                            <select id="perPageSelect" class="form-select form-select-sm border-0 shadow-sm text-white" style="width: auto; height: 32px; background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 50px; padding: 0 1.5rem 0 1rem;">
+                                <option value="15" @selected(request('per_page') == 15 || !request('per_page')) class="bg-dark text-white">15</option>
+                                <option value="25" @selected(request('per_page') == 25) class="bg-dark text-white">25</option>
+                                <option value="50" @selected(request('per_page') == 50) class="bg-dark text-white">50</option>
+                                <option value="100" @selected(request('per_page') == 100) class="bg-dark text-white">100</option>
+                            </select>
+                        </div>
+                        <div class="pagination-links-container">
                             {{ $notifications->links() }}
                         </div>
-                    @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -230,6 +241,16 @@
             background-color: #0d6efd !important;
             border-color: #0d6efd !important;
         }
+        /* Center pagination "Showing X to Y of Z" text between dropdown and pages */
+        @media (min-width: 576px) {
+            .pagination-links-container nav div.d-sm-flex > div:first-child {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                margin: 0 !important;
+            }
+        }
     </style>
 
     @push('scripts')
@@ -241,6 +262,14 @@
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
+            });
+
+            // Change rows per page dropdown handler
+            $('#perPageSelect').on('change', function() {
+                const url = new URL(window.location.href);
+                url.searchParams.set('per_page', $(this).val());
+                url.searchParams.set('page', 1); // Reset page to 1 on size change
+                window.location.href = url.toString();
             });
 
             // Master checkbox Selection logic

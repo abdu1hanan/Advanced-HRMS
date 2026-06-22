@@ -941,6 +941,21 @@ select.form-select option {
     line-height: 1 !important;
 }
 
+.row-badge-purple {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 28px !important;
+    padding: 0 0.8rem !important;
+    font-size: 0.72rem !important;
+    border-radius: 50px !important;
+    background-color: rgba(139, 92, 246, 0.15) !important;
+    color: #c084fc !important;
+    border: 1px solid rgba(139, 92, 246, 0.35) !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+}
+
 /* Spacious select widths to accommodate long descriptive texts */
 .role-select-width {
     width: 175px !important;

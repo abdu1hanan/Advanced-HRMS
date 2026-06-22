@@ -494,11 +494,15 @@ class SlackWebhookController extends Controller
             $overrideAt = $targetLocal->timezone(config('app.timezone', 'UTC'));
 
             if ($isPendingEdit) {
-                $message->update([
+                $updateData = [
                     'approval_status' => 'pending_edit',
                     'pending_message_text' => $pendingText,
                     'pending_override_at' => $overrideAt,
-                ]);
+                ];
+                if (!$message->original_message_at) {
+                    $updateData['original_message_at'] = $message->message_at;
+                }
+                $message->update($updateData);
             } else {
                 $message->update([
                     'approval_status' => 'pending',

@@ -17,7 +17,7 @@ class LeaveRequestController extends Controller
     public function index(Request $request): View
     {
         $validated = $request->validate([
-            'status' => ['nullable', 'in:pending,approved,rejected,cancelled,approved_by_manager,rejected_by_manager'],
+            'status' => ['nullable', 'in:pending,approved,rejected,cancelled,approved_by_manager,rejected_by_manager,all'],
             'department_id' => ['nullable', 'exists:departments,id'],
             'user_id' => ['nullable', 'exists:users,id'],
             'leave_type_id' => ['nullable', 'exists:leave_types,id'],
@@ -25,14 +25,18 @@ class LeaveRequestController extends Controller
 
         $query = LeaveRequest::with(['user.department', 'leaveType', 'reviewer', 'comments.user']);
 
-        if (! empty($validated['status'])) {
-            if ($validated['status'] === 'pending') {
-                $query->whereIn('status', ['pending', 'approved_by_manager', 'rejected_by_manager']);
-            } else {
-                $query->where('status', $validated['status']);
-            }
-        } else {
-            $query->whereIn('status', ['pending', 'approved_by_manager', 'rejected_by_manager']);
+        $status = $request->query('status');
+        if ($status === null && !$request->has('status')) {
+            $status = 'all';
+        }
+
+        if ($status !== 'all' && $status !== null && $status !== '') {
+            $query->where('status', $status);
+        } elseif ($status === '') {
+            $query->where(function($q) {
+                $q->whereIn('status', [LeaveRequest::STATUS_PENDING, 'approved_by_manager', 'rejected_by_manager'])
+                  ->orWhereIn('change_request_status', ['pending', 'approved_by_manager', 'rejected_by_manager']);
+            });
         }
 
         if (! empty($validated['department_id'])) {
@@ -200,5 +204,35 @@ class LeaveRequestController extends Controller
         }
 
         return back()->with('success', 'Leave request rejected.');
+    }
+
+    public function approveChange(Request $request, LeaveRequest $leaveRequest)
+    {
+        if ($request->filled('comment')) {
+            app(\App\Services\LeaveRequestService::class)->addComment($leaveRequest, auth()->user(), $request->comment);
+        }
+
+        try {
+            app(\App\Services\LeaveRequestService::class)->approveChangeRequest($leaveRequest, auth()->user());
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->with('error', collect($e->errors())->flatten()->first());
+        }
+
+        return back()->with('success', 'Leave change request approved successfully.');
+    }
+
+    public function rejectChange(Request $request, LeaveRequest $leaveRequest)
+    {
+        if ($request->filled('comment')) {
+            app(\App\Services\LeaveRequestService::class)->addComment($leaveRequest, auth()->user(), $request->comment);
+        }
+
+        try {
+            app(\App\Services\LeaveRequestService::class)->rejectChangeRequest($leaveRequest, auth()->user());
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->with('error', collect($e->errors())->flatten()->first());
+        }
+
+        return back()->with('success', 'Leave change request rejected.');
     }
 }

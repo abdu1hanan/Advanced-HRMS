@@ -30,10 +30,18 @@ class TeamLeaveController extends Controller
         $query = LeaveRequest::with(['user.department', 'leaveType', 'reviewer', 'comments.user'])
             ->whereIn('user_id', $subordinateIds);
 
-        if (! empty($validated['status'])) {
-            $query->where('status', $validated['status']);
-        } else {
-            $query->where('status', LeaveRequest::STATUS_PENDING);
+        $status = $request->query('status');
+        if ($status === null && !$request->has('status')) {
+            $status = 'all';
+        }
+
+        if ($status !== 'all' && $status !== null && $status !== '') {
+            $query->where('status', $status);
+        } elseif ($status === '') {
+            $query->where(function($q) {
+                $q->where('status', LeaveRequest::STATUS_PENDING)
+                  ->orWhere('change_request_status', 'pending');
+            });
         }
 
         if (! empty($validated['department_id'])) {
@@ -305,5 +313,35 @@ class TeamLeaveController extends Controller
         $team = $query->orderBy('name')->paginate(10)->withQueryString();
 
         return view('admin.team.directory', compact('team', 'year'));
+    }
+
+    public function approveChange(Request $request, LeaveRequest $leaveRequest)
+    {
+        if ($request->filled('comment')) {
+            app(\App\Services\LeaveRequestService::class)->addComment($leaveRequest, auth()->user(), $request->comment);
+        }
+
+        try {
+            app(\App\Services\LeaveRequestService::class)->approveChangeRequest($leaveRequest, auth()->user());
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->with('error', collect($e->errors())->flatten()->first());
+        }
+
+        return back()->with('success', 'Leave change request approved successfully.');
+    }
+
+    public function rejectChange(Request $request, LeaveRequest $leaveRequest)
+    {
+        if ($request->filled('comment')) {
+            app(\App\Services\LeaveRequestService::class)->addComment($leaveRequest, auth()->user(), $request->comment);
+        }
+
+        try {
+            app(\App\Services\LeaveRequestService::class)->rejectChangeRequest($leaveRequest, auth()->user());
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->with('error', collect($e->errors())->flatten()->first());
+        }
+
+        return back()->with('success', 'Leave change request rejected.');
     }
 }

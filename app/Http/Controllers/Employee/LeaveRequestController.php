@@ -149,4 +149,34 @@ class LeaveRequestController extends Controller
 
         return view('employee.record', compact('user', 'recentRequests', 'leaveTypes', 'year'));
     }
+
+    public function changeRequest(Request $request, LeaveRequest $leaveRequest): JsonResponse
+    {
+        if ($leaveRequest->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'leave_type_id' => ['nullable', Rule::exists('leave_types', 'id')->where('is_active', true)],
+            'reason' => ['nullable', 'string', 'max:2000'],
+            'request_cancellation' => ['nullable', 'boolean'],
+        ]);
+
+        try {
+            $this->leaveRequestService->requestChange($leaveRequest, $validated, Auth::user());
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => collect($e->errors())->flatten()->first(),
+                'errors' => $e->errors(),
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Leave change request submitted successfully.',
+        ]);
+    }
 }

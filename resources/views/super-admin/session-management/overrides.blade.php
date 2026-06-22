@@ -1,6 +1,76 @@
 <x-app-layout>
     <x-slot name="header">Beetle Sync</x-slot>
 
+    <!-- Filters Card -->
+    <div class="spotify-card mb-3 mt-3">
+        <div class="p-4">
+            <div class="row g-3 align-items-end">
+                <!-- Employee Name Filter -->
+                <div class="col-md-2">
+                    <label class="form-label text-white opacity-50 small mb-1">Employee Filter</label>
+                    <select id="filter-employee" class="form-select border-0 shadow-sm" style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #ffffff !important; height: 37px; border-radius: 6px;">
+                        <option value="" class="bg-dark text-white">All Employees</option>
+                    </select>
+                </div>
+                
+                <!-- Date Filter -->
+                <div class="col-md-2">
+                    <label class="form-label text-white opacity-50 small mb-1">Date Period</label>
+                    <select id="filter-date-period" class="form-select border-0 shadow-sm" style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #ffffff !important; height: 37px; border-radius: 6px;">
+                        <option value="all" class="bg-dark text-white">All Dates</option>
+                        <option value="today" class="bg-dark text-white">Today</option>
+                        <option value="yesterday" class="bg-dark text-white">Yesterday</option>
+                        <option value="last_7" class="bg-dark text-white">Last 7 Days</option>
+                        <option value="last_30" class="bg-dark text-white">Last 30 Days</option>
+                    </select>
+                </div>
+
+                <!-- Custom Date Range Inputs (always visible, applies when dates are entered) -->
+                <div class="col-md-4" id="custom-date-range-container">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label text-white opacity-50 small mb-1">Start Date</label>
+                            <input type="date" id="filter-start-date" class="form-control border-0 shadow-sm" style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #ffffff !important; height: 37px; border-radius: 6px;">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-white opacity-50 small mb-1">End Date</label>
+                            <input type="date" id="filter-end-date" class="form-control border-0 shadow-sm" style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #ffffff !important; height: 37px; border-radius: 6px;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Approval Required Checkbox inside badge -->
+                <div class="col-md-2 d-flex align-items-end">
+                    <div class="w-100">
+                        <label class="form-label text-white opacity-50 small mb-1">&nbsp;</label>
+                        <div class="d-flex align-items-center gap-3 px-3 justify-content-between" style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 50px !important; height: 37px;">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-info-circle text-white opacity-75 cursor-pointer" 
+                                   data-custom-tooltip="Toggle to filter the stream and display only messages&#10;requiring your approval or action." 
+                                   data-tooltip-placement="top" 
+                                   style="font-size: 0.85rem;"></i>
+                                <span class="text-white small opacity-75" style="user-select: none; font-size: 0.82rem; white-space: nowrap;">Approval Required</span>
+                            </div>
+                            <div class="form-check form-switch mb-0" style="padding-left: 0;">
+                                <input class="form-check-input bg-dark border-secondary cursor-pointer" type="checkbox" id="filter-approval-required" style="width: 2.2em; height: 1.1em; margin-left: 0;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clear Filters Button -->
+                <div class="col-md-2 d-flex align-items-end">
+                    <div class="w-100">
+                        <label class="form-label text-white opacity-50 small mb-1">&nbsp;</label>
+                        <button type="button" id="clear-filters-btn" class="row-btn w-100 text-decoration-none justify-content-center" style="height: 37px !important;">
+                            <i class="bi bi-x-circle me-1"></i> Clear Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Table Card -->
     <div class="spotify-card mb-4 mt-3">
         <div class="card-header-area px-4 pt-4">
@@ -276,10 +346,236 @@
                 
                 // Initialize the messages cache from PHP
                 window.slackMessagesCache = @json($initialMessages);
+
+                // Track highest message ID historically seen since page load to prevent animation re-triggers when filtering
+                let maxSeenId = window.slackMessagesCache.reduce((max, msg) => Math.max(max, msg.id), 0);
+
+                function getMessageDateString(dateObj) {
+                    const year = dateObj.getFullYear();
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const day = String(dateObj.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                }
+
+                function matchMessage(msg) {
+                    // 1. Employee Filter
+                    const filterEmployee = $('#filter-employee').val();
+                    if (filterEmployee && msg.display_name !== filterEmployee) {
+                        return false;
+                    }
+                    
+                    // 2. Approval Required Filter
+                    const filterApproval = $('#filter-approval-required').is(':checked');
+                    if (filterApproval) {
+                        if (msg.channel_id === 'manual_override') {
+                            if (!msg.user_id) return false;
+                        } else {
+                            if (msg.approval_status !== 'pending' && msg.approval_status !== 'pending_edit') {
+                                return false;
+                            }
+                        }
+                    }
+                    
+                    // 3. Date Filter
+                    const period = $('#filter-date-period').val();
+                    const startDateVal = $('#filter-start-date').val();
+                    const endDateVal = $('#filter-end-date').val();
+
+                    if (period !== 'all') {
+                        const msgTime = new Date(msg.message_at_raw);
+                        const msgDateStr = getMessageDateString(msgTime);
+                        
+                        const nowLocal = new Date();
+                        const todayStr = getMessageDateString(nowLocal);
+                        
+                        const yesterdayLocal = new Date();
+                        yesterdayLocal.setDate(yesterdayLocal.getDate() - 1);
+                        const yesterdayStr = getMessageDateString(yesterdayLocal);
+                        
+                        if (period === 'today') {
+                            if (msgDateStr !== todayStr) return false;
+                        } else if (period === 'yesterday') {
+                            if (msgDateStr !== yesterdayStr) return false;
+                        } else if (period === 'last_7') {
+                            const diffTime = nowLocal - msgTime;
+                            const diffDays = diffTime / (24 * 60 * 60 * 1000);
+                            if (diffDays < 0 || diffDays > 7) return false;
+                        } else if (period === 'last_30') {
+                            const diffTime = nowLocal - msgTime;
+                            const diffDays = diffTime / (24 * 60 * 60 * 1000);
+                            if (diffDays < 0 || diffDays > 30) return false;
+                        }
+                    } else if (startDateVal || endDateVal) {
+                        const msgTime = new Date(msg.message_at_raw);
+                        const msgDateStr = getMessageDateString(msgTime);
+                        
+                        if (startDateVal && msgDateStr < startDateVal) return false;
+                        if (endDateVal && msgDateStr > endDateVal) return false;
+                    }
+                    
+                    return true;
+                }
+
+                function updateEmployeeFilterOptions(data) {
+                    const select = $('#filter-employee');
+                    const currentValue = select.val();
+                    
+                    const names = [];
+                    data.forEach(function(msg) {
+                        if (msg.display_name && !names.includes(msg.display_name)) {
+                            names.push(msg.display_name);
+                        }
+                    });
+                    
+                    names.sort();
+                    
+                    let html = '<option value="" class="bg-dark text-white">All Employees</option>';
+                    names.forEach(function(name) {
+                        html += `<option value="${name}" class="bg-dark text-white">${name}</option>`;
+                    });
+                    
+                    select.html(html);
+                    if (currentValue && names.includes(currentValue)) {
+                        select.val(currentValue);
+                    }
+                }
+
+                function renderMessagesTable() {
+                    const data = window.slackMessagesCache || [];
+                    const filteredData = data.filter(matchMessage);
+
+                    const tbody = $('#message-table-body');
+
+                    if (filteredData.length === 0) {
+                        tbody.html(`
+                            <tr id="empty-row">
+                                <td colspan="5" class="text-center text-white opacity-50 py-5">
+                                    <div class="mb-2"><i class="bi bi-chat-left-dots fs-3"></i></div>
+                                    No messages found matching the filters.
+                                </td>
+                            </tr>
+                        `);
+                        isFirstLoad = false;
+                        return;
+                    }
+
+                    let html = '';
+                    let hasMapped = false;
+                    let lastDate = null;
+                    
+                    filteredData.forEach(function(msg) {
+                        const isNew = !isFirstLoad && msg.id > maxSeenId;
+                        const highlightClass = isNew ? 'new-row-highlight' : '';
+                        
+                        const currentDate = msg.formatted_date;
+                        if (lastDate !== currentDate) {
+                            html += `
+                                <tr>
+                                    <td colspan="5" class="py-3 px-4" style="background-color: rgba(255, 255, 255, 0.01); border-bottom: 1px solid rgba(255, 255, 255, 0.03);">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1" style="border-top: 1px solid rgba(255, 255, 255, 0.08);"></div>
+                                            <span class="mx-3 text-white opacity-75 small fw-semibold text-uppercase px-3 py-1 rounded-pill" style="letter-spacing: 0.08em; font-size: 0.72rem; background-color: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);">${currentDate}</span>
+                                            <div class="flex-grow-1" style="border-top: 1px solid rgba(255, 255, 255, 0.08);"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                            lastDate = currentDate;
+                        }
+                        
+                        let editBadge = msg.is_edited 
+                            ? `<span class="text-white opacity-75 small ms-1 edit-history-trigger" style="font-size: 0.75rem; cursor: pointer; text-decoration: underline;" data-message-id="${msg.id}">(edited)</span>` 
+                            : '';
+
+                        if (msg.display_name !== msg.slack_user_id) {
+                            hasMapped = true;
+                        }
+
+                        let userCell = '';
+                        if (msg.display_name !== msg.slack_user_id) {
+                            userCell = `<span class="fw-semibold text-white">${msg.display_name}</span>`;
+                        } else {
+                            userCell = `<code class="text-white opacity-75 px-3 py-1 rounded-pill bg-dark border border-secondary border-opacity-25" style="border-radius: 50px !important; font-size: 0.8rem; display: inline-block;">${msg.slack_user_id}</code>`;
+                        }
+
+                        let approvalCell = '';
+                        if (msg.channel_id === 'manual_override') {
+                            if (msg.user_id) {
+                                const fixUrl = `/super-admin/session-management/track-record?user_id=${msg.user_id}&period=month&month=${msg.month}&year=${msg.year}&edit=true`;
+                                approvalCell = `
+                                    <a href="${fixUrl}" class="row-btn-blue d-inline-flex align-items-center justify-content-center" style="height: 24px !important; font-size: 0.72rem !important; padding: 0 0.8rem !important; border-radius: 50px !important; text-decoration: none;">
+                                        Fix
+                                    </a>
+                                `;
+                            } else {
+                                approvalCell = '';
+                            }
+                        } else if (msg.approval_status === 'pending' || msg.approval_status === 'pending_edit') {
+                            approvalCell = `
+                                <div class="d-inline-flex gap-2 align-items-center approval-cell-container justify-content-center">
+                                    <button type="button" class="btn-circle-blue btn-approve-override" data-message-id="${msg.id}" data-custom-tooltip="Approve" data-tooltip-placement="top">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                    <button type="button" class="btn-circle-red-filled btn-reject-override" data-message-id="${msg.id}" data-custom-tooltip="Reject" data-tooltip-placement="top">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                            `;
+                        } else if (msg.approval_status === 'approved') {
+                            approvalCell = `
+                                <span class="row-badge-green d-inline-flex align-items-center btn-reset-decision-trigger" data-message-id="${msg.id}" style="height: 24px !important; font-size: 0.72rem !important; padding: 0 0.8rem !important; border-radius: 50px !important; border: 1px solid rgba(16, 185, 129, 0.3) !important; cursor: pointer;" data-custom-tooltip="Click to change decision" data-tooltip-placement="top">
+                                    Approved
+                                </span>
+                            `;
+                        } else if (msg.approval_status === 'rejected') {
+                            approvalCell = `
+                                <span class="row-badge-red d-inline-flex align-items-center btn-reset-decision-trigger" data-message-id="${msg.id}" style="height: 24px !important; font-size: 0.72rem !important; padding: 0 0.8rem !important; border-radius: 50px !important; border: 1px solid rgba(239, 68, 68, 0.3) !important; cursor: pointer;" data-custom-tooltip="Click to change decision" data-tooltip-placement="top">
+                                    Rejected
+                                </span>
+                            `;
+                        } else {
+                            approvalCell = '';
+                        }
+
+                        let breakExceededIndicator = '';
+                        if (msg.break_exceeded) {
+                            const lowerText = msg.message_text.toLowerCase();
+                            const isCheckIn = lowerText.includes('back');
+                            const tooltipText = isCheckIn 
+                                ? 'This break exceeded 10 minutes and was considered as a sign in.' 
+                                : 'This break exceeded 10 minutes and was considered as a sign out.';
+                            breakExceededIndicator = `
+                                <span class="ms-2 text-warning cursor-pointer" data-custom-tooltip="${tooltipText}" data-tooltip-placement="top">
+                                    <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 0.85rem;"></i>
+                                </span>
+                            `;
+                        }
+
+                        const autoAppendedClass = msg.is_auto_appended ? 'auto-appended-row' : '';
+                        html += `
+                            <tr data-message-id="${msg.id}" class="${highlightClass} ${autoAppendedClass}">
+                                <td class="ps-4 fw-semibold text-white text-break">
+                                    <span>${msg.message_text}</span>
+                                    ${editBadge}
+                                    ${breakExceededIndicator}
+                                </td>
+                                <td>${userCell}</td>
+                                <td><code class="text-white opacity-75 px-3 py-1 rounded-pill bg-dark border border-secondary border-opacity-25" style="border-radius: 50px !important; font-size: 0.8rem; display: inline-block;">${msg.channel_id}</code></td>
+                                <td class="text-muted">${msg.formatted_time}</td>
+                                <td class="text-center">${approvalCell}</td>
+                            </tr>
+                        `;
+                    });
+
+                    // Dynamically update the column header
+                    $('#user-column-header').text(hasMapped ? 'Employee' : 'Slack User ID');
+
+                    tbody.html(html);
+                    isFirstLoad = false;
+                }
                 
                 // Polling function to keep page updated live
                 function fetchMessages() {
-
                     $.ajax({
                         url: "{{ route('super-admin.session-management.api.messages') }}",
                         method: "GET",
@@ -289,142 +585,49 @@
                             // Save the polled messages into global cache
                             window.slackMessagesCache = data;
 
-                            if (data.length === 0) {
-                                return;
-                            }
+                            // Update employee dropdown options and apply filters
+                            updateEmployeeFilterOptions(data);
+                            renderMessagesTable();
 
-                            // If there was an empty row, clear it
-                            $('#empty-row').remove();
-
-                            const tbody = $('#message-table-body');
-                            
-                            // Track existing IDs on screen to identify new ones
-                            let existingIds = [];
-                            tbody.find('tr').each(function() {
-                                const id = $(this).data('message-id');
-                                if (id) existingIds.push(parseInt(id));
-                            });
-
-                            // Re-build table rows with highlighting on new ones
-                            let html = '';
-                            let hasMapped = false;
-                            let lastDate = null;
-                            
-                            data.forEach(function(msg) {
-                                const isNew = !isFirstLoad && !existingIds.includes(msg.id);
-                                const highlightClass = isNew ? 'new-row-highlight' : '';
-                                
-                                const currentDate = msg.formatted_date;
-                                if (lastDate !== currentDate) {
-                                    html += `
-                                        <tr>
-                                            <td colspan="5" class="py-3 px-4" style="background-color: rgba(255, 255, 255, 0.01); border-bottom: 1px solid rgba(255, 255, 255, 0.03);">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="flex-grow-1" style="border-top: 1px solid rgba(255, 255, 255, 0.08);"></div>
-                                                    <span class="mx-3 text-white opacity-75 small fw-semibold text-uppercase px-3 py-1 rounded-pill" style="letter-spacing: 0.08em; font-size: 0.72rem; background-color: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);">${currentDate}</span>
-                                                    <div class="flex-grow-1" style="border-top: 1px solid rgba(255, 255, 255, 0.08);"></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    `;
-                                    lastDate = currentDate;
-                                }
-                                
-                                let editBadge = msg.is_edited 
-                                    ? `<span class="text-white opacity-75 small ms-1 edit-history-trigger" style="font-size: 0.75rem; cursor: pointer; text-decoration: underline;" data-message-id="${msg.id}">(edited)</span>` 
-                                    : '';
-
-                                if (msg.display_name !== msg.slack_user_id) {
-                                    hasMapped = true;
-                                }
-
-                                let userCell = '';
-                                if (msg.display_name !== msg.slack_user_id) {
-                                    userCell = `<span class="fw-semibold text-white">${msg.display_name}</span>`;
-                                } else {
-                                    userCell = `<code class="text-white opacity-75 px-3 py-1 rounded-pill bg-dark border border-secondary border-opacity-25" style="border-radius: 50px !important; font-size: 0.8rem; display: inline-block;">${msg.slack_user_id}</code>`;
-                                }
-
-                                let approvalCell = '';
-                                if (msg.channel_id === 'manual_override') {
-                                    if (msg.user_id) {
-                                        const fixUrl = `/super-admin/session-management/track-record?user_id=${msg.user_id}&period=month&month=${msg.month}&year=${msg.year}&edit=true`;
-                                        approvalCell = `
-                                            <a href="${fixUrl}" class="row-btn-blue d-inline-flex align-items-center justify-content-center" style="height: 24px !important; font-size: 0.72rem !important; padding: 0 0.8rem !important; border-radius: 50px !important; text-decoration: none;">
-                                                Fix
-                                            </a>
-                                        `;
-                                    } else {
-                                        approvalCell = '';
-                                    }
-                                } else if (msg.approval_status === 'pending' || msg.approval_status === 'pending_edit') {
-                                    approvalCell = `
-                                        <div class="d-inline-flex gap-2 align-items-center approval-cell-container justify-content-center">
-                                            <button type="button" class="btn-circle-blue btn-approve-override" data-message-id="${msg.id}" data-custom-tooltip="Approve" data-tooltip-placement="top">
-                                                <i class="bi bi-check-lg"></i>
-                                            </button>
-                                            <button type="button" class="btn-circle-red-filled btn-reject-override" data-message-id="${msg.id}" data-custom-tooltip="Reject" data-tooltip-placement="top">
-                                                <i class="bi bi-x-lg"></i>
-                                            </button>
-                                        </div>
-                                    `;
-                                } else if (msg.approval_status === 'approved') {
-                                    approvalCell = `
-                                        <span class="row-badge-green d-inline-flex align-items-center btn-reset-decision-trigger" data-message-id="${msg.id}" style="height: 24px !important; font-size: 0.72rem !important; padding: 0 0.8rem !important; border-radius: 50px !important; border: 1px solid rgba(16, 185, 129, 0.3) !important; cursor: pointer;" data-custom-tooltip="Click to change decision" data-tooltip-placement="top">
-                                            Approved
-                                        </span>
-                                    `;
-                                } else if (msg.approval_status === 'rejected') {
-                                    approvalCell = `
-                                        <span class="row-badge-red d-inline-flex align-items-center btn-reset-decision-trigger" data-message-id="${msg.id}" style="height: 24px !important; font-size: 0.72rem !important; padding: 0 0.8rem !important; border-radius: 50px !important; border: 1px solid rgba(239, 68, 68, 0.3) !important; cursor: pointer;" data-custom-tooltip="Click to change decision" data-tooltip-placement="top">
-                                            Rejected
-                                        </span>
-                                    `;
-                                } else {
-                                    approvalCell = '';
-                                }
-
-                                let breakExceededIndicator = '';
-                                if (msg.break_exceeded) {
-                                    const lowerText = msg.message_text.toLowerCase();
-                                    const isCheckIn = lowerText.includes('back');
-                                    const tooltipText = isCheckIn 
-                                        ? 'This break exceeded 10 minutes and was considered as a sign in.' 
-                                        : 'This break exceeded 10 minutes and was considered as a sign out.';
-                                    breakExceededIndicator = `
-                                        <span class="ms-2 text-warning cursor-pointer" data-custom-tooltip="${tooltipText}" data-tooltip-placement="top">
-                                            <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 0.85rem;"></i>
-                                        </span>
-                                    `;
-                                }
-
-                                const autoAppendedClass = msg.is_auto_appended ? 'auto-appended-row' : '';
-                                html += `
-                                    <tr data-message-id="${msg.id}" class="${highlightClass} ${autoAppendedClass}">
-                                        <td class="ps-4 fw-semibold text-white text-break">
-                                            <span>${msg.message_text}</span>
-                                            ${editBadge}
-                                            ${breakExceededIndicator}
-                                        </td>
-                                        <td>${userCell}</td>
-                                        <td><code class="text-white opacity-75 px-3 py-1 rounded-pill bg-dark border border-secondary border-opacity-25" style="border-radius: 50px !important; font-size: 0.8rem; display: inline-block;">${msg.channel_id}</code></td>
-                                        <td class="text-muted">${msg.formatted_time}</td>
-                                        <td class="text-center">${approvalCell}</td>
-                                    </tr>
-                                `;
-                            });
-
-                            // Dynamically update the column header
-                            $('#user-column-header').text(hasMapped ? 'Employee' : 'Slack User ID');
-
-                            tbody.html(html);
-                            isFirstLoad = false;
+                            // Update the maxSeenId historically for the next poll
+                            maxSeenId = Math.max(maxSeenId, ...data.map(msg => msg.id), 0);
                         },
                         error: function(err) {
                             console.error('Error fetching Slack stream data:', err);
                         }
                     });
                 }
+
+                // Attach event listeners for real-time filter reactivity
+                $('#filter-employee, #filter-approval-required').on('change', function() {
+                    renderMessagesTable();
+                });
+
+                // When user interacts with custom date inputs, reset Date Period dropdown to 'all' so they apply.
+                $('#filter-start-date, #filter-end-date').on('input change', function() {
+                    if ($(this).val()) {
+                        $('#filter-date-period').val('all');
+                    }
+                    renderMessagesTable();
+                });
+
+                // When Date Period is changed, clear custom date pickers
+                $('#filter-date-period').on('change', function() {
+                    if ($(this).val() !== 'all') {
+                        $('#filter-start-date').val('');
+                        $('#filter-end-date').val('');
+                    }
+                    renderMessagesTable();
+                });
+
+                $('#clear-filters-btn').on('click', function() {
+                    $('#filter-employee').val('');
+                    $('#filter-date-period').val('all');
+                    $('#filter-start-date').val('');
+                    $('#filter-end-date').val('');
+                    $('#filter-approval-required').prop('checked', false);
+                    renderMessagesTable();
+                });
 
                 // Handle click on "(edited)" trigger to display the edit history timeline modal
                 $(document).on('click', '.edit-history-trigger', function() {
@@ -443,7 +646,7 @@
                     html += `
                         <div class="mb-4 position-relative" style="padding-left: 20px;">
                             <span class="position-absolute rounded-circle bg-success" style="width: 12px; height: 12px; border: 2px solid #181818; top: 5px; left: -6px; z-index: 10; box-shadow: 0 0 6px rgba(40, 167, 69, 0.4);"></span>
-                            <div class="small text-white opacity-50 mb-1 fw-semibold" style="font-size: 0.78rem;">Original Message &bull; ${msg.formatted_time}</div>
+                            <div class="small text-white opacity-50 mb-1 fw-semibold" style="font-size: 0.78rem;">Original Message &bull; ${msg.formatted_original_time}</div>
                             <div class="text-white p-2 rounded border border-secondary border-opacity-25 font-monospace" style="background-color: #121212; border-color: rgba(255,255,255,0.08) !important; font-size: 0.88rem;">${originalText}</div>
                         </div>
                     `;

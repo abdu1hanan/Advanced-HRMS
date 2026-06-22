@@ -28,6 +28,8 @@ class LeaveRequest extends Model
         'reviewed_by',
         'reviewed_at',
         'admin_comment',
+        'change_request',
+        'change_request_status',
     ];
 
     protected function casts(): array
@@ -37,7 +39,28 @@ class LeaveRequest extends Model
             'end_date' => 'date',
             'days_count' => 'decimal:1',
             'reviewed_at' => 'datetime',
+            'change_request' => 'array',
         ];
+    }
+
+    public function hasPendingChangeRequest(): bool
+    {
+        return $this->change_request_status === 'pending';
+    }
+
+    public function hasApprovedManagerChangeRequest(): bool
+    {
+        return $this->change_request_status === 'approved_by_manager';
+    }
+
+    public function hasRejectedManagerChangeRequest(): bool
+    {
+        return $this->change_request_status === 'rejected_by_manager';
+    }
+
+    public function hasOutstandingChangeRequest(): bool
+    {
+        return in_array($this->change_request_status, ['pending', 'approved_by_manager', 'rejected_by_manager']);
     }
 
     public function user(): BelongsTo

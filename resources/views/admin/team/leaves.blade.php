@@ -6,7 +6,8 @@
             <label class="form-label small text-white opacity-50 mb-1">Status Filter</label>
             <select name="status" class="form-select border-0 shadow-sm" onchange="document.getElementById('filterForm').submit()"
                     style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #ffffff !important;">
-                <option value="" class="bg-dark text-white">All Active Leaves</option>
+                <option value="all" @selected(!request()->has('status') || request('status') === 'all') class="bg-dark text-white">All Leaves</option>
+                <option value="" @selected(request()->has('status') && request('status') === '') class="bg-dark text-white">All Pending Leaves</option>
                 @foreach([
                     'pending' => 'Manager Approval Pending',
                     'approved_by_manager' => 'Manager Approved (CEO Pending)',
@@ -97,13 +98,31 @@
                                         <i class="bi bi-x-circle-fill me-1"></i> Rejected by You
                                     </span>
                                 @elseif($request->status === 'cancelled')
-                                    <span class="row-badge-gray">
-                                        <i class="bi bi-x-circle me-1"></i> Cancelled
-                                    </span>
+                                    <span class="row-badge-gray"><i class="bi bi-x-circle me-1"></i> Cancelled</span>
                                 @else
                                     <span class="row-badge-warning">
                                         <i class="bi bi-clock-fill me-1"></i> Pending Manager Approval
                                     </span>
+                                @endif
+
+                                @if($request->hasPendingChangeRequest())
+                                    <div class="mt-1">
+                                        <span class="row-badge-purple">
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i> Pending Changes
+                                        </span>
+                                    </div>
+                                @elseif($request->hasApprovedManagerChangeRequest())
+                                    <div class="mt-1">
+                                        <span class="row-badge-purple" style="background: rgba(139, 92, 246, 0.12) !important; border: 1px solid rgba(139, 92, 246, 0.25) !important;">
+                                            <i class="bi bi-clock-history me-1"></i> Changes Approved (Pending CEO Approval)
+                                        </span>
+                                    </div>
+                                @elseif($request->hasRejectedManagerChangeRequest())
+                                    <div class="mt-1">
+                                        <span class="row-badge-purple" style="background: rgba(139, 92, 246, 0.12) !important; border: 1px solid rgba(139, 92, 246, 0.25) !important;">
+                                            <i class="bi bi-clock-history me-1"></i> Changes Rejected (Pending CEO Approval)
+                                        </span>
+                                    </div>
                                 @endif
                             </td>
                             <td class="text-end pe-4">
@@ -127,6 +146,26 @@
                             <span class="d-reason">{{ $request->reason }}</span>
                             <span class="d-status">{{ $request->status }}</span>
                             <span class="d-super-admin-resolved">{{ ($request->reviewer && $request->reviewer->isSuperAdmin()) ? 'true' : 'false' }}</span>
+                            <span class="d-has-change">{{ $request->hasOutstandingChangeRequest() ? '1' : '0' }}</span>
+                            <span class="d-change-status">{{ $request->change_request_status }}</span>
+                            @if($request->hasOutstandingChangeRequest())
+                                <span class="d-change-cancel">{{ !empty($request->change_request['request_cancellation']) ? '1' : '0' }}</span>
+                                <span class="d-change-dates">
+                                    @if(!empty($request->change_request['start_date']) || !empty($request->change_request['end_date']))
+                                        {{ \Carbon\Carbon::parse($request->change_request['start_date'] ?? $request->start_date)->format('M d, Y') }} – {{ \Carbon\Carbon::parse($request->change_request['end_date'] ?? $request->end_date)->format('M d, Y') }}
+                                    @else
+                                        N/A
+                                    @endif
+                                </span>
+                                <span class="d-change-type">
+                                    @if(!empty($request->change_request['leave_type_id']))
+                                        {{ \App\Models\LeaveType::find($request->change_request['leave_type_id'])?->name ?? 'N/A' }}
+                                    @else
+                                        N/A
+                                    @endif
+                                </span>
+                                <span class="d-change-reason">{{ $request->change_request['reason'] ?? 'N/A' }}</span>
+                            @endif
                             <div class="d-comments">
                                 @forelse($request->comments->sortBy('created_at') as $comment)
                                     @php
@@ -189,15 +228,20 @@
     <div class="modal fade" id="requestModal" tabindex="-1" style="z-index: 1060;">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content bg-dark border-0 shadow" style="overflow: hidden; background-color: #212529 !important;">
-                <div class="modal-header bg-dark border-bottom border-secondary border-opacity-25">
-                    <h5 class="modal-title fw-bold text-white fs-6">Leave Request Details</h5>
+                <div class="modal-header bg-dark border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <h5 class="modal-title fw-bold text-white fs-6 mb-0">Leave Request Details</h5>
+                        <span id="m_change_badge" class="row-badge-purple d-none" style="font-size: 0.78rem !important; padding: 0 0.9rem !important; height: 30px !important;">Changes Requested</span>
+                    </div>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-0">
                     <div class="row g-0">
                         <!-- Left Side: Details -->
                         <div class="col-md-5 bg-dark border-end border-secondary border-opacity-25 p-4">
-                            <h6 class="text-uppercase text-white opacity-50 fw-bold small mb-3"><i class="bi bi-info-circle me-1"></i> Request Info</h6>
+                            <div class="mb-3">
+                                <h6 class="text-uppercase text-white opacity-50 fw-bold small mb-0"><i class="bi bi-info-circle me-1"></i> Request Info</h6>
+                            </div>
                             <div class="mb-3">
                                 <label class="small text-white opacity-50 mb-0">Employee</label>
                                 <div class="fw-medium text-white" id="m_name"></div>
@@ -214,6 +258,30 @@
                             <div class="mb-3">
                                 <label class="small text-white opacity-50 mb-0">Reason Provided</label>
                                 <div class="bg-dark p-3 rounded shadow-sm small mt-1 border border-secondary text-white" id="m_reason" style="min-height: 80px; background-color: rgba(255,255,255,0.02);"></div>
+                            </div>
+
+                            <!-- Comparison Section (visible when change requested) -->
+                            <div id="m_comparison_section" class="d-none mt-3 p-3 rounded" style="background: rgba(255, 193, 7, 0.05); border: 1px solid rgba(255, 193, 7, 0.15);">
+                                <h6 class="text-warning small fw-bold mb-3"><i class="bi bi-arrow-left-right me-1"></i> Requested Changes</h6>
+                                
+                                <div id="m_change_cancel_alert" class="alert alert-danger py-2 px-3 small d-none">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> <strong>Cancellation Requested!</strong> The employee has requested to cancel this approved leave.
+                                </div>
+
+                                <div id="m_change_details_pane">
+                                    <div class="mb-2">
+                                        <label class="small text-white opacity-50 mb-0">Requested Dates</label>
+                                        <div class="fw-medium text-warning" id="m_change_dates"></div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="small text-white opacity-50 mb-0">Requested Leave Type</label>
+                                        <div class="fw-medium text-warning" id="m_change_type"></div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="small text-white opacity-50 mb-0">Updated Reason</label>
+                                        <div class="small text-white" id="m_change_reason" style="word-break: break-word;"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -248,6 +316,10 @@
                                         <button type="button" class="row-btn-outline-red" id="btn-reject" onclick="submitAction('reject')"><i class="bi bi-x-circle me-1"></i> Reject Leave</button>
                                         <button type="button" class="row-btn-outline-green" id="btn-approve" onclick="submitAction('approve')"><i class="bi bi-check-circle me-1"></i> Approve Leave</button>
                                     </div>
+                                    <div id="m_change_buttons" class="d-flex gap-2 d-none">
+                                        <button type="button" class="row-btn-outline-red" id="btn-change-reject" onclick="submitAction('reject-change')"><i class="bi bi-x-circle me-1"></i> Reject Change</button>
+                                        <button type="button" class="row-btn-outline-green" id="btn-change-approve" onclick="submitAction('approve-change')"><i class="bi bi-check-circle me-1"></i> Approve Change</button>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -258,7 +330,7 @@
     </div>
 
     <!-- Beautiful Custom Confirm Modal -->
-    <div class="modal fade" id="confirmActionModal" tabindex="-1" style="z-index: 1060;">
+    <div class="modal fade" id="confirmActionModal" tabindex="-1" data-bs-backdrop="false" style="z-index: 1070; background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(2px);">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow" style="background-color: #0c0c0c !important; border: 1px solid rgba(255, 255, 255, 0.08) !important;">
                 <div class="modal-body text-center p-4">
@@ -306,28 +378,78 @@
                 // Super Admin resolved checks
                 const isSuperAdminResolved = dataDiv.querySelector('.d-super-admin-resolved').textContent.trim() === 'true';
                 const mActionButtons = document.getElementById('m_action_buttons');
+                const mChangeButtons = document.getElementById('m_change_buttons');
                 const superAdminAlert = document.getElementById('m_super_admin_alert');
+                const mChangeBadge = document.getElementById('m_change_badge');
+                const mComparisonSection = document.getElementById('m_comparison_section');
                 
                 const status = dataDiv.querySelector('.d-status').textContent.trim();
+                const hasChange = dataDiv.querySelector('.d-has-change') ? dataDiv.querySelector('.d-has-change').textContent.trim() : '0';
+                const changeStatus = dataDiv.querySelector('.d-change-status') ? dataDiv.querySelector('.d-change-status').textContent.trim() : '';
                 const isFinal = status === 'approved' || status === 'rejected' || status === 'cancelled';
                 
-                if (isSuperAdminResolved || isFinal) {
+                if (hasChange === '1') {
+                    if (mChangeBadge) {
+                        mChangeBadge.style.setProperty('display', 'inline-flex', 'important');
+                        mChangeBadge.classList.remove('d-none');
+                        if (changeStatus === 'approved_by_manager') {
+                            mChangeBadge.textContent = 'Changes Approved (Pending CEO)';
+                        } else if (changeStatus === 'rejected_by_manager') {
+                            mChangeBadge.textContent = 'Changes Rejected (Pending CEO)';
+                        } else {
+                            mChangeBadge.textContent = 'Changes Requested';
+                        }
+                    }
+                    mComparisonSection.classList.remove('d-none');
                     mActionButtons.classList.add('d-none');
-                    if (isSuperAdminResolved || status === 'approved' || status === 'rejected') {
-                        superAdminAlert.classList.remove('d-none');
+                    
+                    if (changeStatus === 'approved_by_manager' || changeStatus === 'rejected_by_manager') {
+                        mChangeButtons.classList.add('d-none');
                     } else {
-                        superAdminAlert.classList.add('d-none');
+                        mChangeButtons.classList.remove('d-none');
+                    }
+                    superAdminAlert.classList.add('d-none');
+
+                    const isCancel = dataDiv.querySelector('.d-change-cancel').textContent.trim() === '1';
+                    const changeCancelAlert = document.getElementById('m_change_cancel_alert');
+                    const changeDetailsPane = document.getElementById('m_change_details_pane');
+
+                    if (isCancel) {
+                        changeCancelAlert.classList.remove('d-none');
+                        changeDetailsPane.classList.add('d-none');
+                    } else {
+                        changeCancelAlert.classList.add('d-none');
+                        changeDetailsPane.classList.remove('d-none');
+                        document.getElementById('m_change_dates').textContent = dataDiv.querySelector('.d-change-dates').textContent;
+                        document.getElementById('m_change_type').textContent = dataDiv.querySelector('.d-change-type').textContent;
+                        document.getElementById('m_change_reason').textContent = dataDiv.querySelector('.d-change-reason').textContent;
                     }
                 } else {
-                    superAdminAlert.classList.add('d-none');
-                    mActionButtons.classList.remove('d-none');
-                    
-                    // Toggle action buttons based on status
-                    const btnApprove = document.getElementById('btn-approve');
-                    const btnReject = document.getElementById('btn-reject');
-                    
-                    btnApprove.classList.toggle('d-none', status === 'approved_by_manager');
-                    btnReject.classList.toggle('d-none', status === 'rejected_by_manager');
+                    if (mChangeBadge) {
+                        mChangeBadge.style.setProperty('display', 'none', 'important');
+                        mChangeBadge.classList.add('d-none');
+                    }
+                    mComparisonSection.classList.add('d-none');
+                    mChangeButtons.classList.add('d-none');
+
+                    if (isSuperAdminResolved || isFinal) {
+                        mActionButtons.classList.add('d-none');
+                        if (isSuperAdminResolved || status === 'approved' || status === 'rejected') {
+                            superAdminAlert.classList.remove('d-none');
+                        } else {
+                            superAdminAlert.classList.add('d-none');
+                        }
+                    } else {
+                        superAdminAlert.classList.add('d-none');
+                        mActionButtons.classList.remove('d-none');
+                        
+                        // Toggle action buttons based on status
+                        const btnApprove = document.getElementById('btn-approve');
+                        const btnReject = document.getElementById('btn-reject');
+                        
+                        btnApprove.classList.toggle('d-none', status === 'approved_by_manager');
+                        btnReject.classList.toggle('d-none', status === 'rejected_by_manager');
+                    }
                 }
  
                 // Clear inline alerts
@@ -368,7 +490,7 @@
                         return;
                     }
                 } else {
-                    // For approve/reject, use custom confirmation modal instead of browser confirm()
+                    // For approve/reject/approve-change/reject-change, use confirmation modal
                     pendingActionType = actionType;
                     const confirmTitle = document.getElementById('confirmTitle');
                     const confirmText = document.getElementById('confirmText');
@@ -384,6 +506,16 @@
                         confirmText.textContent = 'Are you sure you want to reject this leave request? This will decline the request.';
                         btnConfirmAction.className = 'row-btn-red px-4';
                         btnConfirmAction.textContent = 'Yes, Reject';
+                    } else if (actionType === 'approve-change') {
+                        confirmTitle.textContent = 'Approve Requested Changes?';
+                        confirmText.textContent = 'Are you sure you want to approve these changes? This will override the original leave request.';
+                        btnConfirmAction.className = 'row-btn-green px-4';
+                        btnConfirmAction.textContent = 'Approve Changes';
+                    } else if (actionType === 'reject-change') {
+                        confirmTitle.textContent = 'Reject Requested Changes?';
+                        confirmText.textContent = 'Are you sure you want to reject these changes? The original approved leave will remain unchanged.';
+                        btnConfirmAction.className = 'row-btn-red px-4';
+                        btnConfirmAction.textContent = 'Reject Changes';
                     }
  
                     const confirmModalEl = document.getElementById('confirmActionModal');
