@@ -1,4 +1,4 @@
-# BeetleOps HRMS
+# Human Resource Management System
 
 A modern, fully-featured Human Resource Management System (HRMS) built with **Laravel**, **Blade**, **Bootstrap 5**, **jQuery/AJAX**, and **MySQL**. It features an elegant dark glassmorphism dashboard, granular role-based permissions, automated department hierarchies, and dynamic leave request/approval workflows.
 
@@ -11,7 +11,7 @@ Perfect as a ready-to-use internal tool or a standout project for your resume.
 ### 1. Database Setup
 Create a new MySQL database for the project (e.g., using DBeaver, phpMyAdmin, or terminal):
 ```sql
-CREATE DATABASE hrms_beetleops CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE <YOUR-DB-NAME> CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 ### 2. Configure Environment
@@ -24,9 +24,9 @@ Open `.env` and fill in your database details:
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=hrms_beetleops
-DB_USERNAME=root
-DB_PASSWORD=[PASSWORD]
+DB_DATABASE=your_db_name
+DB_USERNAME=your_mysql_username
+DB_PASSWORD=your_mysql_password
 ```
 
 ### 3. Install & Initialize
@@ -55,9 +55,19 @@ To explore the dashboard, log in with the default seeded credentials:
 
 ---
 
+## Customizing the Company Logo
+
+To make this HRMS your own, swap the default placeholder logo with your company logo:
+
+1. Place your custom logo in `public/images/logo.png`.
+2. **Recommended Size:** The logo should be **65x65 pixels** (or a square aspect ratio) so it matches the navbar toggle layout and doesn't break the responsive side menu container.
+
+---
+
 ## ✨ Features
 
-- **Dashboard Role Parity**: Custom UI panels tailored specifically for Super Admins, Admin/Line Managers, and Employees.
-- **Dynamic Leave System**: Full workflow from application (AJAX form) to manager approval and history tracking.
-- **Manager-Employee Hierarchy**: Automatic linking of line managers to department employees.
-- **Interactive Data Tables**: Dynamic server-side pagination, filters, and records.
+- **Dashboard Role Parity & Hierarchies**: Custom UI panels tailored specifically for Super Admins, Line Managers, and Employees to preserve clean data segregation, combined with an automated organizational tree that handles dynamic reporting lines and leadership updates seamlessly.
+- **Real-Time Communication Sync**: Webhook-driven integration with company messaging platforms that transforms chat check-ins instantly into structured attendance records, featuring automated profile handle mapping and intelligent text-parsing triage.
+- **Self-Healing Session Management**: Advanced attendance ledger supporting multi-shift days, automatic shift-splitting for late night hours crossing past midnight, and dynamic multi-day gap repair logic designed to eliminate compounding tracking errors.
+- **Automated Leave Workflows**: End-to-end asynchronous leave pipelines running from initial employee submission through multi-tier approvals, backed by real-time inline discussion boards and scheduled tasks to manage annual balance rollovers.
+- **Administrative Overhaul Suite**: Interactive inline grid utilities that toggle static data listings into live input forms on the fly, high-density historical dataset filtering, and a strict database soft-deletion standard to prevent accidental data loss.
