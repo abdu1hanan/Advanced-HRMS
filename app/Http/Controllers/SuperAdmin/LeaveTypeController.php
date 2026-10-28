@@ -18,8 +18,14 @@ class LeaveTypeController extends Controller
             ->withCount(['requests as pending_requests_count' => function ($query) {
                 $query->where('status', \App\Models\LeaveRequest::STATUS_PENDING);
             }])
-            ->orderBy('name')
-            ->get();
+            ->get()
+            ->sortBy(function ($type) {
+                if ($type->slug === 'unpaid') return '0_unpaid';
+                if ($type->slug === 'emergency') return '1_emergency';
+                if ($type->slug === 'absent') return '2_absent';
+                return '3_' . strtolower($type->name);
+            })
+            ->values();
 
         return view('super-admin.leave-types.index', compact('leaveTypes'));
     }
@@ -32,6 +38,7 @@ class LeaveTypeController extends Controller
             'default_entitled' => ['required', 'integer', 'min:0'],
             'allow_carry_forward' => ['boolean'],
             'max_carry_forward_days' => ['integer', 'min:0'],
+            'is_half_day' => ['boolean'],
         ]);
 
         $slug = Str::slug($validated['name']);
@@ -45,6 +52,7 @@ class LeaveTypeController extends Controller
             'max_days_per_year' => $validated['max_days_per_year'],
             'allow_carry_forward' => $request->boolean('allow_carry_forward'),
             'max_carry_forward_days' => $validated['max_carry_forward_days'] ?? 0,
+            'is_half_day' => $request->boolean('is_half_day'),
         ]);
 
         LeaveSetting::create([
@@ -63,18 +71,26 @@ class LeaveTypeController extends Controller
             'default_entitled' => ['required', 'integer', 'min:0'],
             'allow_carry_forward' => ['boolean'],
             'max_carry_forward_days' => ['integer', 'min:0'],
+            'is_half_day' => ['boolean'],
         ]);
 
+        $isSystemType = ($leaveType->slug === 'unpaid' || $leaveType->slug === 'emergency' || $leaveType->slug === 'absent');
+        $name = $isSystemType ? $leaveType->name : $validated['name'];
+        $maxDays = $isSystemType ? $leaveType->max_days_per_year : $validated['max_days_per_year'];
+        $defaultEntitled = $isSystemType ? ($leaveType->settings->first()?->default_entitled ?? 0) : $validated['default_entitled'];
+        $isHalfDay = $isSystemType ? false : $request->boolean('is_half_day');
+
         $leaveType->update([
-            'name' => $validated['name'],
-            'max_days_per_year' => $validated['max_days_per_year'],
+            'name' => $name,
+            'max_days_per_year' => $maxDays,
             'allow_carry_forward' => $request->boolean('allow_carry_forward'),
             'max_carry_forward_days' => $validated['max_carry_forward_days'] ?? 0,
+            'is_half_day' => $isHalfDay,
         ]);
 
         LeaveSetting::updateOrCreate(
             ['leave_type_id' => $leaveType->id],
-            ['default_entitled' => $validated['default_entitled']]
+            ['default_entitled' => $defaultEntitled]
         );
 
         return back()->with('success', 'Leave type updated.');
@@ -82,6 +98,10 @@ class LeaveTypeController extends Controller
     
     public function toggleStatus(LeaveType $leaveType, \App\Services\LeaveBalanceService $balanceService): RedirectResponse
     {
+        if ($leaveType->slug === 'unpaid' || $leaveType->slug === 'emergency' || $leaveType->slug === 'absent') {
+            return back()->withErrors(['status' => 'System-required leave types (Unpaid, Emergency and Absent) cannot be disabled.']);
+        }
+
         $newStatus = !$leaveType->is_active;
 
         if (!$newStatus) {
@@ -113,11 +133,21 @@ class LeaveTypeController extends Controller
 
     public function destroy(LeaveType $leaveType): RedirectResponse
     {
+        if ($leaveType->slug === 'unpaid' || $leaveType->slug === 'emergency' || $leaveType->slug === 'absent') {
+            return back()->withErrors(['delete' => 'System-required leave types (Unpaid, Emergency and Absent) cannot be deleted.']);
+        }
+
         if ($leaveType->requests()->where('status', \App\Models\LeaveRequest::STATUS_PENDING)->exists()) {
             return back()->withErrors(['delete' => 'Cannot delete this leave type because there are pending leave requests. You can only disable it.']);
         }
         
-        $leaveType->delete();
+        \Illuminate\Support\Facades\DB::transaction(function () use ($leaveType) {
+            \App\Models\LeaveBalance::where('leave_type_id', $leaveType->id)->delete();
+            \App\Models\LeaveSetting::where('leave_type_id', $leaveType->id)->delete();
+            \App\Models\LeaveBalanceOverride::where('leave_type_id', $leaveType->id)->delete();
+            $leaveType->delete();
+        });
+
         return back()->with('success', 'Leave type deleted successfully.');
     }
 }

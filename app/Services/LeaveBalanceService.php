@@ -30,17 +30,32 @@ class LeaveBalanceService
             ->first();
 
         if ($existing) {
+            $updates = [];
+            if ($existing->used < 0 || $existing->pending < 0) {
+                $updates['used'] = max(0.0, (double)$existing->used);
+                $updates['pending'] = max(0.0, (double)$existing->pending);
+            }
+            if ($type->slug === 'absent') {
+                $count = \App\Models\AttendanceRecord::where('user_id', $user->id)->whereYear('date', $year)->count();
+                if ((int)$existing->used !== $count) {
+                    $updates['used'] = $count;
+                }
+            }
+            if (!empty($updates)) {
+                $existing->update($updates);
+            }
             return $existing;
         }
 
         $entitled = $this->resolveEntitlement($user, $type, $year);
+        $used = $type->slug === 'absent' ? \App\Models\AttendanceRecord::where('user_id', $user->id)->whereYear('date', $year)->count() : 0;
 
         return LeaveBalance::create([
             'user_id' => $user->id,
             'leave_type_id' => $type->id,
             'year' => $year,
             'entitled' => $entitled,
-            'used' => 0,
+            'used' => $used,
             'pending' => 0,
             'carried_forward' => 0,
         ]);
@@ -65,6 +80,9 @@ class LeaveBalanceService
 
     public function availableDays(LeaveBalance $balance): float
     {
+        if ($balance->leaveType->slug === 'unpaid' || $balance->leaveType->slug === 'emergency' || $balance->leaveType->slug === 'absent') {
+            return (float) $balance->used;
+        }
         $left = (float) $balance->entitled
             + (float) $balance->carried_forward
             - (float) $balance->used
@@ -75,6 +93,9 @@ class LeaveBalanceService
 
     public function leftDays(LeaveBalance $balance): float
     {
+        if ($balance->leaveType->slug === 'unpaid' || $balance->leaveType->slug === 'emergency' || $balance->leaveType->slug === 'absent') {
+            return (float) $balance->used;
+        }
         $left = (float) $balance->entitled
             + (float) $balance->carried_forward
             - (float) $balance->used;

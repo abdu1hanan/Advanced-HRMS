@@ -6,7 +6,15 @@ $.ajaxSetup({
 });
 
 window.showToast = function(message, type = 'danger') {
-    const icon = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill';
+    if (type === 'error') type = 'danger';
+    let icon = 'bi-exclamation-circle-fill';
+    if (type === 'success') {
+        icon = 'bi-check-circle-fill';
+    } else if (type === 'warning') {
+        icon = 'bi-exclamation-triangle-fill';
+    } else if (type === 'info') {
+        icon = 'bi-info-circle-fill';
+    }
     const toastHtml = `
         <div class="sleek-toast sleek-toast-${type}">
             <div class="d-flex align-items-center gap-2">

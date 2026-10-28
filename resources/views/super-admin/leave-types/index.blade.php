@@ -12,35 +12,46 @@
                 @csrf
                 <input type="hidden" name="_method" id="formMethod" value="PATCH" disabled>
                 
-                <div class="row g-4 mb-3">
-                    <div class="col-md-3">
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-5 g-3 mb-3">
+                    <div class="col">
                         <label class="form-label text-white opacity-75 small">Name <i class="bi bi-info-circle ms-1 text-white opacity-50" data-bs-toggle="tooltip" title="The name of the leave type (e.g. Annual Leave, Sick Leave)"></i></label>
                         <input type="text" name="name" id="lt_name" class="form-control bg-dark border-secondary text-white" placeholder="e.g. Annual Leave" required>
                         <div class="form-text text-white opacity-50 small mt-1" style="font-size: 0.7rem;">Identifier for this leave type.</div>
                     </div>
                     
-                    <div class="col-md-3">
+                    <div class="col">
                         <label class="form-label text-white opacity-75 small">Max days/year <i class="bi bi-info-circle ms-1 text-white opacity-50" data-bs-toggle="tooltip" title="The absolute hard limit of days any employee can take in a single year for this leave."></i></label>
                         <input type="number" name="max_days_per_year" id="lt_max_days" class="form-control bg-dark border-secondary text-white" placeholder="e.g. 30" required min="0">
-                        <div class="form-text text-white opacity-50 small mt-1" style="font-size: 0.7rem;">Ceiling limit for taken leaves per year.</div>
+                        <div class="form-text text-white opacity-50 small mt-1" style="font-size: 0.7rem;">Ceiling limit per year.</div>
                     </div>
                     
-                    <div class="col-md-3">
+                    <div class="col">
                         <label class="form-label text-white opacity-75 small">Default entitled <i class="bi bi-info-circle ms-1 text-white opacity-50" data-bs-toggle="tooltip" title="The standard starting balance given to employees at the beginning of the year."></i></label>
                         <input type="number" name="default_entitled" id="lt_default" class="form-control bg-dark border-secondary text-white" placeholder="e.g. 20" required min="0">
-                        <div class="form-text text-white opacity-50 small mt-1" style="font-size: 0.7rem;">Default starting balance for new cycles.</div>
+                        <div class="form-text text-white opacity-50 small mt-1" style="font-size: 0.7rem;">Default start balance.</div>
+                    </div>
+
+                    <div class="col">
+                        <label class="form-label text-white opacity-75 small">Duration <i class="bi bi-info-circle ms-1 text-white opacity-50" data-bs-toggle="tooltip" title="Mark this leave type as half day. When approved, it deducts half of the expected hours for that day."></i></label>
+                        <div class="d-flex align-items-center justify-content-between px-3" style="height: 38px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px;">
+                            <span class="text-white opacity-75 small">Half Day</span>
+                            <div class="form-check form-switch mb-0 p-0 d-flex align-items-center">
+                                <input class="form-check-input bg-dark border-secondary m-0 cursor-pointer" type="checkbox" name="is_half_day" value="1" id="lt_is_half_day">
+                            </div>
+                        </div>
+                        <div class="form-text text-white opacity-50 small mt-1" style="font-size: 0.7rem;">Deducts 50% expected hours.</div>
                     </div>
                     
-                    <div class="col-md-3">
+                    <div class="col">
                         <label class="form-label text-white opacity-75 small">Carry Forward <i class="bi bi-info-circle ms-1 text-white opacity-50" data-bs-toggle="tooltip" title="Enable rolling over unused balances to the next year."></i></label>
-                        <div class="d-flex align-items-center gap-3 mb-2">
-                            <div class="form-check form-switch mb-0">
+                        <div class="d-flex align-items-center gap-2" style="height: 38px;">
+                            <div class="form-check form-switch mb-0 text-nowrap">
                                 <input class="form-check-input bg-dark border-secondary" type="checkbox" name="allow_carry_forward" value="1" id="lt_allow_cf">
                                 <label class="form-check-label text-white opacity-75 small" for="lt_allow_cf">Allow</label>
                             </div>
-                            <input type="number" name="max_carry_forward_days" id="lt_max_cf" class="form-control form-control-sm bg-dark border-secondary text-white w-50" placeholder="Max (e.g. 5)" value="0" disabled>
+                            <input type="number" name="max_carry_forward_days" id="lt_max_cf" class="form-control bg-dark border-secondary text-white flex-grow-1" placeholder="Max" value="0" min="0" disabled>
                         </div>
-                        <div class="form-text text-white opacity-50 small mt-1" style="font-size: 0.7rem;">Enable rolling over unused balances.</div>
+                        <div class="form-text text-white opacity-50 small mt-1" style="font-size: 0.7rem;">Roll over unused balances.</div>
                     </div>
                 </div>
                 
@@ -63,6 +74,7 @@
                 <thead>
                     <tr>
                         <th class="ps-4">Name</th>
+                        <th>Duration</th>
                         <th>Max/yr</th>
                         <th>Default</th>
                         <th>Carry Forward</th>
@@ -74,6 +86,13 @@
                     @forelse($leaveTypes as $type)
                         <tr>
                             <td class="ps-4 fw-semibold text-white">{{ $type->name }}</td>
+                            <td>
+                                @if($type->is_half_day)
+                                    <span class="text-warning small fw-medium">Half Day</span>
+                                @else
+                                    <span class="text-white opacity-75 small">Full Day</span>
+                                @endif
+                            </td>
                             <td><span class="text-white opacity-75">{{ $type->max_days_per_year }}</span></td>
                             <td><span class="text-white opacity-75">{{ $type->settings->first()?->default_entitled ?? $type->max_days_per_year }}</span></td>
                             <td>
@@ -93,29 +112,31 @@
                             <td class="pe-4 text-end">
                                 <div class="d-inline-flex gap-2">
                                     <button type="button" class="row-btn-outline-blue" 
-                                        onclick="editLeaveType({{ $type->id }}, '{{ addslashes($type->name) }}', {{ $type->max_days_per_year }}, {{ $type->settings->first()?->default_entitled ?? $type->max_days_per_year }}, {{ $type->allow_carry_forward ? 1 : 0 }}, {{ $type->max_carry_forward_days ?? 0 }})">
+                                        onclick="editLeaveType({{ $type->id }}, '{{ addslashes($type->name) }}', {{ $type->max_days_per_year }}, {{ $type->settings->first()?->default_entitled ?? $type->max_days_per_year }}, {{ $type->allow_carry_forward ? 1 : 0 }}, {{ $type->max_carry_forward_days ?? 0 }}, {{ $type->is_half_day ? 1 : 0 }}, '{{ $type->slug }}')">
                                         Edit
                                     </button>
                                     
-                                    <form method="POST" action="{{ route('super-admin.leave-types.toggle-status', $type) }}" class="d-inline toggle-status-form" data-pending="{{ $type->pending_requests_count }}" data-is-active="{{ $type->is_active ? 'true' : 'false' }}">
-                                        @csrf
-                                        @if($type->is_active)
-                                            <button type="button" class="row-btn-outline-warning btn-toggle-status">Disable</button>
-                                        @else
-                                            <button type="button" class="row-btn-outline-success btn-toggle-status">Enable</button>
-                                        @endif
-                                    </form>
+                                    @if($type->slug !== 'unpaid' && $type->slug !== 'emergency' && $type->slug !== 'absent')
+                                        <form method="POST" action="{{ route('super-admin.leave-types.toggle-status', $type) }}" class="d-inline toggle-status-form" data-pending="{{ $type->pending_requests_count }}" data-is-active="{{ $type->is_active ? 'true' : 'false' }}">
+                                            @csrf
+                                            @if($type->is_active)
+                                                <button type="button" class="row-btn-outline-warning btn-toggle-status">Disable</button>
+                                            @else
+                                                <button type="button" class="row-btn-outline-success btn-toggle-status">Enable</button>
+                                            @endif
+                                        </form>
 
-                                    <form method="POST" action="{{ route('super-admin.leave-types.destroy', $type) }}" class="d-inline delete-lt-form" data-pending="{{ $type->pending_requests_count }}">
-                                        @csrf @method('DELETE')
-                                        <button type="button" class="row-btn-outline-red btn-delete-lt">Delete</button>
-                                    </form>
+                                        <form method="POST" action="{{ route('super-admin.leave-types.destroy', $type) }}" class="d-inline delete-lt-form" data-pending="{{ $type->pending_requests_count }}">
+                                            @csrf @method('DELETE')
+                                            <button type="button" class="row-btn-outline-red btn-delete-lt">Delete</button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5 text-white opacity-50">No leave types configured yet.</td>
+                            <td colspan="7" class="text-center py-5 text-white opacity-50">No leave types configured yet.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -206,6 +227,9 @@
             }
             cfCheckbox.addEventListener('change', toggleCfInput);
 
+            // Half Day Logic
+            const halfDayCheckbox = document.getElementById('lt_is_half_day');
+
             // Edit Logic
             const form = document.getElementById('leaveTypeForm');
             const formMethod = document.getElementById('formMethod');
@@ -214,17 +238,46 @@
             const formCancelBtn = document.getElementById('formCancelBtn');
             const originalAction = "{{ route('super-admin.leave-types.store') }}";
 
-            window.editLeaveType = function(id, name, maxDays, defaultEntitled, allowCf, maxCf) {
+            window.editLeaveType = function(id, name, maxDays, defaultEntitled, allowCf, maxCf, isHalfDay, slug) {
                 form.action = `/super-admin/leave-types/${id}`;
                 formMethod.disabled = false; // Enables the PATCH method
                 
-                document.getElementById('lt_name').value = name;
-                document.getElementById('lt_max_days').value = maxDays;
-                document.getElementById('lt_default').value = defaultEntitled;
+                const isSystem = (slug === 'unpaid' || slug === 'emergency' || slug === 'absent');
+                const nameInput = document.getElementById('lt_name');
+                const maxDaysInput = document.getElementById('lt_max_days');
+                const defaultInput = document.getElementById('lt_default');
+                
+                nameInput.value = name;
+                maxDaysInput.value = maxDays;
+                defaultInput.value = defaultEntitled;
+                
+                const inputs = [nameInput, maxDaysInput, defaultInput];
+                inputs.forEach(input => {
+                    if (isSystem) {
+                        input.readOnly = true;
+                        input.style.cursor = 'not-allowed';
+                        input.style.backgroundColor = '#1a1a1a';
+                        input.style.color = 'rgba(255,255,255,0.4)';
+                        input.style.borderColor = 'rgba(255,255,255,0.05)';
+                    } else {
+                        input.readOnly = false;
+                        input.style.cursor = '';
+                        input.style.backgroundColor = '';
+                        input.style.color = '';
+                        input.style.borderColor = '';
+                    }
+                });
                 
                 cfCheckbox.checked = (allowCf == 1);
                 toggleCfInput();
                 cfMaxInput.value = maxCf;
+
+                halfDayCheckbox.checked = (isHalfDay == 1);
+                if (isSystem) {
+                    halfDayCheckbox.disabled = true;
+                } else {
+                    halfDayCheckbox.disabled = false;
+                }
 
                 formHeader.textContent = 'Edit Leave Type';
                 formHeader.classList.add('text-primary');
@@ -239,6 +292,22 @@
                 formMethod.disabled = true;
                 form.reset();
                 toggleCfInput();
+                
+                halfDayCheckbox.checked = false;
+                halfDayCheckbox.disabled = false;
+
+                const inputs = [
+                    document.getElementById('lt_name'),
+                    document.getElementById('lt_max_days'),
+                    document.getElementById('lt_default')
+                ];
+                inputs.forEach(input => {
+                    input.readOnly = false;
+                    input.style.cursor = '';
+                    input.style.backgroundColor = '';
+                    input.style.color = '';
+                    input.style.borderColor = '';
+                });
                 
                 formHeader.textContent = 'Add Leave Type';
                 formHeader.classList.remove('text-primary');

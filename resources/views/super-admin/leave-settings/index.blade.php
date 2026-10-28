@@ -25,6 +25,57 @@
             </div>
         </div>
     </div>
+
+    <div class="spotify-card mb-4" style="position: relative; z-index: 10; overflow: visible !important;">
+        <div class="card-header-area px-4 pt-4">
+            <h6 class="text-uppercase text-white fw-semibold small mb-2 opacity-75 d-inline-flex align-items-center" style="letter-spacing: 0.05em;">
+                Approval Chain Settings
+                <i class="bi bi-info-circle text-white opacity-50 ms-2 cursor-pointer" 
+                   style="font-size: 0.85rem;" 
+                   data-custom-tooltip="This setting applies to all new leave requests from this point forward." 
+                   data-tooltip-placement="top"></i>
+            </h6>
+            <div class="grid-separator" style="margin-bottom: 1.15rem !important;"></div>
+        </div>
+        <div class="px-4 pb-4 pt-1">
+            <form method="POST" id="approval-settings-form" action="{{ route('super-admin.settings.approval-levels') }}" class="d-flex justify-content-between align-items-center gap-3 flex-wrap flex-md-nowrap">
+                @csrf
+                <p class="text-white opacity-75 small mb-0">Configure level of approval required for approval chain.</p>
+                
+                <div class="d-flex align-items-center gap-2">
+                    <div class="dropdown level-dropdown position-relative" style="width: 230px; z-index: 1060;">
+                        <button class="form-select form-select-sm text-start text-white w-100" 
+                                type="button" 
+                                id="approvalLevelsDropdown" 
+                                data-bs-toggle="dropdown" 
+                                aria-expanded="false" 
+                                style="border-color: rgba(255, 255, 255, 0.15); background-color: rgba(255, 255, 255, 0.03); border-radius: 4px; height: 31px; font-size: 0.85rem; padding-right: 2rem; color: #ffffff !important;">
+                            <span class="text-truncate d-inline-block w-100" id="selected-level-text" style="max-width: 180px;">
+                                {{ $currentApprovalLevels }} {{ $currentApprovalLevels == 1 ? 'Level of Manager Approval' : 'Levels of Manager Approval' }}
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark p-0" aria-labelledby="approvalLevelsDropdown" style="max-height: 200px; overflow-y: auto; width: 230px; border: 1px solid rgba(255, 255, 255, 0.15); background-color: #121212; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); z-index: 1070 !important;">
+                            @for ($i = 1; $i <= 10; $i++)
+                                <li>
+                                    <a class="dropdown-item py-2 text-white @if($currentApprovalLevels == $i) active @endif" 
+                                       href="#" 
+                                       data-value="{{ $i }}" 
+                                       onclick="selectApprovalLevel(event, '{{ $i }}', '{{ $i }} {{ $i == 1 ? 'Level of Manager Approval' : 'Levels of Manager Approval' }}')">
+                                       {{ $i }} {{ $i == 1 ? 'Level of Manager Approval' : 'Levels of Manager Approval' }}
+                                    </a>
+                                </li>
+                            @endfor
+                        </ul>
+                        <input type="hidden" name="approval_levels" id="approval-levels-input" form="approval-settings-form" value="{{ $currentApprovalLevels }}">
+                    </div>
+
+                    <button type="submit" class="row-btn-outline-blue" style="height: 31px; line-height: 1; padding: 0 16px;">
+                        Save Setting
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
     
     <div class="spotify-card mb-4">
         <div class="card-header-area px-4 pt-4">
@@ -68,5 +119,20 @@
             </div>
         </div>
     </div>
+    @endpush
+
+    @push('scripts')
+    <script>
+        function selectApprovalLevel(e, val, text) {
+            e.preventDefault();
+            document.getElementById('approval-levels-input').value = val;
+            document.getElementById('selected-level-text').textContent = text;
+            const menu = e.target.closest('.dropdown-menu');
+            if (menu) {
+                menu.querySelectorAll('.dropdown-item').forEach(item => item.classList.remove('active'));
+                e.target.classList.add('active');
+            }
+        }
+    </script>
     @endpush
 </x-app-layout>

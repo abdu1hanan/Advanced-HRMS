@@ -13,7 +13,8 @@ class LeaveRequestOverridden extends Notification
     public function __construct(
         public LeaveRequest $leaveRequest, 
         public string $superAdminName, 
-        public string $previousStatus = 'approved_by_manager'
+        public string $previousStatus = 'approved_by_manager',
+        public ?string $superAdminDesignation = null
     ) {}
 
     public function via(object $notifiable): array
@@ -30,11 +31,17 @@ class LeaveRequestOverridden extends Notification
             $priorWord = 'reviewed';
         }
 
+        $desigStr = $this->superAdminDesignation ? " ({$this->superAdminDesignation})" : '';
+
+        $url = $notifiable->isSuperAdmin()
+            ? route('super-admin.leave-requests.index')
+            : route('admin.team.leaves.history');
+
         return [
             'type' => 'leave_overridden',
             'leave_request_id' => $this->leaveRequest->id,
-            'message' => "{$this->superAdminName} rejected the leave request for {$this->leaveRequest->user->name} that you previously {$priorWord}.",
-            'url' => route('admin.team.leaves.history'),
+            'message' => "{$this->superAdminName}{$desigStr} rejected the leave request for {$this->leaveRequest->user->name} that you previously {$priorWord}.",
+            'url' => $url,
         ];
     }
 }

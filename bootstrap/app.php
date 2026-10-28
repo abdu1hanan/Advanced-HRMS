@@ -12,7 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'role' => \App\Http\Middleware\EnsureUserHasRole::class,
+            'role'             => \App\Http\Middleware\EnsureUserHasRole::class,
+            'account.approved' => \App\Http\Middleware\EnsureAccountApproved::class,
         ]);
         $middleware->validateCsrfTokens(except: [
             'webhook/slack',

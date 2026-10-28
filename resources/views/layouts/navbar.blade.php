@@ -5,10 +5,15 @@
         <div class="d-flex align-items-center" style="width: 65px; justify-content: center;">
             <!-- Company Logo Icon (triggers toggle menu directly) -->
             <img src="{{ asset('images/logo.png') }}" id="desktopSidebarToggle" alt="Logo" data-custom-tooltip="Close sidebar" data-tooltip-placement="right" style="height: 65px; width: 65px; object-fit: contain; cursor: pointer; user-select: none;" onerror="this.onerror=null; this.src='https://placehold.co/65x48/ffffff/000000?text=C';">
+            <script>
+                if (localStorage.getItem('inverted-bw') === 'true') {
+                    document.getElementById('desktopSidebarToggle').src = "{{ asset('images/logo-dark.png') }}";
+                }
+            </script>
         </div>
 
         <!-- Center: Centered Title -> HRMS Only -->
-        <div class="navbar-center-title text-center text-white fw-bold mb-0 text-uppercase d-flex align-items-center justify-content-center">
+        <div id="toggle-color-switch" class="navbar-center-title text-center text-white fw-bold mb-0 text-uppercase d-flex align-items-center justify-content-center" style="cursor: pointer; user-select: none;">
             HRMS
         </div>
 

@@ -19,17 +19,17 @@ class LeaveRequestSubmittedNoManager extends Notification
 
     public function toArray(object $notifiable): array
     {
-        $department = \App\Models\Department::where('head_user_id', $this->leaveRequest->user_id)->first();
-        if ($department) {
-            $message = "Leave requested by Head of {$department->name} ({$this->leaveRequest->user->name}).";
-        } else {
-            $message = "{$this->leaveRequest->user->name} submitted leave but has no line manager assigned.";
-        }
+        $user = $this->leaveRequest->user;
+        $designation = $user->designation?->name ? " ({$user->designation->name})" : '';
+        $leaveTypeName = $this->leaveRequest->leaveType->name;
+
+        $message = "{$user->name}{$designation} submitted a {$leaveTypeName} leave request but has no immediate boss assigned.";
 
         return [
             'type' => 'leave_no_manager',
             'leave_request_id' => $this->leaveRequest->id,
-            'employee_name' => $this->leaveRequest->user->name,
+            'employee_name' => $user->name,
+            'leave_type' => $leaveTypeName,
             'message' => $message,
             'url' => route('super-admin.leave-requests.index'),
         ];

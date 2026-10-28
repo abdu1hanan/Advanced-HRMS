@@ -36,8 +36,10 @@
 
 /* Base Body Styles */
 body {
-    background-color: #030303 !important; /* Pure modern dark background */
-    background-image: radial-gradient(rgba(255, 255, 255, 0.095) 1px, transparent 1px) !important; /* Thin crisp white dotted grid */
+    background-color: #030303 !important;
+    /* Pure modern dark background */
+    background-image: radial-gradient(rgba(255, 255, 255, 0.080) 1px, transparent 1px) !important;
+    /* Subtle crisp white dotted grid */
     background-size: 24px 24px !important;
     color: var(--text-secondary) !important;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
@@ -86,21 +88,49 @@ h6,
 
 /* Glassmorphism Cards - Flat & Premium */
 .spotify-card {
-    background-color: rgba(10, 10, 10, 0.94) !important; /* Darker carbon glass */
+    background-color: rgba(10, 10, 10, 0.94) !important;
+    /* Darker carbon glass */
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border-color) !important;
     border-radius: var(--radius-lg);
-    box-shadow: none !important; /* Remove drop shadows completely */
+    box-shadow: none !important;
+    /* Remove drop shadows completely */
     transition: var(--transition-fast) !important;
-    overflow: hidden;
+    position: relative;
+    overflow: visible;
+}
+
+.spotify-card.flush-list-card,
+.spotify-card.table-card,
+.spotify-card.overflow-hidden-card {
+    overflow: hidden !important;
+}
+
+.custom-employee-dropdown {
+    position: relative;
+    z-index: 1050;
+}
+
+.custom-employee-dropdown input.form-select,
+.custom-employee-dropdown input.form-control,
+.custom-employee-dropdown input {
+    padding-left: 38px !important;
+    padding-right: 32px !important;
+    background-image: none !important;
+}
+
+.custom-employee-dropdown .dropdown-menu {
+    z-index: 1060 !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8) !important;
 }
 
 .spotify-card:hover {
     border-color: var(--border-color) !important;
     background-color: rgba(10, 10, 10, 0.94) !important;
     transform: none !important;
-    box-shadow: none !important; /* Still and shadowless */
+    box-shadow: none !important;
+    /* Still and shadowless */
 }
 
 /* Ultra-Clean Grid Separator Lines */
@@ -122,7 +152,8 @@ h6,
     padding: 0.5rem 1.2rem !important;
     font-size: 0.9rem !important;
     transition: var(--transition-fast) !important;
-    color-scheme: dark !important; /* Force native controls (like number spinners and date pickers) to render in dark mode */
+    color-scheme: dark !important;
+    /* Force native controls (like number spinners and date pickers) to render in dark mode */
 }
 
 .form-control:focus,
@@ -138,7 +169,8 @@ h6,
 
 /* Sidebar Absolute Black Panel & Toggle collapsing support */
 #sidebarMenu {
-    background-color: #050505 !important; /* Solid elegant black background */
+    background-color: #050505 !important;
+    /* Solid elegant black background */
     border-right: 1px solid var(--border-color);
     transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
@@ -273,6 +305,34 @@ h6,
     animation-delay: 0.64s;
 }
 
+.nav-item:nth-child(9) {
+    animation-delay: 0.72s;
+}
+
+.nav-item:nth-child(10) {
+    animation-delay: 0.80s;
+}
+
+.nav-item:nth-child(11) {
+    animation-delay: 0.88s;
+}
+
+.nav-item:nth-child(12) {
+    animation-delay: 0.96s;
+}
+
+.nav-item:nth-child(13) {
+    animation-delay: 1.04s;
+}
+
+.nav-item:nth-child(14) {
+    animation-delay: 1.12s;
+}
+
+.nav-item:nth-child(15) {
+    animation-delay: 1.20s;
+}
+
 /* Nav Links - Transparent Hover & Selected (text highlight only) */
 .nav-link {
     color: rgba(255, 255, 255, 0.5) !important;
@@ -308,23 +368,28 @@ h6,
     font-weight: 900;
     font-size: 2.2rem;
     letter-spacing: -0.08em;
-    
+
     /* Beautiful continuous color gradient representing all system colors */
-    background: linear-gradient(
-        to bottom,
-        #10b981, /* Green */
-        #3b82f6, /* Blue */
-        #f59e0b, /* Yellow */
-        #e11d48, /* Red */
-        #ffffff, /* White */
-        #10b981  /* Seamless loop back to green */
-    );
+    background: linear-gradient(to bottom,
+            #10b981,
+            /* Green */
+            #3b82f6,
+            /* Blue */
+            #f59e0b,
+            /* Yellow */
+            #e11d48,
+            /* Red */
+            #ffffff,
+            /* White */
+            #10b981
+            /* Seamless loop back to green */
+        );
     background-size: 100% 200%;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     opacity: 0.25;
-    
+
     /* Stunning watermark appearance */
     text-align: center;
     height: 90%;
@@ -334,7 +399,7 @@ h6,
     white-space: nowrap;
     margin: auto;
     transform: rotate(180deg);
-    
+
     /* Smooth transition & animations */
     animation: gradientShift 6s linear infinite;
 }
@@ -344,6 +409,7 @@ h6,
     0% {
         background-position: 0% 0%;
     }
+
     100% {
         background-position: 0% -200%;
     }
@@ -398,15 +464,57 @@ h6,
     background-color: transparent !important;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
+
 .btn-deleted-tab:hover {
     border-color: #e11d48 !important;
     background-color: #e11d48 !important;
     color: #ffffff !important;
 }
+
 .btn-deleted-tab.active {
     border-color: #e11d48 !important;
     background-color: #e11d48 !important;
     color: #ffffff !important;
+}
+
+.btn-unresolved-tab {
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+    background-color: transparent !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn-unresolved-tab:hover {
+    border-color: #f59e0b !important;
+    background-color: #f59e0b !important;
+    color: #000000 !important;
+}
+
+.btn-unresolved-tab.active {
+    border-color: #f59e0b !important;
+    background-color: #f59e0b !important;
+    color: #000000 !important;
+    font-weight: 600 !important;
+}
+
+.btn-resolved-tab {
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+    background-color: transparent !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn-resolved-tab:hover {
+    border-color: #e11d48 !important;
+    background-color: #e11d48 !important;
+    color: #ffffff !important;
+}
+
+.btn-resolved-tab.active {
+    border-color: #e11d48 !important;
+    background-color: #e11d48 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
 }
 
 /* Custom Table borders and structures */
@@ -479,7 +587,8 @@ h6,
 
 /* Glassmorphism Navbar & Circular Elements */
 .navbar-glass {
-    background-color: #050505 !important; /* Solid elegant black background matching side menu */
+    background-color: #050505 !important;
+    /* Solid elegant black background matching side menu */
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     position: relative !important;
     z-index: 1060 !important;
@@ -534,9 +643,11 @@ h6,
 
 .navbar-center-title {
     font-weight: 900 !important;
-    letter-spacing: -0.02em !important; /* Modern compressed letter spacing */
+    letter-spacing: -0.02em !important;
+    /* Modern compressed letter spacing */
     text-indent: 0 !important;
-    font-size: 1.5rem !important; /* Sleek elegant size */
+    font-size: 1.5rem !important;
+    /* Sleek elegant size */
     line-height: 1.0 !important;
     text-transform: uppercase;
     color: #ffffff !important;
@@ -695,13 +806,16 @@ main {
     width: 6px;
     height: 6px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.2);
     border-radius: 10px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background-color: rgba(255, 255, 255, 0.3);
 }
@@ -709,8 +823,8 @@ main {
 /* Pagination Text Readability */
 .pagination-summary,
 nav[aria-label="Pagination Navigation"] .text-muted,
-.border-top > nav > div > div > p.text-muted,
-.px-4.py-3 > nav > div > div > p.text-muted,
+.border-top>nav>div>div>p.text-muted,
+.px-4.py-3>nav>div>div>p.text-muted,
 .px-4.py-3 .text-muted {
     color: rgba(255, 255, 255, 0.5) !important;
 }
@@ -735,14 +849,18 @@ select.form-select option {
     border-radius: var(--radius-lg) !important;
     box-shadow: none !important;
 }
+
 .modal-header {
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
+
 .modal-footer {
     border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
+
 .btn-close {
-    filter: invert(1) !important; /* Stark white close button */
+    filter: invert(1) !important;
+    /* Stark white close button */
 }
 
 /* Muted modern custom row inputs */
@@ -756,6 +874,7 @@ select.form-select option {
     color: #ffffff !important;
     transition: var(--transition-fast) !important;
 }
+
 .form-select-sm:focus {
     background-color: rgba(255, 255, 255, 0.1) !important;
     border-color: #ffffff !important;
@@ -767,6 +886,7 @@ select.form-select option {
     margin-bottom: 0 !important;
     gap: 4px !important;
 }
+
 .pagination .page-item .page-link {
     background-color: rgba(255, 255, 255, 0.04) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -777,21 +897,25 @@ select.form-select option {
     font-weight: 600 !important;
     transition: var(--transition-fast) !important;
 }
+
 .pagination .page-item .page-link:hover {
     background-color: #ffffff !important;
     color: #000000 !important;
     border-color: #ffffff !important;
 }
+
 .pagination .page-item.active .page-link {
     background-color: #ffffff !important;
     color: #000000 !important;
     border-color: #ffffff !important;
 }
+
 .pagination .page-item.disabled .page-link {
     background-color: transparent !important;
     border-color: rgba(255, 255, 255, 0.04) !important;
     color: rgba(255, 255, 255, 0.25) !important;
 }
+
 .card-footer {
     background-color: transparent !important;
     border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -815,6 +939,7 @@ select.form-select option {
     transition: var(--transition-fast) !important;
     cursor: pointer;
 }
+
 .row-btn-blue:hover {
     background-color: #2563eb !important;
     border-color: #2563eb !important;
@@ -837,9 +962,33 @@ select.form-select option {
     transition: var(--transition-fast) !important;
     cursor: pointer;
 }
+
 .row-btn-red:hover {
     background-color: #f43f5e !important;
     border-color: #f43f5e !important;
+    color: #ffffff !important;
+}
+
+.row-btn-warning {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 32px !important;
+    padding: 0 1.2rem !important;
+    font-size: 0.75rem !important;
+    border-radius: 50px !important;
+    border: 1px solid #d97706 !important;
+    background-color: #d97706 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    transition: var(--transition-fast) !important;
+    cursor: pointer;
+}
+
+.row-btn-warning:hover {
+    background-color: #f59e0b !important;
+    border-color: #f59e0b !important;
     color: #ffffff !important;
 }
 
@@ -859,6 +1008,7 @@ select.form-select option {
     transition: var(--transition-fast) !important;
     cursor: pointer;
 }
+
 .row-btn-green:hover {
     background-color: #059669 !important;
     border-color: #059669 !important;
@@ -960,8 +1110,12 @@ select.form-select option {
 .role-select-width {
     width: 175px !important;
 }
+
 .dept-select-width {
-    width: 185px !important;
+    width: 215px !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    padding-right: 2.5rem !important;
 }
 
 /* Blue outline action buttons */
@@ -981,14 +1135,45 @@ select.form-select option {
     transition: var(--transition-fast) !important;
     cursor: pointer;
 }
+
 .row-btn-outline-blue:hover {
     background-color: #0d6efd !important;
     border-color: #0d6efd !important;
     color: #ffffff !important;
 }
 
+/* Green outline action buttons */
+.row-btn-outline-green {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 32px !important;
+    padding: 0 1.2rem !important;
+    font-size: 0.75rem !important;
+    border-radius: 50px !important;
+    border: 1px solid rgba(16, 185, 129, 0.4) !important;
+    background-color: transparent !important;
+    color: #10b981 !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    transition: var(--transition-fast) !important;
+    cursor: pointer;
+}
+
+.row-btn-outline-green:hover:not(:disabled) {
+    background-color: #10b981 !important;
+    border-color: #10b981 !important;
+    color: #ffffff !important;
+}
+
+.row-btn-outline-green:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+
 /* Yellow/Warning outline action buttons */
-.row-btn-outline-warning {
+.row-btn-outline-warning,
+.row-btn-outline-yellow {
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
@@ -1004,7 +1189,9 @@ select.form-select option {
     transition: var(--transition-fast) !important;
     cursor: pointer;
 }
-.row-btn-outline-warning:hover {
+
+.row-btn-outline-warning:hover,
+.row-btn-outline-yellow:hover {
     background-color: #f59e0b !important;
     border-color: #f59e0b !important;
     color: #000000 !important;
@@ -1027,6 +1214,7 @@ select.form-select option {
     transition: var(--transition-fast) !important;
     cursor: pointer;
 }
+
 .row-btn-outline-success:hover {
     background-color: #10b981 !important;
     border-color: #10b981 !important;
@@ -1050,6 +1238,7 @@ select.form-select option {
     transition: var(--transition-fast) !important;
     cursor: pointer;
 }
+
 .row-btn-outline-red:hover {
     background-color: #dc3545 !important;
     border-color: #dc3545 !important;
@@ -1073,6 +1262,7 @@ select.form-select option {
     transition: var(--transition-fast) !important;
     cursor: pointer;
 }
+
 .row-btn-outline-green:hover {
     background-color: #10b981 !important;
     border-color: #10b981 !important;
@@ -1112,15 +1302,35 @@ select.form-select option {
 .sleek-toast-success {
     border-color: rgba(16, 185, 129, 0.4) !important;
 }
+
 .sleek-toast-success i {
     color: #10b981 !important;
 }
 
-.sleek-toast-danger {
+.sleek-toast-danger,
+.sleek-toast-error {
     border-color: rgba(225, 29, 72, 0.4) !important;
 }
-.sleek-toast-danger i {
+
+.sleek-toast-danger i,
+.sleek-toast-error i {
     color: #e11d48 !important;
+}
+
+.sleek-toast-warning {
+    border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+.sleek-toast-warning i {
+    color: #f59e0b !important;
+}
+
+.sleek-toast-info {
+    border-color: rgba(59, 130, 246, 0.4) !important;
+}
+
+.sleek-toast-info i {
+    color: #3b82f6 !important;
 }
 
 @keyframes toastSlideIn {
@@ -1128,6 +1338,7 @@ select.form-select option {
         opacity: 0;
         transform: translate(-50%, -20px) !important;
     }
+
     to {
         opacity: 1;
         transform: translate(-50%, 0) !important;
@@ -1138,6 +1349,7 @@ select.form-select option {
 #mark-all-read {
     transition: var(--transition-fast) !important;
 }
+
 #mark-all-read:hover {
     color: #ffffff !important;
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
@@ -1179,7 +1391,8 @@ select.form-select option {
 
 .session-tree-submenu .nav-item {
     position: relative;
-    border-bottom: none !important; /* Remove individual item borders inside submenu */
+    border-bottom: none !important;
+    /* Remove individual item borders inside submenu */
 }
 
 /* The vertical trunk segment for each item */
@@ -1209,7 +1422,8 @@ select.form-select option {
     position: absolute;
     left: -10px;
     top: 50%;
-    width: 18px; /* Extends to align/touch the left edge of the icon */
+    width: 18px;
+    /* Extends to align/touch the left edge of the icon */
     height: 1px;
     background-color: rgba(255, 255, 255, 0.25);
 }
@@ -1229,6 +1443,7 @@ select.form-select option {
     transition: all 0.2s ease-in-out;
     cursor: pointer;
 }
+
 .btn-circle-blue:hover {
     background: #3b82f6;
     color: #fff;
@@ -1249,6 +1464,7 @@ select.form-select option {
     transition: all 0.2s ease-in-out;
     cursor: pointer;
 }
+
 .btn-circle-red:hover {
     background: #dc2626;
     color: #ffffff;
@@ -1269,6 +1485,7 @@ select.form-select option {
     transition: all 0.2s ease-in-out;
     cursor: pointer;
 }
+
 .btn-circle-gray:hover {
     background: rgba(255, 255, 255, 0.1);
     color: #ffffff;
@@ -1279,7 +1496,17 @@ select.form-select option {
 .modal {
     z-index: 2050 !important;
 }
+
+.modal.show,
+.modal.fade.show {
+    z-index: 2060 !important;
+}
+
 .modal-backdrop {
+    z-index: 2040 !important;
+}
+
+.modal-backdrop.show {
     z-index: 2040 !important;
 }
 
@@ -1296,10 +1523,12 @@ select.form-select option {
     outline: none !important;
     cursor: pointer;
 }
+
 .filter-pill:hover {
     background-color: rgba(255, 255, 255, 0.15) !important;
     color: #ffffff !important;
 }
+
 .filter-pill.active {
     background-color: #ffffff !important;
     color: #000000 !important;
@@ -1309,13 +1538,16 @@ select.form-select option {
 .custom-notification-list-scroll::-webkit-scrollbar {
     width: 4px;
 }
+
 .custom-notification-list-scroll::-webkit-scrollbar-track {
     background: transparent;
 }
+
 .custom-notification-list-scroll::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.15);
     border-radius: 4px;
 }
+
 .custom-notification-list-scroll::-webkit-scrollbar-thumb:hover {
     background-color: rgba(255, 255, 255, 0.25);
 }
@@ -1329,12 +1561,15 @@ select.form-select option {
     background-color: transparent;
     text-decoration: none !important;
 }
+
 .custom-notification-item:hover {
     background-color: rgba(255, 255, 255, 0.04) !important;
 }
+
 .custom-notification-item:last-child {
     border-bottom: none !important;
 }
+
 .custom-notification-avatar {
     width: 32px;
     height: 32px;
@@ -1350,6 +1585,7 @@ select.form-select option {
     border: 1px solid rgba(255, 255, 255, 0.1);
     margin-top: 3px !important;
 }
+
 .custom-notification-message {
     font-size: 0.8rem !important;
     line-height: 1.35 !important;
@@ -1357,15 +1593,18 @@ select.form-select option {
     margin: 0 !important;
     word-break: break-word;
 }
+
 .custom-notification-message strong {
     color: #ffffff !important;
     font-weight: 600 !important;
 }
+
 .custom-notification-time {
     font-size: 0.68rem !important;
     color: rgba(255, 255, 255, 0.35) !important;
     font-weight: 500;
 }
+
 .custom-notification-unread-dot {
     width: 8px;
     height: 8px;
@@ -1392,6 +1631,7 @@ select.form-select option {
     box-shadow: none !important;
     outline: none !important;
 }
+
 .btn-circle-gray:hover {
     background: rgba(255, 255, 255, 0.12) !important;
     color: #ffffff !important;
@@ -1408,6 +1648,128 @@ select.form-select option {
     font-size: 0.78rem !important;
     transition: all 0.2s ease !important;
 }
+
 #see-all-notifications:hover {
     color: #ffffff !important;
+}
+
+/* ==========================================
+   Inverted Black & White Mode
+   ========================================== */
+html.inverted-bw {
+    filter: invert(100%) hue-rotate(180deg);
+}
+
+html.inverted-bw img,
+html.inverted-bw .user-avatar-circle,
+html.inverted-bw iframe,
+html.inverted-bw video {
+    filter: invert(100%) hue-rotate(180deg);
+}
+
+/* Responsive Row Badges */
+.row-badge,
+.row-badge-green,
+.row-badge-red,
+.row-badge-blue,
+.row-badge-warning,
+.row-badge-gray,
+.row-badge-purple {
+    min-height: 28px !important;
+    height: auto !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+    line-height: 1.25 !important;
+    white-space: normal !important;
+    text-align: center !important;
+    word-break: break-word !important;
+    max-width: 100% !important;
+}
+
+/* ==========================================
+   Searchable Select Dropdown Styles
+   ========================================== */
+.searchable-select-container {
+    position: relative;
+    width: 100%;
+}
+
+.searchable-select-input {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+    text-align: left !important;
+    padding-left: 1rem !important;
+    padding-right: 32px !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.searchable-select-input:focus {
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.1) !important;
+    outline: none;
+}
+
+.searchable-select-dropdown {
+    position: fixed;
+    z-index: 99999;
+    max-height: 250px;
+    overflow-y: auto;
+    background-color: #181818 !important;
+    background: #181818 !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
+}
+
+.searchable-select-option {
+    padding: 8px 12px;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    transition: background 0.1s ease;
+}
+
+.searchable-select-option:last-child {
+    border-bottom: none;
+}
+
+.searchable-select-option:hover,
+.searchable-select-option.highlighted {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.searchable-select-option.selected {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    font-weight: 600;
+}
+
+.searchable-select-no-results {
+    padding: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    font-size: 0.82rem;
+}
+
+/* ==========================================
+   Gamified Background Grid Dot Styles
+   ========================================== */
+html.inverted-bw body {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.065) 1px, transparent 1px) !important;
+}
+
+.table-light-theme {
+    background-image: radial-gradient(rgba(15, 23, 42, 0.075) 1px, transparent 1px) !important;
+}
+
+html.inverted-bw #gamifiedCanvas {
+    filter: invert(100%) hue-rotate(180deg);
+}
+
+html.inverted-bw #gamifiedScoreboard {
+    filter: invert(100%) hue-rotate(180deg);
 }

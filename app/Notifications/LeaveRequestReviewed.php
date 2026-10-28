@@ -10,7 +10,11 @@ class LeaveRequestReviewed extends Notification
 {
     use Queueable;
 
-    public function __construct(public LeaveRequest $leaveRequest) {}
+    public function __construct(
+        public LeaveRequest $leaveRequest,
+        public ?string $actorName = null,
+        public ?string $actorDesignation = null,
+    ) {}
 
     public function via(object $notifiable): array
     {
@@ -20,53 +24,59 @@ class LeaveRequestReviewed extends Notification
     public function toArray(object $notifiable): array
     {
         $statusText = $this->leaveRequest->status;
-        $reviewer = $this->leaveRequest->reviewer;
+        $progress   = (int) $this->leaveRequest->approval_chain_progress;
+        $target     = (int) $this->leaveRequest->approval_chain_target;
+        $hasChain   = $target > 0;
+
+        // Use the acting manager's name if passed, else fallback to reviewer or immediate manager
+        $reviewerUser = $this->leaveRequest->reviewer;
+        $reviewerName = $this->actorName ?: ($reviewerUser?->name ?: ($this->leaveRequest->user->manager?->name ?: ''));
         
-        if ($statusText === 'approved_by_manager') {
-            $manager = $this->leaveRequest->user->manager;
-            $reviewerName = $reviewer ? $reviewer->name : ($manager ? $manager->name : '');
-            if ($reviewerName) {
-                $message = "Your leave request was recommended for approval by your Line Manager ({$reviewerName}). CEO final approval is pending.";
+        $actorDesig = $this->actorDesignation;
+        if (!$actorDesig) {
+            $actorDesig = $reviewerUser?->designation?->name 
+                ?? ($reviewerUser?->special_order === 1 ? 'CEO' : ($reviewerUser?->special_order === 2 ? 'CTO' : ($reviewerUser?->special_order === 3 ? 'HR Manager' : null)));
+        }
+        $designationStr = $actorDesig ? " ({$actorDesig})" : '';
+
+        if ($statusText === 'approved_by_manager' || ($statusText === 'pending' && $progress > 0)) {
+            $levelText = "Level {$progress} of {$target}";
+            if ($progress < $target && $statusText === 'pending') {
+                $message = $reviewerName
+                    ? "Your leave was approved by {$reviewerName}{$designationStr} ({$levelText}). Awaiting next level manager approval."
+                    : "Your leave was approved at {$levelText}. Awaiting next level manager approval.";
             } else {
-                $message = "Your leave request was recommended for approval by your Line Manager. CEO final approval is pending.";
+                $message = $reviewerName
+                    ? "Your leave was approved by {$reviewerName}{$designationStr} ({$levelText}). Pending CEO final approval."
+                    : "Your leave was approved at {$levelText}. Pending CEO final approval.";
             }
         } elseif ($statusText === 'approved') {
-            if ($reviewer && $reviewer->isSuperAdmin()) {
-                $message = "Your leave request was fully approved by the CEO / System Administrator.";
-            } else {
-                $manager = $this->leaveRequest->user->manager;
-                $reviewerName = $reviewer ? $reviewer->name : ($manager ? $manager->name : '');
-                if ($reviewerName) {
-                    $message = "Your leave request was approved by your Line Manager ({$reviewerName}).";
-                } else {
-                    $message = "Your leave request was approved by your Line Manager.";
-                }
-            }
+            $message = $reviewerName 
+                ? "Your leave request was fully approved by {$reviewerName}{$designationStr}." 
+                : "Your leave request was fully approved.";
         } elseif ($statusText === 'rejected_by_manager') {
-            $manager = $this->leaveRequest->user->manager;
-            $reviewerName = $reviewer ? $reviewer->name : ($manager ? $manager->name : '');
-            if ($reviewerName) {
-                $message = "Your leave request was rejected by your Line Manager ({$reviewerName}).";
-            } else {
-                $message = "Your leave request was rejected by your Line Manager.";
-            }
+            $rejLevel  = $this->leaveRequest->rejectionLevel();
+            $levelText = ($hasChain && $rejLevel > 0) ? " (Level {$rejLevel} of {$target})" : '';
+            $message   = $reviewerName
+                ? "Your leave request was rejected by {$reviewerName}{$designationStr}{$levelText}."
+                : "Your leave request was rejected by Line Manager{$levelText}.";
         } elseif ($statusText === 'rejected') {
-            $message = "Your leave request was rejected by the CEO / System Administrator.";
+            $message = $reviewerName
+                ? "Your leave request was rejected by {$reviewerName}{$designationStr}."
+                : "Your leave request was rejected.";
         } else {
-            $message = "Your leave request was {$statusText}.";
+            $message = "Your leave request is currently pending review.";
         }
 
-        $url = $notifiable->isAdmin() 
-            ? route('admin.leaves.apply') 
-            : route('employee.dashboard');
+        $url = route('admin.leaves.record', ['type' => 'leaves']);
 
         return [
-            'type' => 'leave_reviewed',
+            'type'             => 'leave_reviewed',
             'leave_request_id' => $this->leaveRequest->id,
-            'status' => $this->leaveRequest->status,
-            'message' => $message,
-            'admin_comment' => $this->leaveRequest->admin_comment,
-            'url' => $url,
+            'status'           => $this->leaveRequest->status,
+            'message'          => $message,
+            'admin_comment'    => $this->leaveRequest->admin_comment,
+            'url'              => $url,
         ];
     }
 }

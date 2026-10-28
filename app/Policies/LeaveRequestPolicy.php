@@ -14,6 +14,7 @@ class LeaveRequestPolicy
 
     public function view(User $user, LeaveRequest $leaveRequest): bool
     {
+        // Requester can always view their own
         if ($leaveRequest->user_id === $user->id) {
             return true;
         }
@@ -22,8 +23,9 @@ class LeaveRequestPolicy
             return true;
         }
 
-        if ($user->isAdmin()) {
-            return $leaveRequest->user->manager_id === $user->id;
+        // Any staff or guest manager who is a boss of the requester can view
+        if ($user->isStaff() || $user->isGuest()) {
+            return in_array($leaveRequest->user_id, $user->subordinate_ids, true);
         }
 
         return false;
@@ -31,26 +33,29 @@ class LeaveRequestPolicy
 
     public function create(User $user): bool
     {
-        return $user->isEmployee() || $user->isAdmin();
+        // Only regular staff or super admin can submit a personal leave request (not guests)
+        return $user->isStaff() || $user->isSuperAdmin();
     }
 
     public function review(User $user, LeaveRequest $leaveRequest): bool
     {
-        if (! $user->isAdmin() && ! $user->isSuperAdmin()) {
-            return false;
-        }
-
+        // Only super admin or managers with the requester as a subordinate
         if ($user->isSuperAdmin()) {
-            return $leaveRequest->status === LeaveRequest::STATUS_PENDING;
+            return $leaveRequest->status === LeaveRequest::STATUS_PENDING
+                || $leaveRequest->status === 'approved_by_manager';
         }
 
-        return $leaveRequest->user->manager_id === $user->id
-            && $leaveRequest->status === LeaveRequest::STATUS_PENDING;
+        if ($user->isStaff() || $user->isGuest()) {
+            // The reviewer must be in the requester's boss chain
+            return in_array($leaveRequest->user_id, $user->subordinate_ids, true)
+                && $leaveRequest->status === LeaveRequest::STATUS_PENDING;
+        }
+
+        return false;
     }
 
     public function cancel(User $user, LeaveRequest $leaveRequest): bool
     {
-        return $leaveRequest->user_id === $user->id
-            && $leaveRequest->status === LeaveRequest::STATUS_PENDING;
+        return $leaveRequest->user_id === $user->id;
     }
 }

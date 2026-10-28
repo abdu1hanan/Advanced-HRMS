@@ -12,6 +12,30 @@ class LeaveTypeSeeder extends Seeder
     {
         $types = [
             [
+                'name' => 'Unpaid Leave',
+                'slug' => 'unpaid',
+                'max_days_per_year' => 999,
+                'allow_carry_forward' => false,
+                'max_carry_forward_days' => 0,
+                'default_entitled' => 0,
+            ],
+            [
+                'name' => 'Emergency',
+                'slug' => 'emergency',
+                'max_days_per_year' => 999,
+                'allow_carry_forward' => false,
+                'max_carry_forward_days' => 0,
+                'default_entitled' => 0,
+            ],
+            [
+                'name' => 'Absent',
+                'slug' => 'absent',
+                'max_days_per_year' => 999,
+                'allow_carry_forward' => false,
+                'max_carry_forward_days' => 0,
+                'default_entitled' => 0,
+            ],
+            [
                 'name' => 'Annual Leave',
                 'slug' => 'annual',
                 'max_days_per_year' => 5,

@@ -50,14 +50,29 @@
                             <button type="button" class="row-btn-outline-blue w-100 justify-content-center" id="applyBulkActionButton" style="height: 38px !important; display: inline-flex; align-items: center; gap: 6px; padding: 0;">Apply</button>
                         </div>
 
-                        <!-- Search Input with Left Search Icon -->
-                        <div class="col-md-5">
-                            <label class="form-label text-white opacity-50 small mb-1">Search Keyword</label>
-                            <div class="position-relative">
-                                <i class="bi bi-search position-absolute text-white-50" style="left: 14px; top: 50%; transform: translateY(-50%); font-size: 0.9rem;"></i>
-                                <input type="text" name="search" class="form-control border-0 shadow-sm" placeholder="Search and press Enter..." value="{{ request('search') }}"
-                                       style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #ffffff !important; padding-left: 42px !important; height: 38px;">
-                            </div>
+                        <!-- Keyword Filter Dropdown -->
+                        <div class="col-md-3">
+                            <label class="form-label text-white opacity-50 small mb-1">Keyword Filter</label>
+                            <select name="keyword" id="filter-keyword" class="form-select border-0 shadow-sm text-start searchable-select"
+                                    style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #ffffff !important; height: 38px; border-radius: 6px; text-align: left !important; text-align-last: left !important; padding-left: 0.75rem !important;">
+                                <option value="" class="bg-dark text-white">All Keywords</option>
+                                @foreach($keywords as $kw)
+                                    <option value="{{ $kw }}" @selected(request('keyword') === $kw) class="bg-dark text-white">[{{ $kw }}]</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Employee Filter Dropdown -->
+                        <div class="col-md-2">
+                            <label class="form-label text-white opacity-50 small mb-1">Employee Filter</label>
+                            <select name="employee" id="filter-employee" class="form-select border-0 shadow-sm text-start searchable-select"
+                                    style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #ffffff !important; height: 38px; border-radius: 6px; text-align: left !important; text-align-last: left !important; padding-left: 0.75rem !important;">
+                                <option value="" class="bg-dark text-white">All Employees</option>
+                                @foreach($employees as $emp)
+                                    @php $empVal = is_array($emp) ? $emp['value'] : $emp; $empLbl = is_array($emp) ? $emp['label'] : $emp; @endphp
+                                    <option value="{{ $empVal }}" @selected(request('employee') === $empVal) class="bg-dark text-white">{{ $empLbl }}</option>
+                                @endforeach
+                            </select>
                         </div>
 
                         <!-- Clear Filters Button (Always Visible in White) -->
@@ -141,8 +156,8 @@
                                 <!-- Message and Bottom Details -->
                                 <div class="flex-grow-1 min-width-0 pe-4">
                                     <div class="text-white mb-1" style="font-size: 0.88rem; line-height: 1.45;">
-                                        @if ($n->data['url'] && $n->data['url'] !== '#')
-                                            <a href="{{ $n->data['url'] }}" class="text-decoration-none text-white hover-underline">
+                                        @if ($n->mapped_url && $n->mapped_url !== '#')
+                                            <a href="{{ $n->mapped_url }}" class="text-decoration-none text-white hover-underline action-notification-link" data-id="{{ $n->id }}">
                                                 <strong>[{{ $prefix }}] {{ $username }}:</strong> "{{ $content }}"
                                             </a>
                                         @else
@@ -160,7 +175,7 @@
                                                 </span>
                                             @endif
                                         </div>
-                                        <span class="text-white-50" style="font-size: 0.72rem;">{{ $n->created_at->diffForHumans() }}</span>
+                                        <span class="text-white-50" style="font-size: 0.72rem;">{{ $n->created_at->isAfter(now()->subHours(24)) ? $n->created_at->diffForHumans() : $n->created_at->format('M d, Y') }}</span>
                                     </div>
                                 </div>
 
@@ -264,6 +279,11 @@
                 }
             });
 
+            // Keyword and Employee Filter Change Handlers
+            $('#filter-keyword, #filter-employee').on('change', function() {
+                $('#filter-form').submit();
+            });
+
             // Change rows per page dropdown handler
             $('#perPageSelect').on('change', function() {
                 const url = new URL(window.location.href);
@@ -341,11 +361,35 @@
                     });
             });
 
+            // Handle clicking a notification link to auto-mark read first
+            $(document).on('click', '.action-notification-link', function(e) {
+                e.preventDefault();
+                const link = $(this);
+                const id = link.attr('data-id');
+                const url = link.attr('href');
+                
+                $.ajax({
+                    url: '/notifications/' + id + '/read',
+                    method: 'POST',
+                    async: false,
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    complete: function() {
+                        if (url && url !== '#') {
+                            window.location.href = url;
+                        } else {
+                            location.reload();
+                        }
+                    }
+                });
+            });
+
             // Bulk actions implementation
             $('#applyBulkActionButton').on('click', function() {
                 const action = $('#bulkActionSelect').val();
                 if (!action) {
-                    alert('Please select a bulk action.');
+                    window.showToast('Please select a bulk action.', 'danger');
                     return;
                 }
 
@@ -355,7 +399,7 @@
                 });
 
                 if (selectedIds.length === 0) {
-                    alert('No items selected.');
+                    window.showToast('No items selected.', 'danger');
                     return;
                 }
 
@@ -373,6 +417,13 @@
                 .fail(function() {
                     window.showToast('Bulk action failed.', 'danger');
                 });
+            });
+
+            // Invalidate browser back-forward cache (bfcache) to auto-update unread markers on back-button click
+            window.addEventListener('pageshow', function (event) {
+                if (event.persisted || (typeof window.performance != 'undefined' && window.performance.getEntriesByType('navigation')[0] && window.performance.getEntriesByType('navigation')[0].type === 'back_forward')) {
+                    window.location.reload();
+                }
             });
         });
     </script>

@@ -17,10 +17,11 @@ class LeaveSettingsController extends Controller
 
     public function index(): View
     {
-        $leaveTypes = LeaveType::with('settings')->where('is_active', true)->get();
-        $year = (int) now()->year;
+        $leaveTypes            = LeaveType::with('settings')->where('is_active', true)->get();
+        $year                  = (int) now()->year;
+        $currentApprovalLevels = (int) \App\Models\SystemSetting::approvalLevels();
 
-        return view('super-admin.leave-settings.index', compact('leaveTypes', 'year'));
+        return view('super-admin.leave-settings.index', compact('leaveTypes', 'year', 'currentApprovalLevels'));
     }
 
     public function applyToAll(Request $request): RedirectResponse

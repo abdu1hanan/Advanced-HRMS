@@ -1,0 +1,103 @@
+{
+  "sections": [
+    {
+      "title": "Getting Started",
+      "slug": "getting-started",
+      "pages": [
+        { "title": "Introduction", "slug": "introduction", "file": "getting-started/introduction.md" },
+        { "title": "Complete Beginner's Guide", "slug": "beginners-guide", "file": "getting-started/beginners-guide.md" },
+        { "title": "First Login", "slug": "first-login", "file": "getting-started/first-login.md" },
+        { "title": "Your Role Explained", "slug": "your-role", "file": "getting-started/your-role.md" },
+        { "title": "App Overview", "slug": "app-overview", "file": "getting-started/app-overview.md" }
+      ]
+    },
+    {
+      "title": "Navigating the App",
+      "slug": "navigating-the-app",
+      "pages": [
+        { "title": "Site Map", "slug": "site-map", "file": "navigating-the-app/site-map.md" },
+        { "title": "Navigation Flows", "slug": "navigation-flows", "file": "navigating-the-app/navigation-flows.md" },
+        { "title": "Sidebar Guide", "slug": "sidebar-guide", "file": "navigating-the-app/sidebar-guide.md" },
+        { "title": "Top Bar & Notifications", "slug": "top-bar-notifications", "file": "navigating-the-app/top-bar-notifications.md" },
+        { "title": "Profile & Account", "slug": "profile-account", "file": "navigating-the-app/profile-account.md" }
+      ]
+    },
+    {
+      "title": "Features Overview",
+      "slug": "features-overview",
+      "pages": [
+        { "title": "All Features at a Glance", "slug": "all-features", "file": "features-overview/all-features.md" },
+        { "title": "Leave Management", "slug": "leave-management", "file": "features-overview/leave-management.md" },
+        { "title": "Attendance & Holidays", "slug": "attendance-holidays", "file": "features-overview/attendance-holidays.md" },
+        { "title": "Beetle Sync", "slug": "beetle-sync", "file": "features-overview/beetle-sync.md" },
+        { "title": "Track Records", "slug": "track-records", "file": "features-overview/track-records.md" },
+        { "title": "Notifications", "slug": "notifications", "file": "features-overview/notifications.md" }
+      ]
+    },
+    {
+      "title": "Employee Guide",
+      "slug": "employee-guide",
+      "pages": [
+        { "title": "My Dashboard", "slug": "my-dashboard", "file": "employee-guide/my-dashboard.md" },
+        { "title": "Applying for Leave", "slug": "applying-for-leave", "file": "employee-guide/applying-for-leave.md" },
+        { "title": "My Attendance & Logs", "slug": "attendance-logs", "file": "employee-guide/attendance-logs.md" },
+        { "title": "My Track Record", "slug": "track-record", "file": "employee-guide/track-record.md" }
+      ]
+    },
+    {
+      "title": "Manager Guide",
+      "slug": "manager-guide",
+      "pages": [
+        { "title": "Manager Dashboard", "slug": "dashboard", "file": "manager-guide/dashboard.md" },
+        { "title": "Apply for Leave", "slug": "apply-leave", "file": "manager-guide/apply-leave.md" },
+        { "title": "My Attendance & Logs", "slug": "attendance-logs", "file": "manager-guide/attendance-logs.md" },
+        { "title": "Team Directory & Logs", "slug": "team-directory", "file": "manager-guide/team-directory.md" },
+        { "title": "Pending Leaves", "slug": "pending-leaves", "file": "manager-guide/pending-leaves.md" },
+        { "title": "Leave History", "slug": "leave-history", "file": "manager-guide/leave-history.md" },
+        { "title": "Track Records", "slug": "track-records", "file": "manager-guide/track-records.md" }
+      ]
+    },
+    {
+      "title": "Super Admin Guide",
+      "slug": "admin-guide",
+      "pages": [
+        { "title": "Admin Dashboard", "slug": "dashboard", "file": "admin-guide/dashboard.md" },
+        { "title": "User Management", "slug": "user-management", "file": "admin-guide/user-management.md" },
+        { "title": "Departments", "slug": "departments", "file": "admin-guide/departments.md" },
+        { "title": "Leave Types", "slug": "leave-types", "file": "admin-guide/leave-types.md" },
+        { "title": "Leave Settings", "slug": "leave-settings", "file": "admin-guide/leave-settings.md" },
+        { "title": "All Leave Requests", "slug": "leave-requests", "file": "admin-guide/leave-requests.md" },
+        { "title": "Leave History", "slug": "leave-history", "file": "admin-guide/leave-history.md" }
+      ],
+      "folders": [
+        {
+          "title": "Attendance & Holidays",
+          "pages": [
+            { "title": "Attendance Management", "slug": "attendance-management", "file": "admin-guide/attendance-management.md" },
+            { "title": "Holiday Management", "slug": "holiday-management", "file": "admin-guide/holiday-management.md" }
+          ]
+        },
+        {
+          "title": "Session Management",
+          "pages": [
+            { "title": "Beetle Sync", "slug": "beetle-sync", "file": "admin-guide/beetle-sync.md" },
+            { "title": "Slack User Mapping", "slug": "slack-mapping", "file": "admin-guide/slack-mapping.md" },
+            { "title": "Employee Track Record", "slug": "track-record", "file": "admin-guide/track-record.md" }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Reference",
+      "slug": "reference",
+      "collapsedByDefault": true,
+      "pages": [
+        { "title": "Leave Workflow", "slug": "leave-workflow", "file": "reference/leave-workflow.md" },
+        { "title": "Attendance & Slack Sync", "slug": "slack-sync", "file": "reference/slack-sync.md" },
+        { "title": "Roles & Permissions", "slug": "roles-permissions", "file": "reference/roles-permissions.md" },
+        { "title": "FAQ", "slug": "faq", "file": "reference/faq.md" },
+        { "title": "Glossary", "slug": "glossary", "file": "reference/glossary.md" }
+      ]
+    }
+  ]
+}

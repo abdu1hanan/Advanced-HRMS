@@ -18,3 +18,7 @@ Schedule::call(function () {
         ->delete();
 })->daily();
 
+Schedule::command('attendance:incomplete-reminders')
+    ->timezone('Asia/Karachi')
+    ->dailyAt('12:00');
+

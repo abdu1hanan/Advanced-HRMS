@@ -1,6 +1,7 @@
 <x-app-layout>
     <x-slot name="header">Super Admin Dashboard</x-slot>
 
+
     <!-- Top Row: Minimal carbon glass layout side-by-side -->
     <div class="row g-4 mb-4 align-items-stretch">
         <!-- Redesigned Profile Card (Left) -->
@@ -88,11 +89,11 @@
             <a href="{{ route('super-admin.departments.index') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
                 <i class="bi bi-diagram-3" style="color: #10b981;"></i> Operations Departments
             </a>
-            <a href="{{ route('super-admin.leave-requests.index', ['status' => 'pending']) }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+            <a href="{{ route('super-admin.leave-requests.index') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
                 <i class="bi bi-clock" style="color: #f43f5e;"></i> View Pending Requests
             </a>
-            <a href="{{ route('super-admin.users.index') }}" class="btn btn-primary d-flex align-items-center gap-2">
-                <i class="bi bi-person-plus-fill"></i> New Hire Registration
+            <a href="{{ route('super-admin.users.approvals') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                <i class="bi bi-person-check" style="color: #eab308;"></i> Pending Approvals
             </a>
         </div>
     </div>
@@ -100,12 +101,67 @@
     <!-- Third Row: Active Activity Logs & Pending Streams (Zero margin flush design for edge-to-edge hovers) -->
     <div class="spotify-card flush-list-card mb-4">
         <div class="card-header-area">
-            <h6 class="text-uppercase text-white fw-semibold small mb-2 opacity-75" style="letter-spacing: 0.05em;"><i class="bi bi-activity me-2"></i> Pending Leave Request Activity stream</h6>
+            <h6 class="text-uppercase text-white fw-semibold small mb-2 opacity-75" style="letter-spacing: 0.05em;"><i class="bi bi-activity me-2"></i> Live Activity Stream</h6>
             <div class="grid-separator"></div>
         </div>
         
         <div class="list-group list-group-flush scrollable-stream">
-            @forelse($recentRequests as $req)
+            {{-- Pending Account Approvals --}}
+            @foreach($pendingApprovals as $approval)
+                @php
+                    $submittedAt = $approval->created_at;
+                    $diffSec = (int) floor(abs($submittedAt->diffInSeconds(now())));
+                    $diffMin = (int) floor(abs($submittedAt->diffInMinutes(now())));
+                    $diffHr  = (int) floor(abs($submittedAt->diffInHours(now())));
+                    $diffDay = (int) floor(abs($submittedAt->diffInDays(now())));
+                    if ($diffDay >= 1) {
+                        $timeAgo = $diffDay . ' ' . \Illuminate\Support\Str::plural('day', $diffDay) . ' ago';
+                    } elseif ($diffHr >= 1) {
+                        $timeAgo = $diffHr . ' ' . \Illuminate\Support\Str::plural('hour', $diffHr) . ' ago';
+                    } elseif ($diffMin >= 1) {
+                        $timeAgo = $diffMin . ' ' . \Illuminate\Support\Str::plural('min', $diffMin) . ' ago';
+                    } elseif ($diffSec >= 10) {
+                        $timeAgo = $diffSec . ' sec ago';
+                    } else {
+                        $timeAgo = 'Just now';
+                    }
+                @endphp
+                <div class="list-group-item bg-transparent d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-dark text-white rounded-circle p-2.5 d-flex align-items-center justify-content-center border border-secondary" style="width: 40px; height: 40px;">
+                            <i class="bi bi-person-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold text-white fs-6" style="letter-spacing: -0.02em; line-height: 1.1;">
+                                {{ $approval->user?->name ?? 'New User' }}
+                            </div>
+                            <small class="text-white opacity-75" style="line-height: 1.1;">
+                                {{ $approval->user?->department?->name ?? ($approval->user?->isGuest() ? 'External' : 'No Department') }} &bull; {{ $approval->user?->email ?? '—' }}
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="text-end">
+                            <div class="text-white fw-semibold small" style="letter-spacing: -0.02em; line-height: 1.1;">
+                                {{ $approval->created_at->timezone('Asia/Karachi')->format('M d, Y') }}
+                            </div>
+                            <small class="text-white opacity-50" style="line-height: 1.1;">{{ $timeAgo }}</small>
+                        </div>
+
+                        <span class="row-badge-warning">
+                            <i class="bi bi-shield-exclamation me-1"></i> Approval Required
+                        </span>
+
+                        <a href="{{ route('super-admin.users.approvals') }}" class="row-btn-outline-blue text-decoration-none">
+                            Review Account
+                        </a>
+                    </div>
+                </div>
+            @endforeach
+
+            {{-- Pending Leave Requests --}}
+            @foreach($recentRequests as $req)
                 <div class="list-group-item bg-transparent d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div class="d-flex align-items-center gap-3">
                         <div class="bg-dark text-white rounded-circle p-2.5 d-flex align-items-center justify-content-center border border-secondary" style="width: 40px; height: 40px;">
@@ -123,7 +179,22 @@
                             <small class="text-white opacity-50" style="line-height: 1.1;">{{ $req->days_count }} days total</small>
                         </div>
                         
-                        @if($req->status === 'approved_by_manager')
+                        @php
+                            $statusParam = 'all';
+                            if (!empty($req->change_request['request_cancellation'])) {
+                                $statusParam = 'pending_cancellation';
+                            } elseif (!empty($req->change_request_status)) {
+                                $statusParam = 'changes_requested';
+                            } elseif (in_array($req->status, ['pending', 'approved_by_manager', 'rejected_by_manager'])) {
+                                $statusParam = $req->status;
+                            }
+                        @endphp
+
+                        @if(!empty($req->change_request['request_cancellation']))
+                            <span class="row-badge-red"><i class="bi bi-x-circle me-1"></i> Cancellation Requested</span>
+                        @elseif(!empty($req->change_request_status))
+                            <span class="row-badge-warning"><i class="bi bi-pencil me-1"></i> Changes Requested</span>
+                        @elseif($req->status === 'approved_by_manager')
                             <span class="row-badge-blue"><i class="bi bi-check me-1"></i> Manager Approved</span>
                         @elseif($req->status === 'rejected_by_manager')
                             <span class="row-badge-red"><i class="bi bi-x me-1"></i> Manager Rejected</span>
@@ -131,17 +202,19 @@
                             <span class="row-badge-warning"><i class="bi bi-clock-fill me-1"></i> Pending Manager</span>
                         @endif
 
-                        <a href="{{ route('super-admin.leave-requests.index', ['status' => 'pending']) }}" class="row-btn-outline-blue text-decoration-none">
+                        <a href="{{ route('super-admin.leave-requests.index', ['user_id' => $req->user_id, 'status' => $statusParam]) }}" class="row-btn-outline-blue text-decoration-none">
                             Review Request
                         </a>
                     </div>
                 </div>
-            @empty
+            @endforeach
+
+            @if($pendingApprovals->isEmpty() && $recentRequests->isEmpty())
                 <div class="text-center py-4 text-white opacity-75 small px-3">
                     <div class="mb-2"><i class="bi bi-emoji-smile fs-3"></i></div>
-                    All clear! There are no pending leave requests requiring review.
+                    All clear! There are no pending requests or account approvals requiring review.
                 </div>
-            @endforelse
+            @endif
         </div>
     </div>
 </x-app-layout>

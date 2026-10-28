@@ -13,21 +13,43 @@
         <div class="col-md-4">
             <div class="spotify-card h-100">
                 <div class="card-header-area px-4 pt-4">
-                    <h6 class="text-uppercase text-white fw-semibold small mb-2 opacity-75" style="letter-spacing: 0.05em;">Create Department</h6>
-                    <div class="grid-separator"></div>
+                    <h6 class="text-uppercase text-white fw-semibold small mb-0 opacity-75" style="letter-spacing: 0.05em;">Create Department</h6>
                 </div>
                 <div class="px-4 pb-4 pt-2">
+                    <div class="grid-separator mb-3"></div>
                     <form method="POST" action="{{ route('super-admin.departments.store') }}">
                         @csrf
                         <div class="mb-3">
-                            <label class="form-label text-white opacity-75 small">Name</label>
-                            <input type="text" name="name" class="form-control bg-dark border-secondary text-white" required value="{{ old('name') }}">
+                            <label class="form-label text-white opacity-75 small">Name *</label>
+                            <input type="text" name="name" class="form-control bg-dark border-secondary text-white @error('name') is-invalid @enderror" required value="{{ old('name') }}" maxlength="30">
+                            @error('name')
+                                <span class="text-danger d-block mt-1 small" style="font-size: 0.75rem;">{{ $message }}</span>
+                            @else
+                                <small class="text-white opacity-50 d-block mt-1">Maximum 30 characters</small>
+                            @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white opacity-75 small">Code *</label>
+                            <input type="text" name="code" class="form-control bg-dark border-secondary text-white @error('code') is-invalid @enderror" required value="{{ old('code') }}" placeholder="e.g. DEV" maxlength="5">
+                            @error('code')
+                                <span class="text-danger d-block mt-1 small" style="font-size: 0.75rem;">{{ $message }}</span>
+                            @else
+                                <small class="text-white opacity-50 d-block mt-1">Maximum 5 characters</small>
+                            @enderror
                         </div>
                         <div class="mb-4">
-                            <label class="form-label text-white opacity-75 small">Code</label>
-                            <input type="text" name="code" class="form-control bg-dark border-secondary text-white" required value="{{ old('code') }}" placeholder="e.g. DEV">
+                            <label class="form-label text-white opacity-75 small">Department Head (Optional)</label>
+                            <select name="head_id" class="form-select form-select-sm searchable-select" style="min-width: 160px; background-color: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.15) !important; color: #fff; font-size: 0.8rem;">
+                                <option value="" class="bg-dark text-white">No Head</option>
+                                @foreach($users as $u)
+                                    <option value="{{ $u->id }}" class="bg-dark text-white" {{ old('head_id') == $u->id ? 'selected' : '' }}>
+                                        {{ $u->name }} {{ $u->designation ? '('.$u->designation->name.')' : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="text-white opacity-50 d-block mt-1">Select employee to lead this department</small>
                         </div>
-                        <button class="btn btn-primary w-100 py-2">Create</button>
+                        <button class="row-btn-green w-100" style="height: 48px; border: none; font-size: 0.85rem !important;">Create</button>
                     </form>
                 </div>
             </div>
@@ -42,43 +64,38 @@
                     <table class="table table-hover mb-0 align-middle">
                         <thead>
                             <tr>
-                                <th class="ps-4">Name</th>
-                                <th>Code</th>
-                                <th>Head</th>
-                                <th>Assign head</th>
-                                <th class="pe-4 text-end">Actions</th>
+                                <th class="ps-4" style="width: 32%; min-width: 170px;">Name</th>
+                                <th style="width: 15%; min-width: 80px;">Code</th>
+                                <th style="width: 27%; min-width: 180px;">Department Head</th>
+                                <th style="width: 12%; min-width: 90px;">Employees</th>
+                                <th class="pe-4 text-end" style="width: 14%; min-width: 120px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($departments as $department)
                                 <tr>
-                                    <td class="ps-4 fw-semibold text-white">{{ $department->name }}</td>
+                                    <td class="ps-4 fw-semibold text-white" style="word-break: break-word; white-space: normal;">{{ $department->name }}</td>
                                     <td><span class="text-white opacity-75">{{ $department->code }}</span></td>
                                     <td>
-                                        @if($department->head)
-                                            <span class="row-badge-green"><i class="bi bi-person-fill me-1"></i> {{ $department->head->name }}</span>
-                                        @else
-                                            <span class="text-white opacity-50 small">—</span>
-                                        @endif
+                                        <select name="head_id" form="update-dept-form-{{ $department->id }}" class="form-select form-select-sm searchable-select" style="min-width: 160px; background-color: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.15) !important; color: #fff; font-size: 0.8rem;">
+                                            <option value="" class="bg-dark text-white">No Head</option>
+                                            @foreach($users as $u)
+                                                <option value="{{ $u->id }}" class="bg-dark text-white" @selected($department->head_id == $u->id)>
+                                                    {{ $u->name }} {{ $u->designation ? '('.$u->designation->name.')' : '' }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </td>
-                                    <td>
-                                        <form method="POST" action="{{ route('super-admin.departments.assign-head', $department) }}" id="assign-form-{{ $department->id }}" class="assign-head-form" data-department-id="{{ $department->id }}">
-                                            @csrf
-                                            @method('PATCH')
-                                            <input type="hidden" name="confirm_head_replace" value="0" class="confirm-head-replace-input">
-                                            <select name="head_user_id" class="form-select form-select-sm bg-dark border-secondary text-white" style="min-width: 140px; height: 32px;">
-                                                <option value="">No head</option>
-                                                @foreach($admins as $admin)
-                                                    <option value="{{ $admin->id }}" @selected($department->head_user_id == $admin->id)>{{ $admin->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </form>
-                                    </td>
+                                    <td><span class="row-badge" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: transparent; font-weight: 600; padding: 3px 8px; border-radius: 4px;">{{ $department->users_count }}</span></td>
                                     <td class="pe-4 text-end">
-                                        <div class="d-inline-flex gap-2">
-                                            <button type="submit" form="assign-form-{{ $department->id }}" class="row-btn-outline-blue btn-assign-head d-flex align-items-center gap-1" style="height: 32px;">
-                                                <i class="bi bi-check2"></i> Update
-                                            </button>
+                                        <div class="d-inline-flex gap-2 align-items-center">
+                                            <form id="update-dept-form-{{ $department->id }}" method="POST" action="{{ route('super-admin.departments.update', $department) }}" class="d-inline">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="name" value="{{ $department->name }}">
+                                                <input type="hidden" name="code" value="{{ $department->code }}">
+                                                <button type="submit" class="row-btn-outline-blue">Save</button>
+                                            </form>
                                             <form method="POST" action="{{ route('super-admin.departments.destroy', $department) }}" class="d-inline delete-department-form" data-has-users="{{ $department->users_count > 0 ? 'true' : 'false' }}">
                                                 @csrf
                                                 @method('DELETE')
@@ -100,7 +117,7 @@
             <table class="table table-hover mb-0 align-middle">
                 <thead>
                     <tr>
-                        <th class="ps-4">Name</th>
+                        <th class="ps-4" style="width: 400px; min-width: 200px;">Name</th>
                         <th>Code</th>
                         <th>Deleted At</th>
                         <th class="pe-4 text-end">Actions</th>
@@ -109,7 +126,7 @@
                 <tbody>
                     @forelse($departments as $department)
                         <tr>
-                            <td class="ps-4 fw-semibold text-white">{{ $department->name }}</td>
+                            <td class="ps-4 fw-semibold text-white" style="max-width: 300px; word-break: break-word; white-space: normal;">{{ $department->name }}</td>
                             <td class="text-white opacity-75">{{ $department->code }}</td>
                             <td class="text-white opacity-50">{{ $department->deleted_at?->format('M d, Y') }}</td>
                             <td class="pe-4 text-end">
@@ -129,41 +146,22 @@
     @endif
 
     @push('modals')
-    <div class="modal fade" id="replaceHeadModal" tabindex="-1">
+    <div class="modal fade" id="deleteDeptModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold text-white fs-6"><i class="bi bi-question-circle-fill me-2"></i> Replace line manager?</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title fw-bold text-white fs-6" id="deleteDeptModalTitle">Delete Department?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body py-4">
-                    <p class="text-white fs-6">Line manager already exists: <strong id="replace-head-name" class="text-white"></strong>.</p>
-                    <p class="mb-0 small text-white opacity-50">The previous head will report to the new line manager if they are in the same department.</p>
+                    <p class="text-white fs-6 mb-0" id="deleteDeptModalText">No active users are in this department. Do you want to delete this department?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="row-btn" data-bs-dismiss="modal" style="width: 145px;">Cancel</button>
-                    <button type="button" class="row-btn-blue" id="confirm-replace-head" style="width: 145px;">Replace Manager</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="deleteDeptModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold text-white fs-6" id="deleteDeptModalTitle"><i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i> Delete Department</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body py-4">
-                    <p class="text-white fs-6" id="deleteDeptModalText"></p>
-                </div>
-                <div class="modal-footer">
-                    <div id="deleteDeptBtnGroup1" class="d-flex gap-2">
+                    <div id="deleteDeptBtnGroup1" class="d-flex gap-2 w-100 justify-content-end">
                         <button type="button" class="row-btn" data-bs-dismiss="modal" style="width: 145px;">Cancel</button>
-                        <button type="button" class="row-btn-red" id="deleteDeptBtnConfirm" style="width: 145px;">Confirm Delete</button>
+                        <button type="button" class="row-btn-red" id="deleteDeptBtnConfirm" style="width: 145px;">Delete</button>
                     </div>
-                    <div id="deleteDeptBtnGroup2" class="d-none">
+                    <div id="deleteDeptBtnGroup2" class="d-none w-100 text-end">
                         <button type="button" class="row-btn-blue" data-bs-dismiss="modal" style="width: 145px;">OK</button>
                     </div>
                 </div>
@@ -173,7 +171,6 @@
     @endpush
 
     @push('scripts')
-        <script src="{{ asset('js/hierarchy.js') }}"></script>
         <script>
             let formToSubmit = null;
 

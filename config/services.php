@@ -34,6 +34,20 @@ return [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
+        'leave_sync_channel_id' => env('SLACK_LEAVE_SYNC_CHANNEL_ID'),
+    ],
+
+    'salary_slip' => [
+        'cc_emails' => env('SALARY_SLIP_CC_EMAILS'),
+        'node_path' => env('NODE_PATH'),
+        'npm_path' => env('NPM_PATH'),
+        'chrome_path' => env('CHROME_PATH'),
+        'node_modules_path' => env('NODE_MODULES_PATH'),
+    ],
+
+    'salary' => [
+        'encrypt_key' => env('encrypt_key'),
+        'cipher' => env('SALARY_CIPHER', 'AES-256-CBC'),
     ],
 
 ];

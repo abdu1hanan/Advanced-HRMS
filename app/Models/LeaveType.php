@@ -14,6 +14,7 @@ class LeaveType extends Model
         'allow_carry_forward',
         'max_carry_forward_days',
         'requires_attachment',
+        'is_half_day',
         'is_active',
     ];
 
@@ -22,6 +23,7 @@ class LeaveType extends Model
         return [
             'allow_carry_forward' => 'boolean',
             'requires_attachment' => 'boolean',
+            'is_half_day' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

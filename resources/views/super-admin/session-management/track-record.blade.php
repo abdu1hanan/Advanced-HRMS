@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center w-100">
-            <span>Employee Track Record</span>
+            <span>{{ ($readOnly ?? false) ? 'Team Track Record' : 'Employee Track Record' }}</span>
             <!-- Download Excel Button -->
             <div id="export-btn-wrapper" class="d-none">
                 <button type="button" class="row-btn-outline-blue" id="export-btn">
@@ -27,14 +27,193 @@
             background-color: #0a0a0a !important;
         }
 
+        #dynamic-table {
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+        }
+
+        /* Sticky Date (Col 1) & Day (Col 2) on Horizontal Scroll with Smooth Floating Drop Shadow */
+        #dynamic-table th:nth-child(1),
+        #dynamic-table td:nth-child(1) {
+            position: sticky !important;
+            left: 0 !important;
+            z-index: 5 !important;
+            background-color: #0a0a0a !important;
+            border-right: none !important;
+        }
+
+        #dynamic-table th:nth-child(2),
+        #dynamic-table td:nth-child(2) {
+            position: sticky !important;
+            z-index: 5 !important;
+            background-color: #0a0a0a !important;
+            border-right: none !important;
+            box-shadow: 6px 0 12px -2px rgba(0, 0, 0, 0.7) !important;
+        }
+
+        #dynamic-thead th:nth-child(1) {
+            position: sticky !important;
+            top: 0 !important;
+            left: 0 !important;
+            z-index: 15 !important;
+            background-color: #0a0a0a !important;
+            border-right: none !important;
+        }
+
+        #dynamic-thead th:nth-child(2) {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 15 !important;
+            background-color: #0a0a0a !important;
+            border-right: none !important;
+            box-shadow: 6px 0 12px -2px rgba(0, 0, 0, 0.7) !important;
+        }
+
+        body.edit-mode-active #dynamic-table th:nth-child(2),
+        body.edit-mode-active #dynamic-table td:nth-child(2),
+        body.edit-mode-active #dynamic-thead th:nth-child(2) {
+            box-shadow: none !important;
+        }
+
+        body.edit-mode-active #dynamic-table th:nth-child(3),
+        body.edit-mode-active #dynamic-table td:nth-child(3) {
+            position: sticky !important;
+            z-index: 5 !important;
+            background-color: inherit !important;
+            border-right: none !important;
+            box-shadow: 6px 0 12px -2px rgba(0, 0, 0, 0.7) !important;
+        }
+
+        body.edit-mode-active #dynamic-thead th:nth-child(3) {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 15 !important;
+            background-color: #0a0a0a !important;
+            border-right: none !important;
+            box-shadow: 6px 0 12px -2px rgba(0, 0, 0, 0.7) !important;
+        }
+
+        /* Disable Bootstrap's inset box-shadow hover overlay which overrides custom drop shadows */
+        #dynamic-table.table-hover > tbody > tr:hover > * {
+            box-shadow: none !important;
+        }
+
+        /* Default row backgrounds */
+        #dynamic-tbody tr {
+            background-color: #0a0a0a !important;
+            transition: background-color 0.15s ease-in-out;
+        }
+        #dynamic-tbody tr:hover {
+            background-color: #171717 !important;
+        }
+
+        #dynamic-tbody tr.tr-weekend {
+            background-color: #240c0c !important;
+        }
+        #dynamic-tbody tr.tr-weekend:hover {
+            background-color: #361414 !important;
+        }
+
+        #dynamic-tbody tr.tr-leave {
+            background-color: #281806 !important;
+        }
+        #dynamic-tbody tr.tr-leave:hover {
+            background-color: #3d250a !important;
+        }
+
+        #dynamic-tbody tr.tr-unpaid-leave {
+            background-color: #10162a !important;
+        }
+        #dynamic-tbody tr.tr-unpaid-leave:hover {
+            background-color: #1a2240 !important;
+        }
+
+        #dynamic-tbody tr.tr-absent {
+            background-color: #26111e !important;
+        }
+        #dynamic-tbody tr.tr-absent:hover {
+            background-color: #3a1a2e !important;
+        }
+
+        #dynamic-tbody tr.tr-holiday {
+            background-color: #281806 !important;
+        }
+        #dynamic-tbody tr.tr-holiday:hover {
+            background-color: #3d250a !important;
+        }
+
+        #dynamic-tbody tr.tr-current {
+            background-color: #0c1c28 !important;
+        }
+        #dynamic-tbody tr.tr-current:hover {
+            background-color: #142a3c !important;
+        }
+
+        /* Sticky Date (Col 1), Day (Col 2), and Action (Col 3 in edit mode) inherit the EXACT row background */
+        #dynamic-table td:nth-child(1),
+        #dynamic-thead th:nth-child(1) {
+            position: sticky !important;
+            left: 0 !important;
+            z-index: 5 !important;
+            background-color: inherit !important;
+            border-right: none !important;
+        }
+
+        #dynamic-table td:nth-child(2),
+        #dynamic-thead th:nth-child(2) {
+            position: sticky !important;
+            z-index: 5 !important;
+            background-color: inherit !important;
+            border-right: none !important;
+        }
+
+        /* When edit mode is OFF: Day (Col 2) gets the edge drop-shadow */
+        body:not(.edit-mode-active) #dynamic-table td:nth-child(2) {
+            box-shadow: 6px 0 12px -2px rgba(0, 0, 0, 0.7) !important;
+        }
+        body:not(.edit-mode-active) #dynamic-thead th:nth-child(2) {
+            box-shadow: 6px 0 12px -2px rgba(0, 0, 0, 0.7) !important;
+        }
+
+        /* When edit mode is ON: Action (Col 3) is sticky, seamless, and gets the edge drop-shadow */
+        body.edit-mode-active #dynamic-table td:nth-child(3) {
+            position: sticky !important;
+            z-index: 5 !important;
+            background-color: inherit !important;
+            border-right: none !important;
+            box-shadow: 6px 0 12px -2px rgba(0, 0, 0, 0.7) !important;
+        }
+        body.edit-mode-active #dynamic-thead th:nth-child(3) {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 15 !important;
+            background-color: #121820 !important;
+            border-right: none !important;
+            box-shadow: 6px 0 12px -2px rgba(0, 0, 0, 0.7) !important;
+        }
+
+        #dynamic-thead th:nth-child(1),
+        #dynamic-thead th:nth-child(2) {
+            background-color: #121820 !important;
+            z-index: 15 !important;
+        }
+
+        /* --- Results Card & Light Mode Rounded Corners --- */
+        #results-card {
+            overflow: hidden !important;
+            border-radius: var(--radius-lg) !important;
+        }
+
         /* --- Light spreadsheet theme for results card --- */
         .table-light-theme {
-            background-color: #f1f5f9 !important; /* Softer light gray background (less bright/glaring) */
-            border-color: #cbd5e1 !important;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05) !important;
+            background-color: #f8fafc !important; /* Soft off-white light background */
+            border: 1px solid #cbd5e1 !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+            border-radius: var(--radius-lg) !important;
+            overflow: hidden !important;
         }
         .table-light-theme.spotify-card:hover {
-            background-color: #f1f5f9 !important;
+            background-color: #f8fafc !important;
         }
         .table-light-theme .card-header-area {
             background-color: #e2e8f0 !important; /* Soft slate gray for card header */
@@ -50,45 +229,120 @@
             border-bottom-color: #cbd5e1 !important;
         }
         .table-light-theme #dynamic-table {
-            background-color: #f8fafc !important; /* Soft off-white table background */
-            border: 1px solid #cbd5e1 !important;
+            background-color: #f8fafc !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
         }
         .table-light-theme #dynamic-thead th {
             background-color: #cbd5e1 !important; /* Solid gray header column background */
             color: #0f172a !important; /* High contrast dark text */
-            border: 1px solid #94a3b8 !important;
+            border-bottom: 1px solid #94a3b8 !important;
+            border-top: none !important;
+            border-left: none !important;
+            border-right: none !important;
             font-weight: 700 !important;
         }
-        .table-light-theme #dynamic-tbody td {
-            background-color: #f8fafc !important; /* Soft off-white cell background */
-            color: #0f172a !important; /* High-contrast dark text */
-            border: 1px solid #cbd5e1 !important;
+        .table-light-theme #dynamic-thead th:nth-child(1),
+        .table-light-theme #dynamic-thead th:nth-child(2) {
+            background-color: #cbd5e1 !important;
+            border-right: none !important;
         }
-        /* Style alternate rows for Excel feel */
-        .table-light-theme #dynamic-tbody tr:nth-child(even) td {
+        body:not(.edit-mode-active) .table-light-theme #dynamic-thead th:nth-child(2),
+        body:not(.edit-mode-active) .table-light-theme #dynamic-table td:nth-child(2) {
+            box-shadow: 6px 0 12px -2px rgba(0, 0, 0, 0.15) !important;
+            border-right: none !important;
+        }
+
+        body.edit-mode-active .table-light-theme #dynamic-thead th:nth-child(2),
+        body.edit-mode-active .table-light-theme #dynamic-table td:nth-child(2) {
+            box-shadow: none !important;
+        }
+
+        body.edit-mode-active .table-light-theme #dynamic-thead th:nth-child(3) {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 15 !important;
+            background-color: #cbd5e1 !important;
+            border-right: none !important;
+            box-shadow: 6px 0 12px -2px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        body.edit-mode-active .table-light-theme #dynamic-table td:nth-child(3) {
+            position: sticky !important;
+            z-index: 5 !important;
+            background-color: inherit !important;
+            border-right: none !important;
+            box-shadow: 6px 0 12px -2px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        /* Light mode row backgrounds */
+        .table-light-theme #dynamic-tbody tr {
+            background-color: #f8fafc !important;
+            transition: background-color 0.15s ease-in-out;
+        }
+        .table-light-theme #dynamic-tbody tr:nth-child(even) {
             background-color: #f1f5f9 !important; /* Alternating row soft gray */
         }
-        /* Row hover highlights in light mode */
-        .table-light-theme #dynamic-tbody tr:hover td {
+        .table-light-theme #dynamic-tbody tr:hover {
             background-color: #e2e8f0 !important; /* Elegant hover highlight in light mode */
         }
-        .table-light-theme #dynamic-tbody tr[style*="rgba(255, 0, 0"]:hover td {
-            background-color: #fecaca !important; /* Slightly darker rose red for weekend hover */
+        .table-light-theme #dynamic-tbody tr.tr-weekend {
+            background-color: #fecaca !important; /* More visible light red background */
+            color: #7f1d1d !important;
+            font-weight: 600 !important;
         }
-        .table-light-theme #dynamic-tbody tr.tr-dirty:hover td {
+        .table-light-theme #dynamic-tbody tr.tr-weekend:hover {
+            background-color: #fca5a5 !important;
+        }
+        .table-light-theme #dynamic-tbody tr.tr-weekend td:nth-child(2) {
+            color: #991b1b !important;
+            font-weight: 700 !important;
+        }
+        .table-light-theme #dynamic-tbody tr.tr-leave {
+            background-color: #fef08a !important; /* Brighter premium yellow */
+        }
+        .table-light-theme #dynamic-tbody tr.tr-leave:hover {
+            background-color: #fde047 !important;
+        }
+        .table-light-theme #dynamic-tbody tr.tr-unpaid-leave {
+            background-color: #d9defb !important; /* Soft indigo */
+        }
+        .table-light-theme #dynamic-tbody tr.tr-unpaid-leave:hover {
+            background-color: #c7d2fe !important;
+        }
+        .table-light-theme #dynamic-tbody tr.tr-absent {
+            background-color: #fccfe9 !important; /* Soft pink */
+        }
+        .table-light-theme #dynamic-tbody tr.tr-absent:hover {
+            background-color: #f472b6 !important;
+        }
+        .table-light-theme #dynamic-tbody tr.tr-holiday {
+            background-color: #ffe8c9 !important; /* Soft peach */
+        }
+        .table-light-theme #dynamic-tbody tr.tr-holiday:hover {
+            background-color: #fed7aa !important;
+        }
+        .table-light-theme #dynamic-tbody tr.tr-current {
+            background-color: #bae6fd !important;
+        }
+        .table-light-theme #dynamic-tbody tr.tr-current:hover {
+            background-color: #7dd3fc !important;
+        }
+        .table-light-theme #dynamic-tbody tr.tr-dirty:hover {
             background-color: rgba(22, 163, 74, 0.18) !important;
         }
-        /* Weekend rows */
-        .table-light-theme #dynamic-tbody tr[style*="rgba(255, 0, 0"] td,
-        .table-light-theme #dynamic-tbody tr[style*="rgba(255, 0, 0"] {
-            background-color: #fee2e2 !important; /* Soft rose red background */
-            color: #7f1d1d !important; /* Darker red-900 for high-contrast weekend text */
-            font-weight: 600 !important;
-            border-color: #fca5a5 !important;
+
+        .table-light-theme #dynamic-tbody td {
+            background-color: inherit !important;
+            color: #0f172a !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+            border-top: none !important;
+            border-left: none !important;
+            border-right: none !important;
         }
-        .table-light-theme #dynamic-tbody tr[style*="rgba(255, 0, 0"] td:nth-child(2) {
-            color: #991b1b !important; /* Richer red-800 day name */
-            font-weight: 700 !important;
+        .table-light-theme #dynamic-tbody td:nth-child(1),
+        .table-light-theme #dynamic-tbody td:nth-child(2) {
+            border-right: none !important;
         }
         /* Style text/mute states in light mode */
         .table-light-theme .text-white {
@@ -133,9 +387,9 @@
             border: 1px solid rgba(239, 68, 68, 0.25) !important;
         }
         .badge-holiday {
-            background: rgba(245, 158, 11, 0.12) !important;
-            color: #f59e0b !important;
-            border: 1px solid rgba(245, 158, 11, 0.25) !important;
+            background: rgba(6, 182, 212, 0.12) !important;
+            color: #06b6d4 !important;
+            border: 1px solid rgba(6, 182, 212, 0.25) !important;
         }
         .badge-working-hrs, .badge-expected {
             background: rgba(255, 255, 255, 0.05) !important;
@@ -202,9 +456,9 @@
             font-weight: 600 !important;
         }
         .table-light-theme .badge-holiday {
-            background-color: #fffbeb !important;
-            color: #92400e !important;
-            border: 1px solid #fcd34d !important;
+            background-color: #ccfbf1 !important;
+            color: #0f766e !important;
+            border: 1px solid #99f6e4 !important;
             font-weight: 600 !important;
         }
         .table-light-theme .badge-working-hrs,
@@ -278,6 +532,14 @@
             box-shadow: 0 0 5px rgba(217, 119, 6, 0.35) !important;
         }
 
+        /* Light mode break balance exhausted bubble/glow override (purple bubble) */
+        .table-light-theme .edit-time-input-purple {
+            background-color: #faf5ff !important;
+            border-color: #9333ea !important;
+            color: #7e22ce !important;
+            box-shadow: 0 0 5px rgba(147, 51, 234, 0.35) !important;
+        }
+
         /* Light mode active session bubble/glow override (blue bubble) */
         .table-light-theme .edit-time-input-active {
             background-color: #eff6ff !important;
@@ -297,7 +559,6 @@
         /* Leave day row styling in Light Mode */
         .table-light-theme #dynamic-tbody tr.tr-leave td,
         .table-light-theme #dynamic-tbody tr[style*="rgba(217, 119, 6"] td {
-            background-color: #fef08a !important; /* Brighter premium yellow */
             color: #713f12 !important; /* Dark brown text for contrast */
         }
         .table-light-theme #dynamic-tbody tr.tr-leave td span,
@@ -307,12 +568,6 @@
         .table-light-theme #dynamic-tbody tr.tr-leave td.text-total-zero,
         .table-light-theme #dynamic-tbody tr[style*="rgba(217, 119, 6"] td.text-total-zero {
             color: #a16207 !important;
-        }
-        /* Leave inputs in light mode edit mode */
-        .table-light-theme #dynamic-tbody tr.tr-leave .edit-time-input:not(.edit-time-input-virtual):not(.edit-time-input-active) {
-            background-color: #fefef0 !important;
-            color: #713f12 !important;
-            border-color: #fde047 !important;
         }
         
         
@@ -326,14 +581,26 @@
             color: #ffffff !important; /* High contrast white text */
         }
         
-        /* Ensure percentage badge on leave rows looks like other rows, not blue */
+        /* Ensure percentage badge on leave, unpaid leave, absent, and holiday rows looks like other rows, not colored/blue */
         .table-light-theme #dynamic-tbody tr.tr-leave td span.badge-percentage,
-        .table-light-theme #dynamic-tbody tr[style*="rgba(217, 119, 6"] td span.badge-percentage {
+        .table-light-theme #dynamic-tbody tr[style*="rgba(217, 119, 6"] td span.badge-percentage,
+        .table-light-theme #dynamic-tbody tr.tr-unpaid-leave td span.badge-percentage,
+        .table-light-theme #dynamic-tbody tr[style*="rgba(63, 81, 181"] td span.badge-percentage,
+        .table-light-theme #dynamic-tbody tr.tr-absent td span.badge-percentage,
+        .table-light-theme #dynamic-tbody tr[style*="rgba(166, 77, 121"] td span.badge-percentage,
+        .table-light-theme #dynamic-tbody tr.tr-holiday td span.badge-percentage,
+        .table-light-theme #dynamic-tbody tr[style*="rgba(180, 95, 6"] td span.badge-percentage {
             background-color: #334155 !important;
             color: #ffffff !important;
         }
         #dynamic-tbody tr.tr-leave td span.badge-percentage,
-        #dynamic-tbody tr[style*="rgba(217, 119, 6"] td span.badge-percentage {
+        #dynamic-tbody tr[style*="rgba(217, 119, 6"] td span.badge-percentage,
+        #dynamic-tbody tr.tr-unpaid-leave td span.badge-percentage,
+        #dynamic-tbody tr[style*="rgba(63, 81, 181"] td span.badge-percentage,
+        #dynamic-tbody tr.tr-absent td span.badge-percentage,
+        #dynamic-tbody tr[style*="rgba(166, 77, 121"] td span.badge-percentage,
+        #dynamic-tbody tr.tr-holiday td span.badge-percentage,
+        #dynamic-tbody tr[style*="rgba(180, 95, 6"] td span.badge-percentage {
             background-color: #ffffffee !important;
             color: #000000 !important;
         }
@@ -343,13 +610,88 @@
             color: rgba(255, 255, 255, 0.95) !important;
         }
         #dynamic-tbody tr.tr-leave td.text-total-zero {
-            color: rgba(245, 158, 11, 0.75) !important; /* Brighter yellow text for total zero */
+            color: rgba(240, 249, 3, 1) !important; /* Brighter yellow text for total zero */
         }
-        /* Leave inputs in dark mode edit mode */
-        #dynamic-tbody tr.tr-leave .edit-time-input:not(.edit-time-input-virtual):not(.edit-time-input-active) {
-            background-color: rgba(245, 158, 11, 0.15) !important;
-            color: #fbbf24 !important;
-            border-color: rgba(245, 158, 11, 0.4) !important;
+
+        /* Absent day row styling in Light Mode */
+        .table-light-theme #dynamic-tbody tr.tr-absent td {
+            color: #571435ff !important;
+        }
+        .table-light-theme #dynamic-tbody tr.tr-absent td span {
+            color: #571435ff !important;
+        }
+        .table-light-theme #dynamic-tbody tr.tr-absent td.text-total-zero {
+            color: #be185d !important;
+        }
+        .table-light-theme #dynamic-tbody tr.tr-absent td span.badge-percentage {
+            background-color: #334155 !important;
+            color: #ffffff !important;
+        }
+
+        /* Absent day row styling in Dark Mode */
+        #dynamic-tbody tr.tr-absent td {
+            color: rgba(255, 255, 255, 0.95) !important;
+        }
+        #dynamic-tbody tr.tr-absent td.text-total-zero {
+            color: #F472B6 !important;
+        }
+        #dynamic-tbody tr.tr-absent td span.badge-percentage {
+            background-color: #ffffffee !important;
+            color: #000000 !important;
+        }
+
+        /* Holiday day row styling in Light Mode */
+        .table-light-theme #dynamic-tbody tr.tr-holiday td {
+            color: #581805ff !important;
+        }
+        .table-light-theme #dynamic-tbody tr.tr-holiday td span {
+            color: #581805ff !important;
+        }
+        .table-light-theme #dynamic-tbody tr.tr-holiday td.text-total-zero {
+            color: #C2410C !important;
+        }
+        .table-light-theme #dynamic-tbody tr.tr-holiday td span.badge-percentage {
+            background-color: #334155 !important;
+            color: #ffffff !important;
+        }
+
+        /* Holiday day row styling in Dark Mode */
+        #dynamic-tbody tr.tr-holiday td {
+            color: rgba(255, 255, 255, 0.95) !important;
+        }
+        #dynamic-tbody tr.tr-holiday td.text-total-zero {
+            color: #E69138 !important;
+        }
+        #dynamic-tbody tr.tr-holiday td span.badge-percentage {
+            background-color: #ffffffee !important;
+            color: #000000 !important;
+        }
+
+        /* Unpaid Leave row styling in Light Mode */
+        .table-light-theme #dynamic-tbody tr.tr-unpaid-leave td {
+            color: #283593 !important; /* Dark indigo-800 */
+        }
+        .table-light-theme #dynamic-tbody tr.tr-unpaid-leave td span {
+            color: #283593 !important;
+        }
+        .table-light-theme #dynamic-tbody tr.tr-unpaid-leave td.text-total-zero {
+            color: #3f51b5 !important; /* Indigo-500 */
+        }
+        .table-light-theme #dynamic-tbody tr.tr-unpaid-leave td span.badge-percentage {
+            background-color: #334155 !important;
+            color: #ffffff !important;
+        }
+
+        /* Unpaid Leave row styling in Dark Mode */
+        #dynamic-tbody tr.tr-unpaid-leave td {
+            color: rgba(255, 255, 255, 0.95) !important;
+        }
+        #dynamic-tbody tr.tr-unpaid-leave td.text-total-zero {
+            color: #7986CB !important; /* Soft indigo-300 */
+        }
+        #dynamic-tbody tr.tr-unpaid-leave td span.badge-percentage {
+            background-color: #ffffffee !important;
+            color: #000000 !important;
         }
 
         /* --- Pill Theme Toggle Switch --- */
@@ -418,13 +760,48 @@
         .table-light-theme #table-theme-toggle .moon-icon {
             color: #64748b !important; /* Muted moon icon */
         }
+        .table-light-theme #today-toggle-container {
+            background-color: #f8fafc !important;
+            border: 1px solid #000000 !important;
+            box-shadow: none !important;
+        }
+        .table-light-theme #today-toggle-container span,
+        .table-light-theme #today-toggle-container i {
+            color: #000000 !important;
+            opacity: 1 !important;
+            font-weight: 600 !important;
+        }
+        .table-light-theme #today-toggle-container .form-check-input {
+            background-color: #ffffff !important;
+            border: 1px solid #000000 !important;
+        }
+        .table-light-theme #today-toggle-container .form-check-input:checked {
+            background-color: #16a34a !important;
+            border: 1px solid #15803d !important;
+        }
         .edit-time-input {
+            background-color: #151c24 !important;
+            color: #ffffff !important;
+            border: 1px solid rgba(255, 255, 255, 0.18) !important;
+            border-radius: 50px !important;
             transition: all 0.2s ease-in-out;
         }
         .edit-time-input:focus {
             background-color: #1a1a1a !important;
             border-color: #1db954 !important;
             box-shadow: 0 0 5px rgba(29, 185, 84, 0.4) !important;
+            color: #ffffff !important;
+        }
+        .table-light-theme .edit-time-input {
+            background-color: #ffffff !important;
+            color: #111827 !important;
+            border: 1px solid rgba(0, 0, 0, 0.18) !important;
+        }
+        .table-light-theme .edit-time-input:focus {
+            background-color: #ffffff !important;
+            border-color: #16a34a !important;
+            box-shadow: 0 0 5px rgba(22, 163, 74, 0.4) !important;
+            color: #111827 !important;
         }
         .tr-dirty {
             background-color: rgba(29, 185, 84, 0.08) !important;
@@ -441,8 +818,30 @@
             box-shadow: 0 0 5px rgba(245, 158, 11, 0.5) !important;
         }
         .edit-time-input-virtual {
+            border: 1.5px solid #f59e0b !important;
             border-color: #f59e0b !important;
-            box-shadow: 0 0 5px rgba(245, 158, 11, 0.35) !important;
+            box-shadow: 0 0 6px rgba(245, 158, 11, 0.45) !important;
+            color: #fbbf24 !important;
+        }
+        .edit-time-input-virtual:focus {
+            background-color: #1a1a1a !important;
+            border: 1.5px solid #f59e0b !important;
+            border-color: #f59e0b !important;
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.6) !important;
+            color: #fbbf24 !important;
+        }
+        .edit-time-input-purple {
+            border: 1.5px solid #a855f7 !important;
+            border-color: #a855f7 !important;
+            box-shadow: 0 0 6px rgba(168, 85, 247, 0.45) !important;
+            color: #f3e8ff !important;
+        }
+        .edit-time-input-purple:focus {
+            background-color: #1a1a1a !important;
+            border: 1.5px solid #a855f7 !important;
+            border-color: #a855f7 !important;
+            box-shadow: 0 0 8px rgba(168, 85, 247, 0.6) !important;
+            color: #f3e8ff !important;
         }
         .edit-time-input-active {
             border-color: #3b82f6 !important;
@@ -458,25 +857,76 @@
             padding-top: 4px !important;
             padding-bottom: 4px !important;
         }
+
+        /* ── Action Column & Circular Edit Row Button ─────────────────────── */
+        .btn-row-edit {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 0.80rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+        .btn-row-edit:hover {
+            background: rgba(29, 185, 84, 0.15);
+            border-color: #1db954;
+            color: #1db954;
+        }
+        .btn-row-edit.active-editing {
+            background: #1db954 !important;
+            border-color: #1db954 !important;
+            color: #000 !important;
+        }
+        .table-light-theme .btn-row-edit {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #475569;
+        }
+        .table-light-theme .btn-row-edit:hover {
+            background: rgba(22, 163, 74, 0.12);
+            border-color: #16a34a;
+            color: #16a34a;
+        }
+        .table-light-theme .btn-row-edit.active-editing {
+            background: #16a34a !important;
+            border-color: #16a34a !important;
+            color: #fff !important;
+        }
+        .btn-row-edit:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        /* ───────────────────────────────────────────────────────────────────── */
     </style>
+
 
     <!-- Filters Panel Card -->
     <div class="spotify-card p-4 mb-4 mt-3">
         <div class="row g-3">
             <!-- Employee Dropdown -->
-            <div class="col-md-3">
+            <div class="col-md-3" id="employee-select-wrapper" @if($isEmployeeSide ?? false) style="display:none;" @endif>
                 <label class="form-label text-white opacity-75 small fw-semibold">Employee</label>
                 <select class="form-select form-select-sm text-white" id="employee-select" style="height: 32px !important; border-radius: 50px !important; padding: 0 1rem !important; font-size: 0.85rem !important;">
-                    <option value="">-- Select Employee --</option>
-                    <option value="all">All Employees</option>
+                    @if(!($isEmployeeSide ?? false))
+                        <option value="">-- Select Employee --</option>
+                        <option value="all">All Employees</option>
+                    @endif
                     @foreach($users as $user)
-                        <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                        <option value="{{ $user->id }}" @selected(($isEmployeeSide ?? false) || $user->id == ($selectedUserId ?? null))>{{ $user->name }} ({{ $user->email }})</option>
                     @endforeach
                 </select>
             </div>
 
             <!-- Date Period -->
-            <div class="col-md-3">
+            <div class="{{ ($isEmployeeSide ?? false) ? 'col-md-4' : 'col-md-3' }}">
                 <label class="form-label text-white opacity-75 small fw-semibold">Period</label>
                 <select class="form-select form-select-sm text-white" id="period-select" style="height: 32px !important; border-radius: 50px !important; padding: 0 1rem !important; font-size: 0.85rem !important;">
                     <option value="today">Today</option>
@@ -485,7 +935,7 @@
             </div>
 
             <!-- Custom Month Select -->
-            <div class="col-md-2" id="custom-month-wrapper">
+            <div class="{{ ($isEmployeeSide ?? false) ? 'col-md-3' : 'col-md-2' }}" id="custom-month-wrapper">
                 <label class="form-label text-white opacity-75 small fw-semibold">Month</label>
                 <select class="form-select form-select-sm text-white" id="custom-month-select" style="height: 32px !important; border-radius: 50px !important; padding: 0 1rem !important; font-size: 0.85rem !important;">
                     <option value="1">January</option>
@@ -504,14 +954,14 @@
             </div>
 
             <!-- Custom Year Select -->
-            <div class="col-md-2" id="custom-year-wrapper">
+            <div class="{{ ($isEmployeeSide ?? false) ? 'col-md-3' : 'col-md-2' }}" id="custom-year-wrapper">
                 <label class="form-label text-white opacity-75 small fw-semibold">Year</label>
                 <input type="number" class="form-control form-control-sm text-white" id="custom-year-select" style="height: 32px !important; border-radius: 50px !important; padding: 0 1rem !important; font-size: 0.85rem !important; background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15) !important;">
             </div>
 
             <!-- Clear Filter Button -->
             <div class="col-md-2 d-flex align-items-end">
-                <a href="{{ route('super-admin.session-management.track-record') }}" class="row-btn w-100 text-decoration-none justify-content-center" style="height: 32px !important;">
+                <a href="{{ ($isEmployeeSide ?? false) ? route('admin.track-record') : (($readOnly ?? false) ? route('admin.team.track-record') : route('super-admin.session-management.track-record')) }}" class="row-btn w-100 text-decoration-none justify-content-center" style="height: 32px !important;">
                     <i class="bi bi-x-circle me-1"></i> Clear Filters
                 </a>
             </div>
@@ -531,19 +981,36 @@
         </div>
     </div>
 
+
+
     <!-- Main Results Table Card (Hidden initially) -->
     <div id="results-card" class="spotify-card mb-4 d-none">
         <div class="card-header-area px-4 pt-4">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <div class="d-flex align-items-center gap-1">
                     <h6 class="text-uppercase text-white fw-semibold small mb-0 opacity-75" style="letter-spacing: 0.05em;" id="report-title">Employee Timesheet Summary</h6>
+                    @if(!($readOnly ?? false))
                     <button type="button" class="btn btn-sm btn-link text-white p-0 d-none" id="edit-sheet-btn" data-custom-tooltip="Edit Timesheet" data-tooltip-placement="top" style="border: none; background: transparent; outline: none; box-shadow: none; padding: 0 !important; margin-left: 6px !important;">
                         <i class="bi bi-pencil text-secondary fs-6"></i>
                     </button>
+                    @endif
                 </div>
                 <div class="d-flex align-items-center gap-3">
                     <!-- Save / Cancel buttons (hidden initially) -->
                     <div id="edit-actions" class="d-none d-flex align-items-center gap-2">
+                        <!-- Approval Required style toggle for editing today's record -->
+                        <div class="d-flex align-items-center gap-3 px-3 justify-content-between me-1" id="today-toggle-container" style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.25) !important; border-radius: 50px !important; height: 28px !important;">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-info-circle text-white opacity-75 cursor-pointer" 
+                                   data-custom-tooltip="Toggle this if you wanna edit todays record" 
+                                   data-tooltip-placement="top" 
+                                   style="font-size: 0.85rem;"></i>
+                                <span class="text-white small opacity-75" style="user-select: none; font-size: 0.78rem; white-space: nowrap;">Edit Today</span>
+                            </div>
+                            <div class="form-check form-switch mb-0" style="padding-left: 0; display: flex; align-items: center;">
+                                <input class="form-check-input bg-dark border-secondary cursor-pointer" type="checkbox" id="toggle-today-edit" style="width: 2.2em; height: 1.1em; margin-left: 0; margin-top: 0;">
+                            </div>
+                        </div>
                         <button type="button" class="row-btn-outline-blue" id="save-sheet-btn" style="height: 28px !important; padding: 0 12px !important; font-size: 0.75rem !important; display: inline-flex !important; align-items: center !important;">
                             Save
                         </button>
@@ -614,6 +1081,22 @@
                         <span class="text-white opacity-50 small">Total Absents</span>
                         <span id="sum-absents" class="text-white fw-semibold small text-end">0</span>
                     </div>
+                    <div class="d-flex justify-content-between align-items-center profile-field-row">
+                        <span class="text-white opacity-50 small">Unpaid Leaves</span>
+                        <span id="sum-unpaid-leaves" class="text-white fw-semibold small text-end">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center profile-field-row" id="row-sum-pre-join" style="display: none !important;">
+                        <span class="text-white opacity-50 small">Pre-Joining Days</span>
+                        <span id="sum-pre-join" class="text-white fw-semibold small text-end">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center profile-field-row">
+                        <span class="text-white opacity-50 small">Company Holidays</span>
+                        <span id="sum-holidays" class="text-white fw-semibold small text-end">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center profile-field-row">
+                        <span class="text-white opacity-50 small">Remote Work</span>
+                        <span id="sum-remotes" class="text-white fw-semibold small text-end">0</span>
+                    </div>
                 </div>
             </div>
 
@@ -630,20 +1113,21 @@
                 <div>
                     <div class="d-flex justify-content-between align-items-center profile-field-row">
                         <span class="text-white opacity-50 small">Expected Salary</span>
-                        <span class="text-white fw-semibold small text-end">Rs. <span id="sum-actual-salary">0</span></span>
+                        <span class="text-white fw-semibold small text-end" id="sum-actual-salary-container"><span id="sum-actual-salary">—</span></span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center profile-field-row">
                         <span class="text-white opacity-50 small">Total Deductions</span>
-                        <span class="text-danger fw-semibold small text-end">Rs. <span id="sum-deductions">0</span></span>
+                        <span class="text-danger fw-semibold small text-end" id="sum-deductions-container"><span id="sum-deductions">—</span></span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center profile-field-row">
                         <span class="text-white opacity-50 small">Take-Away Salary</span>
-                        <span class="text-success fw-bold small text-end" style="font-size: 1.05rem;">Rs. <span id="sum-take-away">0</span></span>
+                        <span class="text-success fw-bold small text-end" style="font-size: 1.05rem;" id="sum-take-away-container"><span id="sum-take-away">—</span></span>
                     </div>
                 </div>
             </div>
         </div>
 
+        @if(!($isEmployeeSide ?? false))
         <!-- Comments Section -->
         <div class="border-top border-secondary border-opacity-25 mt-4 pt-3">
             <label for="summary-comment" class="form-label text-white opacity-75 small fw-semibold">
@@ -651,6 +1135,7 @@
             </label>
             <textarea id="summary-comment" class="form-control" rows="2" placeholder="Enter comments here..." style="background-color: rgba(255, 255, 255, 0.02) !important; border: 1px solid rgba(255, 255, 255, 0.12); color: #ffffff; border-radius: 6px; font-size: 0.9rem;"></textarea>
         </div>
+        @endif
     </div>
 
     @push('scripts')
@@ -660,12 +1145,35 @@
                 $('main h1').addClass('w-100');
 
                 let isEditMode = false;
+                let allowEditToday = false;
                 let rawReportData = null;
                 let originalReportData = null;
+                let hasExpectedSalary = true;
+                let isFinancialHidden = false;
+                let hasSlackMapping = true;
+                let userEditUrl = '#';
+                // Track dates currently in active horizontal edit mode
+                let editingRowDates = new Set();
+                let activeRowRawEvents = {};
 
                 function cleanTimeStr(val) {
                     if (!val || val === '-' || val === 'Incomplete' || val === 'Active') return '';
                     return val.replace(/\s*\(.*?\)/g, '').trim();
+                }
+
+                function formatTimeToFullSeconds(timeStr) {
+                    if (!timeStr) return '';
+                    let val = cleanTimeStr(timeStr);
+                    const regex = /^(0?[1-9]|1[0-2]):([0-5][0-9])(?::([0-5][0-9]))?\s*(AM|PM)$/i;
+                    const match = val.match(regex);
+                    if (match) {
+                        let hour = match[1].padStart(2, '0');
+                        let min = match[2];
+                        let sec = match[3] ? match[3].padStart(2, '0') : '00';
+                        let ampm = match[4].toUpperCase();
+                        return `${hour}:${min}:${sec} ${ampm}`;
+                    }
+                    return val;
                 }
 
                 function validateTimeFormat(timeStr) {
@@ -698,6 +1206,83 @@
                     return hours * 3600 + minutes * 60 + seconds;
                 }
 
+                // ── Delegate: Click circular edit button for a single row ─────────────
+                $(document).on('click', '.btn-row-edit', function(e) {
+                    e.preventDefault();
+                    const dateStr = $(this).data('date');
+                    if (!dateStr) return;
+
+                    const userId = $('#employee-select').val();
+                    const $btn = $(this);
+
+                    if (editingRowDates.has(dateStr)) {
+                        return;
+                    }
+
+                    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" style="width: 12px; height: 12px; border-width: 1.5px;"></span>');
+
+                    $.ajax({
+                        url: "{{ route('super-admin.session-management.track-record.day-raw-events') }}",
+                        method: 'GET',
+                        data: { user_id: userId, date: dateStr },
+                        success: function(resp) {
+                            $btn.prop('disabled', false).html('<i class="bi bi-pencil-fill"></i>');
+                            if (resp.status !== 'success') {
+                                showError('Failed to load raw events for ' + dateStr);
+                                return;
+                            }
+
+                            activeRowRawEvents[dateStr] = resp.events || [];
+                            editingRowDates.add(dateStr);
+
+                            // Pair up raw events into session pairs with full seconds formatting
+                            let sessionPairs = [];
+                            const evs = resp.events || [];
+                            for (let i = 0; i < evs.length; i += 2) {
+                                const inEv = evs[i];
+                                const outEv = evs[i + 1];
+
+                                let inReason = '';
+                                if (inEv && inEv.is_auto_appended) {
+                                    inReason = inEv.virtual_reason || (inEv.type === 'back' ? 'Auto-Appended Back' : 'Auto-Appended Sign In');
+                                }
+
+                                let outReason = '';
+                                if (outEv && outEv.is_auto_appended) {
+                                    outReason = outEv.virtual_reason || (outEv.type === 'break' ? 'Auto-Appended Break' : 'Auto-Appended Sign Out');
+                                }
+
+                                sessionPairs.push({
+                                    in: inEv ? formatTimeToFullSeconds(inEv.time) : '',
+                                    out: outEv ? formatTimeToFullSeconds(outEv.time) : '',
+                                    is_virtual_in: inEv ? inEv.is_auto_appended : false,
+                                    virtual_in_reason: inReason,
+                                    is_virtual_out: outEv ? outEv.is_auto_appended : false,
+                                    virtual_out_reason: outReason,
+                                });
+                            }
+
+                            if (rawReportData && rawReportData.records) {
+                                const rec = rawReportData.records.find(r => r.raw_date_string === dateStr);
+                                if (rec) {
+                                    rec.sessions = sessionPairs;
+                                }
+
+                                const neededSessions = Math.max(sessionPairs.length, rawReportData.max_sessions || 2);
+                                if (neededSessions > (rawReportData.max_sessions || 2)) {
+                                    rawReportData.max_sessions = neededSessions;
+                                }
+                            }
+
+                            renderTable(rawReportData);
+                        },
+                        error: function() {
+                            $btn.prop('disabled', false).html('<i class="bi bi-pencil"></i>');
+                            showError('Error loading raw events for ' + dateStr);
+                        }
+                    });
+                });
+
                 function showError(message) {
                     if (window.showToast) {
                         window.showToast(message, 'danger');
@@ -705,6 +1290,7 @@
                         alert(message);
                     }
                 }
+
 
                 function showInfo() {
                     if (window.showToast) {
@@ -745,6 +1331,8 @@
                     const userId = $('#employee-select').val();
                     const period = $('#period-select').val();
 
+                    $('#error-card').addClass('d-none');
+
                     // Clear comment textarea on every fresh load
                     $('#summary-comment').val('');
 
@@ -769,7 +1357,7 @@
                     }
 
                     $.ajax({
-                        url: "{{ route('super-admin.session-management.track-record.report') }}",
+                        url: "{{ ($isEmployeeSide ?? false) ? route('admin.track-record.api') : (($readOnly ?? false) ? route('admin.team.track-record.api') : route('super-admin.session-management.track-record.report')) }}",
                         method: "GET",
                         data: {
                             user_id: userId,
@@ -807,7 +1395,13 @@
                             const employeeName = $('#employee-select option:selected').text().split(' (')[0];
                             $('#report-user-badge').text(employeeName);
 
-                            renderTable(response);
+                             if (response.summary) {
+                                 hasExpectedSalary = response.summary.has_expected_salary !== false;
+                                 isFinancialHidden = response.summary.is_financial_hidden === true;
+                                 hasSlackMapping = response.summary.has_slack_mapping !== false;
+                                 userEditUrl = response.summary.edit_url || '#';
+                             }
+                             renderTable(response);
                         },
                         error: function(err) {
                             let errorMsg = 'An error occurred while generating the track record.';
@@ -877,6 +1471,23 @@
                         return;
                     }
 
+                    if (!hasSlackMapping) {
+                        const missingSlackMappingModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('missingSlackMappingModal'));
+                        missingSlackMappingModal.show();
+                        return;
+                    }
+
+                    if (!hasExpectedSalary && !isFinancialHidden) {
+                        @if($isEmployeeSide ?? false)
+                            showError('Expected salary is not configured. Please contact HR to configure it.');
+                        @elseif(auth()->user()->isSuperAdmin())
+                            $('#btnConfigureSalaryModal').attr('href', userEditUrl);
+                            const missingSalaryModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('missingSalaryModal'));
+                            missingSalaryModal.show();
+                        @endif
+                        return;
+                    }
+
                     if (period === 'today') {
                         showError('Export is only available for full calendar months.');
                         return;
@@ -893,7 +1504,7 @@
                     }
 
                     // Build download URL and redirect
-                    const url = new URL("{{ route('super-admin.session-management.track-record.export') }}", window.location.origin);
+                    const url = new URL("{{ ($isEmployeeSide ?? false) ? route('admin.track-record.export') : (auth()->user()->isSuperAdmin() ? route('super-admin.session-management.track-record.export') : route('admin.team.track-record.export')) }}", window.location.origin);
                     url.searchParams.append('user_id', userId);
                     url.searchParams.append('period', 'custom');
                     if (startDate) url.searchParams.append('start_date', startDate);
@@ -910,14 +1521,28 @@
                 // Toggle Edit Mode
                 $('#edit-sheet-btn').on('click', function() {
                     isEditMode = true;
+                    allowEditToday = false;
+                    editingRowDates.clear();
+                    activeRowRawEvents = {};
+                    $('#toggle-today-edit').prop('checked', false);
                     $('#edit-sheet-btn').addClass('d-none');
                     $('#edit-actions').removeClass('d-none');
+                    renderTable(rawReportData);
+                });
+
+                // Today Edit Toggle Change
+                $(document).on('change', '#toggle-today-edit', function() {
+                    allowEditToday = $(this).is(':checked');
                     renderTable(rawReportData);
                 });
 
                 // Cancel Edit Mode
                 $('#cancel-sheet-btn').on('click', function() {
                     isEditMode = false;
+                    allowEditToday = false;
+                    editingRowDates.clear();
+                    activeRowRawEvents = {};
+                    $('#toggle-today-edit').prop('checked', false);
                     $('#edit-actions').addClass('d-none');
                     $('#edit-sheet-btn').removeClass('d-none');
                     rawReportData = JSON.parse(JSON.stringify(originalReportData));
@@ -962,7 +1587,7 @@
                     const originalValue = $(this).attr('data-original-value') || '';
                     if (val !== originalValue) {
                         $(this).attr('data-is-virtual', 'false');
-                        $(this).removeClass('edit-time-input-virtual');
+                        $(this).removeClass('edit-time-input-virtual edit-time-input-purple');
                         $(this).removeAttr('data-custom-tooltip');
                     }
 
@@ -1065,9 +1690,8 @@
                         $(this).attr('data-custom-tooltip', 'Active - ' + val);
                     }
 
-                    if (!validateTimeFormat(val)) {
+                    if (val && !validateTimeFormat(val)) {
                         $(this).addClass('border-danger');
-                        showError('Invalid time format. Please use hh:mm AM/PM or hh:mm:ss AM/PM.');
                     } else {
                         $(this).removeClass('border-danger');
                     }
@@ -1078,22 +1702,37 @@
                     $('.edit-time-input').trigger('blur');
                     
                     let dateEntries = {};
-                    let hasValidationError = false;
+                    let validationErrors = [];
 
                     // Clear previous input validation borders
                     $('.edit-time-input').removeClass('border-danger');
 
-                    $('#dynamic-tbody tr[data-date].tr-dirty').each(function() {
-                        const row = $(this);
-                        const dateStr = row.data('date');
-                        if (!dateStr) return;
+                    // Compute current date and time in Asia/Karachi for future validation
+                    const todayKarachiStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' });
+                    const karachiTimeStr = new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Karachi', hour12: false });
+                    const timeParts = karachiTimeStr.split(':').map(Number);
+                    const nowKarachiSecs = (timeParts[0] * 3600) + (timeParts[1] * 60) + (timeParts[2] || 0);
+                    const bufferSecs = 60; // 1-minute grace buffer
 
+                    // Process all active editing rows (raw_events mode)
+                    editingRowDates.forEach(function(dateStr) {
+                        const row = $(`#dynamic-tbody tr[data-date="${dateStr}"]`);
+                        if (!row.length) return;
+
+                        // Check if this row was actually modified by the user
+                        let isRowModified = false;
                         let inputs = [];
                         row.find('.edit-time-input').each(function() {
                             const type = $(this).data('type');
                             const idx = parseInt($(this).data('session-index'));
                             const val = $(this).val().trim();
                             const isVirtual = $(this).attr('data-is-virtual') === 'true';
+                            const orig = ($(this).attr('data-original-value') || '').trim();
+                            
+                            if (val !== orig) {
+                                isRowModified = true;
+                            }
+
                             inputs.push({
                                 type: type,
                                 idx: idx,
@@ -1103,6 +1742,17 @@
                             });
                         });
 
+                        // If row was unlocked but untouched/unmodified, skip it so DB remains untouched
+                        if (!isRowModified) {
+                            return;
+                        }
+
+                        // Block future dates
+                        if (dateStr > todayKarachiStr) {
+                            validationErrors.push('Future Date Error: Attendance cannot be logged for future date ' + dateStr + '.');
+                            return;
+                        }
+
                         let sessions = [];
                         inputs.forEach(inp => {
                             if (!sessions[inp.idx]) {
@@ -1111,148 +1761,78 @@
                             sessions[inp.idx][inp.type] = inp;
                         });
 
-                        let timeline = [];
-                        let formatError = false;
+                        let rawEvents = [];
+                        let lastFilledIdx = -1;
 
-                        for (let i = 0; i < sessions.length; i++) {
-                            const sess = sessions[i];
-                            if (!sess) continue;
-
-                            const inInp = sess.in;
-                            const outInp = sess.out;
-
-                            if (inInp && inInp.val) {
-                                if (!validateTimeFormat(inInp.val)) {
-                                    inInp.element.addClass('border-danger');
-                                    hasValidationError = true;
-                                    formatError = true;
-                                } else {
-                                    const secs = parseTimeToSeconds(inInp.val);
-                                    timeline.push({
-                                        type: 'in',
-                                        sessionIndex: i,
-                                        val: inInp.val,
-                                        seconds: secs,
-                                        element: inInp.element
-                                    });
-                                }
-                            }
-
-                            if (outInp && outInp.val) {
-                                if (!validateTimeFormat(outInp.val)) {
-                                    outInp.element.addClass('border-danger');
-                                    hasValidationError = true;
-                                    formatError = true;
-                                } else {
-                                    const secs = parseTimeToSeconds(outInp.val);
-                                    timeline.push({
-                                        type: 'out',
-                                        sessionIndex: i,
-                                        val: outInp.val,
-                                        seconds: secs,
-                                        element: outInp.element
-                                    });
-                                }
-                            }
-                        }
-
-                        if (formatError) {
-                            return; // Skip rest of this row, go to next row
-                        }
-
-                        // Missing Sign In check
-                        let missingSignInError = false;
-                        for (let i = 0; i < sessions.length; i++) {
-                            const sess = sessions[i];
-                            if (!sess) continue;
-                            const inVal = sess.in ? sess.in.val : '';
-                            const outVal = sess.out ? sess.out.val : '';
-
-                            if (outVal && !inVal) {
-                                if (sess.out) sess.out.element.addClass('border-danger');
-                                if (sess.in) sess.in.element.addClass('border-danger');
-                                hasValidationError = true;
-                                missingSignInError = true;
-                            }
-                        }
-
-                        if (missingSignInError) {
-                            return; // Skip rest of this row, go to next row
-                        }
-
-                        // Check for session gaps before the last filled session
-                        let maxFilledIndex = -1;
                         for (let i = 0; i < sessions.length; i++) {
                             const sess = sessions[i];
                             if (!sess) continue;
                             if ((sess.in && sess.in.val) || (sess.out && sess.out.val)) {
-                                maxFilledIndex = i;
+                                lastFilledIdx = i;
                             }
                         }
 
-                        let sessionGapError = false;
-                        for (let i = 0; i < maxFilledIndex; i++) {
+                        let prevSecs = -1;
+                        for (let i = 0; i <= lastFilledIdx; i++) {
                             const sess = sessions[i];
-                            const inVal = (sess && sess.in) ? sess.in.val : '';
-                            const outVal = (sess && sess.out) ? sess.out.val : '';
+                            const inVal = sess && sess.in ? sess.in.val : '';
+                            const outVal = sess && sess.out ? sess.out.val : '';
 
-                            if (!inVal || !outVal) {
-                                if (sess) {
-                                    if (sess.in && !inVal) sess.in.element.addClass('border-danger');
-                                    if (sess.out && !outVal) sess.out.element.addClass('border-danger');
+                            if (inVal) {
+                                if (!validateTimeFormat(inVal)) {
+                                    if (sess.in) sess.in.element.addClass('border-danger');
+                                    validationErrors.push('Invalid time format for Sign In ' + (i+1) + ' (' + inVal + ') on ' + dateStr + '. Please use hh:mm AM/PM or hh:mm:ss AM/PM.');
+                                } else {
+                                    const s = parseTimeToSeconds(inVal);
+                                    if (dateStr === todayKarachiStr && s !== null && s > (nowKarachiSecs + bufferSecs)) {
+                                        if (sess.in) sess.in.element.addClass('border-danger');
+                                        validationErrors.push('Future Time Error on ' + dateStr + ': Sign In ' + (i+1) + ' (' + inVal + ') cannot be in the future.');
+                                    } else if (s !== null && s < prevSecs) {
+                                        if (sess.in) sess.in.element.addClass('border-danger');
+                                        validationErrors.push('Chronological Error on ' + dateStr + ': Sign In ' + (i+1) + ' (' + inVal + ') must be after the previous event.');
+                                    }
+                                    prevSecs = s !== null ? s : prevSecs;
+                                    rawEvents.push({ type: (i === 0 ? 'signin' : 'back'), time: inVal });
                                 }
-                                hasValidationError = true;
-                                sessionGapError = true;
+                            }
+
+                            if (outVal) {
+                                if (!validateTimeFormat(outVal)) {
+                                    if (sess.out) sess.out.element.addClass('border-danger');
+                                    validationErrors.push('Invalid time format for Sign Out ' + (i+1) + ' (' + outVal + ') on ' + dateStr + '. Please use hh:mm AM/PM or hh:mm:ss AM/PM.');
+                                } else {
+                                    const s = parseTimeToSeconds(outVal);
+                                    if (dateStr === todayKarachiStr && s !== null && s > (nowKarachiSecs + bufferSecs)) {
+                                        if (sess.out) sess.out.element.addClass('border-danger');
+                                        validationErrors.push('Future Time Error on ' + dateStr + ': Sign Out ' + (i+1) + ' (' + outVal + ') cannot be in the future.');
+                                    } else if (s !== null && s < prevSecs) {
+                                        if (sess.out) sess.out.element.addClass('border-danger');
+                                        validationErrors.push('Chronological Error on ' + dateStr + ': Sign Out ' + (i+1) + ' (' + outVal + ') must be after the previous event.');
+                                    }
+                                    prevSecs = s !== null ? s : prevSecs;
+                                    const isLast = (i === lastFilledIdx);
+                                    rawEvents.push({ type: (isLast ? 'signout' : 'break'), time: outVal });
+                                }
                             }
                         }
 
-                        if (sessionGapError) {
-                            return; // Skip rest of this row, go to next row
-                        }
-
-                        // Chronological alignment check
-                        let chronologyError = false;
-                        for (let k = 0; k < timeline.length - 1; k++) {
-                            const currentEvent = timeline[k];
-                            const nextEvent = timeline[k + 1];
-
-                            if (currentEvent.seconds >= nextEvent.seconds) {
-                                currentEvent.element.addClass('border-danger');
-                                nextEvent.element.addClass('border-danger');
-                                hasValidationError = true;
-                                chronologyError = true;
-                            }
-                        }
-
-                        if (chronologyError) {
-                            return; // Skip rest of this row, go to next row
-                        }
-
-                        // Clean data structure construction
-                        let cleanSessions = [];
-                        for (let i = 0; i < sessions.length; i++) {
-                            const sess = sessions[i];
-                            if (!sess) continue;
-                            const inVal = sess.in ? sess.in.val : '';
-                            const outVal = sess.out ? sess.out.val : '';
-                            const inIsVirtual = sess.in ? sess.in.isVirtual : false;
-                            const outIsVirtual = sess.out ? sess.out.isVirtual : false;
-
-                            if (inVal || outVal) {
-                                cleanSessions.push({
-                                    in: inVal,
-                                    out: outVal,
-                                    in_is_virtual: inIsVirtual,
-                                    out_is_virtual: outIsVirtual
-                                });
-                            }
-                        }
-
-                        dateEntries[dateStr] = cleanSessions;
+                        dateEntries[dateStr] = {
+                            mode: 'raw_events',
+                            events: rawEvents
+                        };
                     });
 
-                    if (hasValidationError) {
+                    // Single vs Multiple Error Notification Logic
+                    if (validationErrors.length === 1) {
+                        showError(validationErrors[0]);
+                        return;
+                    } else if (validationErrors.length > 1) {
                         showError('Validation Error: Please fix all highlighted inputs in red before saving.');
+                        return;
+                    }
+
+                    if (Object.keys(dateEntries).length === 0) {
+                        showError('No changes were made to save.');
                         return;
                     }
 
@@ -1286,6 +1866,8 @@
                                     alert(response.message || 'Timesheet manual overrides saved successfully!');
                                 }
                                 isEditMode = false;
+                                editingRowDates.clear();
+                                activeRowRawEvents = {};
                                 $('#edit-actions').addClass('d-none');
                                 $('#edit-sheet-btn').removeClass('d-none');
                                 fetchReport();
@@ -1335,6 +1917,8 @@
 
                 if (paramUserId) {
                     fetchReport(autoEditTrigger);
+                } else if ($('#employee-select').val()) {
+                    fetchReport();
                 }
 
                 // Render Table dynamically matching Excel template layout
@@ -1349,6 +1933,9 @@
                     thead.empty();
                     tbody.empty();
 
+                    $('body').toggleClass('edit-mode-active', !!isEditMode);
+                    $('#results-card').toggleClass('edit-mode-active', !!isEditMode);
+
                     // Update summary card values
                     if (summary) {
                         $('#sum-expected-time').text(summary.total_expected_formatted);
@@ -1356,9 +1943,29 @@
                         $('#sum-difference').text(summary.total_difference_formatted);
                         $('#sum-leaves').text(summary.total_leaves);
                         $('#sum-absents').text(summary.total_absents);
-                        $('#sum-actual-salary').text(summary.expected_salary);
-                        $('#sum-deductions').text(summary.deductions);
-                        $('#sum-take-away').text(summary.take_away);
+                        $('#sum-unpaid-leaves').text(summary.total_unpaid_leaves || 0);
+                        if (summary.total_days_before_join && summary.total_days_before_join > 0) {
+                            $('#row-sum-pre-join').attr('style', 'display: flex !important;');
+                            $('#sum-pre-join').text(summary.total_days_before_join);
+                        } else {
+                            $('#row-sum-pre-join').attr('style', 'display: none !important;');
+                        }
+                        $('#sum-holidays').text(summary.total_holidays || 0);
+                        $('#sum-remotes').text(Number(summary.total_remotes || 0));
+
+                        if (summary.is_financial_hidden) {
+                            $('#sum-actual-salary-container').html('<span class="text-white opacity-40 fst-italic" style="font-weight: normal;">Hidden</span>');
+                            $('#sum-deductions-container').html('<span class="text-white opacity-40 fst-italic" style="font-weight: normal;">Hidden</span>');
+                            $('#sum-take-away-container').html('<span class="text-white opacity-40 fst-italic" style="font-size: 0.9rem; font-weight: normal;">Hidden</span>');
+                        } else if (summary.has_expected_salary) {
+                            $('#sum-actual-salary-container').html('Rs. <span id="sum-actual-salary">' + summary.expected_salary + '</span>');
+                            $('#sum-deductions-container').html('Rs. <span id="sum-deductions">' + summary.deductions + '</span>');
+                            $('#sum-take-away-container').html('Rs. <span id="sum-take-away">' + summary.take_away + '</span>');
+                        } else {
+                            $('#sum-actual-salary-container').html('<span id="sum-actual-salary">—</span>');
+                            $('#sum-deductions-container').html('<span id="sum-deductions">Rs. 0</span>');
+                            $('#sum-take-away-container').html('<span id="sum-take-away">—</span>');
+                        }
 
                         // Color diff value
                         const diffSec = summary.total_difference_seconds;
@@ -1374,15 +1981,29 @@
                     // 1. Build Headers with fixed widths to support overflow scrolling on 3+ sessions
                     // 1. Build Colgroup and Table Width
                     const period = $('#period-select').val();
-                    const employeeId = $('#employee-select').val();
+                            const employeeId = $('#employee-select').val();
                     const isToday = (period === 'today');
                     const isAll = (employeeId === 'all');
 
-                    let displaySessions = Math.max(2, maxSessions);
+                    let activeMaxSessions = maxSessions;
+                    if (isEditMode && rawReportData && rawReportData.records) {
+                        rawReportData.records.forEach(rec => {
+                            if (editingRowDates.has(rec.raw_date_string) && rec.sessions) {
+                                activeMaxSessions = Math.max(activeMaxSessions, rec.sessions.length);
+                            }
+                        });
+                    }
+                    let displaySessions = Math.max(2, activeMaxSessions);
                     if (isEditMode) {
-                        displaySessions = Math.min(9, displaySessions + 1);
+                        displaySessions = Math.min(10, displaySessions + 1);
                     }
                     
+                    if (isEditMode) {
+                        $('body').addClass('edit-mode-active');
+                    } else {
+                        $('body').removeClass('edit-mode-active');
+                    }
+
                     let tableWidth = '100%';
                     let tableMinWidth = 1000;
                     let sessColWidth = '10%';
@@ -1409,6 +2030,7 @@
                         colgroupHtml = `
                             <col style="width: 10%;">
                             <col style="width: 8%;">
+                            ${isEditMode ? '<col style="width: 65px;">' : ''}
                             <col style="width: 8%;">
                             <col style="width: 12%;">
                         `;
@@ -1422,6 +2044,7 @@
                         colgroupHtml = `
                             <col style="width: 10%;">
                             <col style="width: 8%;">
+                            ${isEditMode ? '<col style="width: 65px;">' : ''}
                             <col style="width: 12%;">
                             <col style="width: 10%;">
                             <col style="width: 8%;">
@@ -1444,6 +2067,10 @@
                     }
                     headerHtml += '<th class="text-center" style="vertical-align: middle;">Day</th>';
                     
+                    if (isEditMode) {
+                        headerHtml += '<th class="text-center" style="vertical-align: middle; width: 65px;">Action</th>';
+                    }
+
                     if (!isToday) {
                         headerHtml += '<th colspan="2" class="text-center" style="vertical-align: middle;">Weekly Summary</th>';
                     }
@@ -1460,7 +2087,7 @@
 
                     // 2. Build Rows
                     if (records.length === 0) {
-                        let emptyCols = (isToday ? 4 : 6) + (displaySessions * 2);
+                        let emptyCols = (isToday ? 4 : 6) + (isEditMode ? 1 : 0) + (displaySessions * 2);
                         tbody.html(`
                             <tr>
                                 <td colspan="${emptyCols}" class="text-center text-white opacity-50 py-5">
@@ -1476,14 +2103,18 @@
                     const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' });
                     records.forEach(function(rec) {
                         const isCurrentDay = (rec.raw_date_string === todayStr);
-                        let rowStyle = '';
                         let rowAttr = '';
                         let rowClass = '';
                         if (rec.is_leave) {
-                            rowStyle = 'style="background-color: rgba(217, 119, 6, 0.18) !important;"';
                             rowClass = 'tr-leave';
+                        } else if (rec.is_unpaid_leave) {
+                            rowClass = 'tr-unpaid-leave';
+                        } else if (rec.is_absent) {
+                            rowClass = 'tr-absent';
+                        } else if (rec.is_holiday) {
+                            rowClass = 'tr-holiday';
                         } else if (rec.is_weekend) {
-                            rowStyle = 'style="background-color: rgba(255, 0, 0, 0.18) !important;"';
+                            rowClass = 'tr-weekend';
                         }
                         if (isCurrentDay) {
                             rowClass += (rowClass ? ' ' : '') + 'tr-current';
@@ -1494,7 +2125,7 @@
                         if (rec.is_dirty) {
                             rowClass += (rowClass ? ' ' : '') + 'tr-dirty';
                         }
-                        bodyHtml += `<tr ${rowStyle} ${rowAttr} class="${rowClass}">`;
+                        bodyHtml += `<tr ${rowAttr} class="${rowClass}">`;
                         
                         // Date/Employee name column
                         if (isAll) {
@@ -1509,11 +2140,30 @@
                         
                         // Day column
                         let dayClass = rec.is_weekend ? 'text-weekend-day' : 'text-normal-day';
-                        let dayInnerClass = '';
-                        if (rec.is_filler) {
-                            dayInnerClass = 'opacity-35 fst-italic';
+                        let dayContent = '';
+                        if (rec.is_remote && !rec.is_filler) {
+                            const notesSafe = rec.remote_notes ? rec.remote_notes.replace(/"/g, '&quot;') : 'Working remotely (Full Day)';
+                            dayContent = `<span class="badge remote-badge-click" data-notes="${notesSafe}" title="Click to view details" style="font-size: 0.68rem; font-weight: normal; background-color: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; border-radius: 4px; padding: 1.5px 5px; text-transform: uppercase; letter-spacing: 0.02em; display: inline-block; cursor: pointer;">REMOTE</span>`;
+                        } else {
+                            let dayInnerClass = rec.is_filler ? 'opacity-35 fst-italic' : '';
+                            dayContent = `<span class="${dayInnerClass}">${rec.day_name}</span>`;
                         }
-                        bodyHtml += `<td class="text-center ${dayClass}"><span class="${dayInnerClass}">${rec.day_name}</span></td>`;
+                        bodyHtml += `<td class="text-center ${dayClass}">${dayContent}</td>`;
+
+                        // Action column (in Edit Mode)
+                        if (isEditMode) {
+                            if (rec.is_filler) {
+                                bodyHtml += `<td class="text-center text-muted font-monospace"><span class="opacity-25">-</span></td>`;
+                            } else if (isCurrentDay && !allowEditToday) {
+                                bodyHtml += `<td class="text-center"><button type="button" class="btn-row-edit" disabled data-custom-tooltip="Enable 'Edit Today' toggle to edit" data-tooltip-placement="top"><i class="bi bi-lock-fill"></i></button></td>`;
+                            } else {
+                                const isEditing = editingRowDates.has(rec.raw_date_string);
+                                const activeClass = isEditing ? 'active-editing' : '';
+                                const icon = isEditing ? '<i class="bi bi-pencil-fill"></i>' : '<i class="bi bi-pencil"></i>';
+                                const tooltipText = isEditing ? 'Editing row' : 'Edit row';
+                                bodyHtml += `<td class="text-center"><button type="button" class="btn-row-edit ${activeClass}" data-date="${rec.raw_date_string}" data-custom-tooltip="${tooltipText}" data-tooltip-placement="top">${icon}</button></td>`;
+                            }
+                        }
                         
                         // Weekly Summary Column (colspan="2")
                         if (!isToday) {
@@ -1557,155 +2207,91 @@
                         bodyHtml += `<td class="text-center font-monospace ${totalClass}"><span class="${totalInnerClass}">${rec.total_formatted}</span></td>`;
  
                         // Fill in dynamic session slots
+                        const isThisRowEditing = isEditMode && editingRowDates.has(rec.raw_date_string) && !rec.is_filler;
+
                         for (let i = 0; i < displaySessions; i++) {
-                            const session = rec.sessions[i];
+                            const session = rec.sessions ? rec.sessions[i] : null;
                             let cellStyle = '';
                             if (rec.is_filler) {
                                 cellStyle = 'style="opacity: 0.35;"';
                             }
- 
-                            if (isEditMode && !rec.is_filler) {
-                                let inRaw = '';
-                                let outRaw = '';
-                                let isVirtualIn = false;
-                                let isVirtualOut = false;
-                                let virtualInReason = '';
-                                let virtualOutReason = '';
 
-                                if (session) {
-                                    inRaw = cleanTimeStr(session.in);
-                                    outRaw = cleanTimeStr(session.out);
-                                    isVirtualIn = !!session.is_virtual_in;
-                                    isVirtualOut = !!session.is_virtual_out;
-                                    virtualInReason = session.virtual_in_reason || 'Auto-appended';
-                                    virtualOutReason = session.virtual_out_reason || 'Auto-appended';
-                                }
+                            if (isThisRowEditing) {
+                                let inRaw = formatTimeToFullSeconds(session ? session.in : '');
+                                let outRaw = formatTimeToFullSeconds(session ? session.out : '');
+                                let isVirtualIn = session ? !!session.is_virtual_in : false;
+                                let isVirtualOut = session ? !!session.is_virtual_out : false;
+                                let defaultInReason = (i === 0) ? 'Auto-Appended Sign In' : 'Auto-Appended Back';
+                                let defaultOutReason = (i === displaySessions - 1) ? 'Auto-Appended Sign Out' : 'Auto-Appended Break';
+                                let virtualInReason = (session && session.virtual_in_reason) ? session.virtual_in_reason : (isVirtualIn ? defaultInReason : '');
+                                let virtualOutReason = (session && session.virtual_out_reason) ? session.virtual_out_reason : (isVirtualOut ? defaultOutReason : '');
 
-                                // Render Sign In input
+                                // Sign In input
                                 let inInputHtml = '';
-                                let inTdAttrs = '';
-                                if (isCurrentDay) {
-                                    const inTooltipAttr = isVirtualIn ? `data-custom-tooltip="${virtualInReason}" data-tooltip-placement="top"` : '';
-                                    inTdAttrs = `${inTooltipAttr}`;
-                                    
+                                if (isVirtualIn) {
                                     inInputHtml = `
                                         <input type="text" 
-                                               class="form-control form-control-sm text-center font-monospace bg-dark text-white edit-time-input ${isVirtualIn ? 'edit-time-input-virtual' : 'border-secondary'}" 
+                                               class="form-control form-control-sm text-center font-monospace edit-time-input edit-time-input-virtual" 
                                                value="${inRaw}" 
-                                               placeholder="hh:mm AM/PM" 
+                                               placeholder="hh:mm:ss AM/PM" 
                                                data-session-index="${i}" 
                                                data-type="in"
-                                               data-is-virtual="${isVirtualIn}"
+                                               data-custom-tooltip="${virtualInReason || defaultInReason}"
+                                               data-tooltip-placement="top"
+                                               data-is-virtual="true"
                                                data-original-value="${inRaw}"
-                                               tabindex="-1"
-                                               readonly
-                                               style="font-size: 0.85rem !important; height: 28px; border-radius: 4px; opacity: 0.6; cursor: not-allowed; user-select: none; pointer-events: none;">
+                                               style="font-size: 0.85rem !important; height: 28px; border-radius: 50px !important;">
                                     `;
                                 } else {
-                                    if (isVirtualIn) {
-                                        inInputHtml = `
-                                            <input type="text" 
-                                                   class="form-control form-control-sm text-center font-monospace bg-dark text-white edit-time-input edit-time-input-virtual" 
-                                                   value="${inRaw}" 
-                                                   placeholder="hh:mm AM/PM" 
-                                                   data-session-index="${i}" 
-                                                   data-type="in"
-                                                   data-custom-tooltip="${virtualInReason}"
-                                                   data-tooltip-placement="top"
-                                                   data-is-virtual="true"
-                                                   data-original-value="${inRaw}"
-                                                   style="font-size: 0.85rem !important; height: 28px; border-radius: 4px;">
-                                        `;
-                                    } else {
-                                        inInputHtml = `
-                                            <input type="text" 
-                                                   class="form-control form-control-sm text-center font-monospace bg-dark text-white border-secondary edit-time-input" 
-                                                   value="${inRaw}" 
-                                                   placeholder="hh:mm AM/PM" 
-                                                   data-session-index="${i}" 
-                                                   data-type="in"
-                                                   data-is-virtual="false"
-                                                   data-original-value="${inRaw}"
-                                                   style="font-size: 0.85rem !important; height: 28px; border-radius: 4px;">
-                                        `;
-                                    }
+                                    inInputHtml = `
+                                        <input type="text" 
+                                               class="form-control form-control-sm text-center font-monospace edit-time-input" 
+                                               value="${inRaw}" 
+                                               placeholder="hh:mm:ss AM/PM" 
+                                               data-session-index="${i}" 
+                                               data-type="in"
+                                               data-is-virtual="false"
+                                               data-original-value="${inRaw}"
+                                               style="font-size: 0.85rem !important; height: 28px; border-radius: 50px !important;">
+                                    `;
                                 }
 
-                                // Render Sign Out input
+                                // Sign Out input
                                 let outInputHtml = '';
-                                let outTdAttrs = '';
-                                const isActiveOut = session && session.out && session.out.includes('(Active)');
+                                const placement = (i === displaySessions - 1) ? 'left' : 'top';
+                                const isExhaustedOut = isVirtualOut && (virtualOutReason === 'Break Balance Exhausted' || (virtualOutReason && virtualOutReason.toLowerCase().includes('balance')));
+                                const outVirtualClass = isExhaustedOut ? 'edit-time-input-purple' : 'edit-time-input-virtual';
 
-                                if (isCurrentDay) {
-                                    let outTooltipAttr = '';
-                                    const placement = (i === displaySessions - 1) ? 'left' : 'top';
-                                    if (isActiveOut) {
-                                        outTooltipAttr = `data-custom-tooltip="active time" data-tooltip-placement="${placement}"`;
-                                    } else if (isVirtualOut) {
-                                        outTooltipAttr = `data-custom-tooltip="${virtualOutReason}" data-tooltip-placement="${placement}"`;
-                                    }
-                                    outTdAttrs = `${outTooltipAttr}`;
-                                    
+                                if (isVirtualOut) {
                                     outInputHtml = `
                                         <input type="text" 
-                                               class="form-control form-control-sm text-center font-monospace bg-dark text-white edit-time-input ${isActiveOut ? 'edit-time-input-active' : (isVirtualOut ? 'edit-time-input-virtual' : 'border-secondary')}" 
+                                               class="form-control form-control-sm text-center font-monospace edit-time-input ${outVirtualClass}" 
                                                value="${outRaw}" 
-                                               placeholder="hh:mm AM/PM" 
+                                               placeholder="hh:mm:ss AM/PM" 
                                                data-session-index="${i}" 
                                                data-type="out"
-                                               data-is-virtual="${isVirtualOut}"
+                                               data-custom-tooltip="${virtualOutReason || defaultOutReason}"
+                                               data-tooltip-placement="${placement}"
+                                               data-is-virtual="true"
                                                data-original-value="${outRaw}"
-                                               tabindex="-1"
-                                               readonly
-                                               style="font-size: 0.85rem !important; height: 28px; border-radius: 4px; opacity: 0.6; cursor: not-allowed; user-select: none; pointer-events: none;">
+                                               style="font-size: 0.85rem !important; height: 28px; border-radius: 50px !important;">
                                     `;
                                 } else {
-                                    const placement = (i === displaySessions - 1) ? 'left' : 'top';
-                                    if (isActiveOut) {
-                                        outInputHtml = `
-                                            <input type="text" 
-                                                   class="form-control form-control-sm text-center font-monospace bg-dark text-white edit-time-input edit-time-input-active" 
-                                                   value="${outRaw}" 
-                                                   placeholder="hh:mm AM/PM" 
-                                                   data-session-index="${i}" 
-                                                   data-type="out"
-                                                   data-custom-tooltip="Active - ${outRaw}"
-                                                   data-tooltip-placement="${placement}"
-                                                   data-is-virtual="false"
-                                                   data-original-value="${outRaw}"
-                                                   style="font-size: 0.85rem !important; height: 28px; border-radius: 4px;">
-                                        `;
-                                    } else if (isVirtualOut) {
-                                        outInputHtml = `
-                                            <input type="text" 
-                                                   class="form-control form-control-sm text-center font-monospace bg-dark text-white edit-time-input edit-time-input-virtual" 
-                                                   value="${outRaw}" 
-                                                   placeholder="hh:mm AM/PM" 
-                                                   data-session-index="${i}" 
-                                                   data-type="out"
-                                                   data-custom-tooltip="${virtualOutReason}"
-                                                   data-tooltip-placement="${placement}"
-                                                   data-is-virtual="true"
-                                                   data-original-value="${outRaw}"
-                                                   style="font-size: 0.85rem !important; height: 28px; border-radius: 4px;">
-                                        `;
-                                    } else {
-                                        outInputHtml = `
-                                            <input type="text" 
-                                                   class="form-control form-control-sm text-center font-monospace bg-dark text-white border-secondary edit-time-input" 
-                                                   value="${outRaw}" 
-                                                   placeholder="hh:mm AM/PM" 
-                                                   data-session-index="${i}" 
-                                                   data-type="out"
-                                                   data-is-virtual="false"
-                                                   data-original-value="${outRaw}"
-                                                   style="font-size: 0.85rem !important; height: 28px; border-radius: 4px;">
-                                        `;
-                                    }
+                                    outInputHtml = `
+                                        <input type="text" 
+                                               class="form-control form-control-sm text-center font-monospace edit-time-input" 
+                                               value="${outRaw}" 
+                                               placeholder="hh:mm:ss AM/PM" 
+                                               data-session-index="${i}" 
+                                               data-type="out"
+                                               data-is-virtual="false"
+                                               data-original-value="${outRaw}"
+                                               style="font-size: 0.85rem !important; height: 28px; border-radius: 50px !important;">
+                                    `;
                                 }
 
-                                bodyHtml += `<td class="text-center font-monospace px-1" ${inTdAttrs}>${inInputHtml}</td>`;
-                                bodyHtml += `<td class="text-center font-monospace px-1" ${outTdAttrs}>${outInputHtml}</td>`;
+                                bodyHtml += `<td class="text-center font-monospace px-1">${inInputHtml}</td>`;
+                                bodyHtml += `<td class="text-center font-monospace px-1">${outInputHtml}</td>`;
                             } else {
                                 if (session) {
                                     let inVal = session.in || '-';
@@ -1724,7 +2310,12 @@
                                         outVal = `<span class="badge rounded-pill px-2 py-0.5 badge-session-active" style="font-size: 0.7rem; font-weight: 500;">Active</span>`;
                                     } else if (session.is_virtual_out) {
                                         const placement = (i === displaySessions - 1) ? 'left' : 'top';
-                                        outVal = `<span class="text-warning" data-custom-tooltip="${session.virtual_out_reason || 'Virtual Entry'}" data-tooltip-placement="${placement}">${session.out} <i class="bi bi-exclamation-triangle-fill text-warning ms-1" style="font-size: 0.82rem;"></i></span>`;
+                                        const isExhaustedOut = (session.virtual_out_reason === 'Break Balance Exhausted' || (session.virtual_out_reason && session.virtual_out_reason.toLowerCase().includes('balance')));
+                                        if (isExhaustedOut) {
+                                            outVal = `<span style="color: #c084fc !important;" data-custom-tooltip="Break Balance Exhausted" data-tooltip-placement="${placement}">${session.out} <i class="bi bi-stopwatch ms-1" style="color: #c084fc; font-size: 0.82rem;"></i></span>`;
+                                        } else {
+                                            outVal = `<span class="text-warning" data-custom-tooltip="${session.virtual_out_reason || 'Virtual Entry'}" data-tooltip-placement="${placement}">${session.out} <i class="bi bi-exclamation-triangle-fill text-warning ms-1" style="font-size: 0.82rem;"></i></span>`;
+                                        }
                                     } else if (session.out) {
                                         outClass = 'text-white';
                                     } else {
@@ -1752,12 +2343,79 @@
                         bodyHtml += '</tr>';
                     });
                     tbody.html(bodyHtml);
+                    updateStickyOffsets();
                 }
+
+                function updateStickyOffsets() {
+                    const col1 = $('#dynamic-thead th:first-child');
+                    if (col1.length) {
+                        const col1Width = col1.outerWidth();
+                        $('#dynamic-table th:nth-child(2), #dynamic-table td:nth-child(2)').css('left', col1Width + 'px');
+
+                        if (isEditMode) {
+                            const col2 = $('#dynamic-thead th:nth-child(2)');
+                            if (col2.length) {
+                                const col2Width = col2.outerWidth();
+                                const col3Left = col1Width + col2Width;
+                                $('#dynamic-table th:nth-child(3), #dynamic-table td:nth-child(3)').css('left', col3Left + 'px');
+                            }
+                        }
+                    }
+                }
+
+                $(window).on('resize', updateStickyOffsets);
+
+                // Click event for REMOTE badges to display custom notes modal
+                $(document).on('click', '.remote-badge-click', function() {
+                    const notes = $(this).data('notes') || 'Working remotely (Full Day)';
+                    const $tr = $(this).closest('tr');
+                    const dateStr = $tr.data('date') || '';
+                    
+                    let formattedDate = dateStr;
+                    if (dateStr) {
+                        const parts = dateStr.split('-');
+                        if (parts.length === 3) {
+                            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                            const year = parts[0];
+                            const month = months[parseInt(parts[1], 10) - 1];
+                            const day = parseInt(parts[2], 10);
+                            formattedDate = `${month} ${day}, ${year}`;
+                        }
+                    }
+                    
+                    $('#remoteDetailsDate').text(formattedDate);
+                    $('#remoteDetailsNotes').text(notes);
+                    
+                    const remoteModal = new bootstrap.Modal(document.getElementById('remoteWorkDetailsModal'));
+                    remoteModal.show();
+                });
             });
         </script>
     @endpush
 
     @push('modals')
+    <!-- Remote Work Log Details Modal -->
+    <div class="modal fade" id="remoteWorkDetailsModal" tabindex="-1" style="z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="background-color: #0c0c0c !important; border: 1px solid rgba(255, 255, 255, 0.08) !important;">
+                <div class="modal-body text-center p-4">
+                    <div class="text-info mb-3">
+                        <i class="bi bi-house-door-fill" style="font-size: 3rem; color: #60a5fa;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2 text-white">Remote Work Details</h5>
+                    <p class="text-white-50 small mb-1" id="remoteDetailsDate"></p>
+                    <div class="p-3 my-3 rounded" style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); text-align: left;">
+                        <span class="text-white-50 small d-block mb-1">Notes / Hours:</span>
+                        <p class="text-white mb-0 small fw-medium" style="white-space: pre-wrap;" id="remoteDetailsNotes"></p>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <button type="button" class="row-btn-blue" data-bs-dismiss="modal" style="width: 145px;">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Beautiful Custom Confirm Modal -->
     <div class="modal fade" id="confirmActionModal" tabindex="-1" style="z-index: 1060;">
         <div class="modal-dialog modal-dialog-centered">
@@ -1776,5 +2434,51 @@
             </div>
         </div>
     </div>
+
+    <!-- Beautiful Custom Expected Salary Alert Modal -->
+    <div class="modal fade" id="missingSalaryModal" tabindex="-1" style="z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="background-color: #0c0c0c !important; border: 1px solid rgba(255, 255, 255, 0.08) !important;">
+                <div class="modal-body text-center p-4">
+                    <div class="text-danger mb-3">
+                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2 text-white">Expected Salary Missing</h5>
+                    <p class="text-white opacity-70 small mb-4">
+                        The expected salary has not been configured for this employee. Please set the expected salary on the employee profile page before downloading their track record spreadsheet.
+                    </p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="row-btn" data-bs-dismiss="modal" style="width: 145px;">Cancel</button>
+                        <a href="#" id="btnConfigureSalaryModal" class="row-btn-blue text-decoration-none d-flex align-items-center justify-content-center" style="width: 145px;">Configure</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Beautiful Custom Slack User Mapping Alert Modal -->
+    <div class="modal fade" id="missingSlackMappingModal" tabindex="-1" style="z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="background-color: #0c0c0c !important; border: 1px solid rgba(255, 255, 255, 0.08) !important;">
+                <div class="modal-body text-center p-4">
+                    <div class="text-danger mb-3">
+                        <i class="bi bi-slack" style="font-size: 3rem; color: #e01e5a;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2 text-white">Slack User Mapping Missing</h5>
+                    <p class="text-white opacity-70 small mb-4">
+                        @if($isEmployeeSide ?? false)
+                            Please ask your HR/Administrator to register your Slack User Mapping first so you can view and export your track record.
+                        @else
+                            This employee is not registered in Slack User Mapping. Please ask your HR/Administrator to register their mapping first.
+                        @endif
+                    </p>
+                    <div class="d-flex justify-content-center">
+                        <button type="button" class="row-btn-blue" data-bs-dismiss="modal" style="width: 145px;">Okay</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     @endpush
 </x-app-layout>
+

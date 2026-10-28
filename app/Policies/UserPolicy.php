@@ -8,7 +8,8 @@ class UserPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isSuperAdmin() || $user->isAdmin();
+        // Super admins can see all; staff & guest supervisors can view subordinates
+        return $user->isSuperAdmin() || $user->isStaff() || $user->isGuest();
     }
 
     public function view(User $user, User $model): bool
@@ -17,8 +18,9 @@ class UserPolicy
             return true;
         }
 
-        if ($user->isAdmin()) {
-            return $model->manager_id === $user->id;
+        // Staff and guest supervisors can view their own profile or any subordinate
+        if ($user->isStaff() || $user->isGuest()) {
+            return $model->manager_id === $user->id || $user->id === $model->id || in_array($model->id, $user->subordinate_ids, true);
         }
 
         return $user->id === $model->id;

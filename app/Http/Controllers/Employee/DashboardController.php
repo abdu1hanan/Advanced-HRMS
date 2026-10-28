@@ -23,6 +23,7 @@ class DashboardController extends Controller
         }
 
         $balances = $user->leaveBalances()
+            ->whereHas('leaveType', fn ($q) => $q->where('is_active', true))
             ->with('leaveType')
             ->where('year', $year)
             ->get()
@@ -34,13 +35,20 @@ class DashboardController extends Controller
 
         $recentRequests = LeaveRequest::query()
             ->where('user_id', $user->id)
-            ->with(['leaveType', 'comments.user'])
+            ->with(['leaveType', 'comments' => function ($q) {
+                $q->where('is_hidden_from_employee', false);
+            }, 'comments.user'])
             ->latest()
             ->limit(25)
             ->get();
 
-        $leaveTypes = LeaveType::where('is_active', true)->orderBy('name')->get();
+        $slackMapping = \App\Models\SlackUserMapping::where('user_id', $user->id)->first();
+        $todayBreakBalance = null;
+        if ($slackMapping) {
+            $todayStr = now('Asia/Karachi')->format('Y-m-d');
+            $todayBreakBalance = \App\Models\SlackMessage::computeDayBreakBalance($slackMapping->slack_user_id, $todayStr);
+        }
 
-        return view('employee.dashboard', compact('user', 'balances', 'leaveTypes', 'year'));
+        return view('employee.dashboard', compact('user', 'balances', 'leaveTypes', 'year', 'isRemoteToday', 'todayBreakBalance', 'slackMapping'));
     }
 }

@@ -10,7 +10,11 @@ class LeaveRequestCommented extends Notification
 {
     use Queueable;
 
-    public function __construct(public LeaveRequest $leaveRequest, public string $commenterName) {}
+    public function __construct(
+        public LeaveRequest $leaveRequest, 
+        public string $commenterName,
+        public ?string $commenterDesignation = null
+    ) {}
 
     public function via(object $notifiable): array
     {
@@ -19,11 +23,16 @@ class LeaveRequestCommented extends Notification
 
     public function toArray(object $notifiable): array
     {
+        $desigStr = $this->commenterDesignation ? " ({$this->commenterDesignation})" : '';
+
         if ($notifiable->id === $this->leaveRequest->user_id) {
-            $message = "{$this->commenterName} left a comment on your leave request.";
-            $url = $notifiable->isAdmin() ? route('admin.leaves.apply') : route('employee.dashboard');
+            $message = "{$this->commenterName}{$desigStr} left a comment on your leave request.";
+            // It's the requester — take them to their own leave record
+            // All staff use admin routes
+            $url = route('admin.leaves.record', ['type' => 'leaves']);
+
         } else {
-            $message = "{$this->commenterName} left a comment on the leave request for {$this->leaveRequest->user->name}.";
+            $message = "{$this->commenterName}{$desigStr} left a comment on the leave request for {$this->leaveRequest->user->name}.";
             $url = $notifiable->isSuperAdmin() 
                 ? route('super-admin.leave-requests.index') 
                 : route('admin.team.leaves');

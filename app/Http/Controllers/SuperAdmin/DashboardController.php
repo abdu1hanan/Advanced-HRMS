@@ -19,7 +19,13 @@ class DashboardController extends Controller
                 $q->whereIn('status', [LeaveRequest::STATUS_PENDING, 'approved_by_manager', 'rejected_by_manager'])
                   ->orWhereIn('change_request_status', ['pending', 'approved_by_manager', 'rejected_by_manager']);
             })->count(),
+            'pending_registrations' => \App\Models\AccountApprovalRequest::where('status', \App\Models\AccountApprovalRequest::STATUS_PENDING)->count(),
         ];
+
+        $pendingApprovals = \App\Models\AccountApprovalRequest::where('status', \App\Models\AccountApprovalRequest::STATUS_PENDING)
+            ->with(['user.department', 'user.role', 'user.designation'])
+            ->latest()
+            ->get();
 
         $recentRequests = LeaveRequest::with(['user.department', 'leaveType'])
             ->where(function($q) {
@@ -30,6 +36,6 @@ class DashboardController extends Controller
             ->limit(15)
             ->get();
 
-        return view('super-admin.dashboard', compact('stats', 'recentRequests'));
+        return view('super-admin.dashboard', compact('stats', 'recentRequests', 'pendingApprovals'));
     }
 }
