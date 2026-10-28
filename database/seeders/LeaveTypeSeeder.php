@@ -17,6 +17,9 @@ class LeaveTypeSeeder extends Seeder
                 'max_days_per_year' => 999,
                 'allow_carry_forward' => false,
                 'max_carry_forward_days' => 0,
+                'requires_attachment' => false,
+                'is_half_day' => false,
+                'is_active' => true,
                 'default_entitled' => 0,
             ],
             [
@@ -25,6 +28,9 @@ class LeaveTypeSeeder extends Seeder
                 'max_days_per_year' => 999,
                 'allow_carry_forward' => false,
                 'max_carry_forward_days' => 0,
+                'requires_attachment' => false,
+                'is_half_day' => false,
+                'is_active' => true,
                 'default_entitled' => 0,
             ],
             [
@@ -33,6 +39,9 @@ class LeaveTypeSeeder extends Seeder
                 'max_days_per_year' => 999,
                 'allow_carry_forward' => false,
                 'max_carry_forward_days' => 0,
+                'requires_attachment' => false,
+                'is_half_day' => false,
+                'is_active' => true,
                 'default_entitled' => 0,
             ],
             [
@@ -41,6 +50,9 @@ class LeaveTypeSeeder extends Seeder
                 'max_days_per_year' => 5,
                 'allow_carry_forward' => true,
                 'max_carry_forward_days' => 2,
+                'requires_attachment' => false,
+                'is_half_day' => false,
+                'is_active' => true,
                 'default_entitled' => 5,
             ],
             [
@@ -49,6 +61,9 @@ class LeaveTypeSeeder extends Seeder
                 'max_days_per_year' => 10,
                 'allow_carry_forward' => false,
                 'max_carry_forward_days' => 0,
+                'requires_attachment' => false,
+                'is_half_day' => false,
+                'is_active' => true,
                 'default_entitled' => 10,
             ],
             [
@@ -57,6 +72,9 @@ class LeaveTypeSeeder extends Seeder
                 'max_days_per_year' => 5,
                 'allow_carry_forward' => false,
                 'max_carry_forward_days' => 0,
+                'requires_attachment' => false,
+                'is_half_day' => false,
+                'is_active' => true,
                 'default_entitled' => 5,
             ],
         ];

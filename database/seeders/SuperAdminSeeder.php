@@ -28,7 +28,12 @@ class SuperAdminSeeder extends Seeder
         $ctoDesig = Designation::firstOrCreate(['name' => 'CTO']);
         $hrDesig  = Designation::firstOrCreate(['name' => 'HR Manager']);
 
-        // 3. CEO: ceo@company.com (special_order: 1)
+        // 3. Ensure Departments exist for executive roles
+        $mgtDept = \App\Models\Department::firstOrCreate(['code' => 'MGT'], ['name' => 'Management Department']);
+        $devDept = \App\Models\Department::firstOrCreate(['code' => 'DEV'], ['name' => 'Development Department']);
+        $hrDept  = \App\Models\Department::firstOrCreate(['code' => 'HR'], ['name' => 'HR Department']);
+
+        // 4. CEO: ceo@company.com (special_order: 1)
         User::updateOrCreate(
             ['email' => 'ceo@company.com'],
             [
@@ -36,12 +41,13 @@ class SuperAdminSeeder extends Seeder
                 'password'          => Hash::make('admin'),
                 'role_id'           => $superAdminRoleId,
                 'designation_id'    => $ceoDesig->id,
+                'department_id'     => $mgtDept->id,
                 'special_order'     => 1,
                 'email_verified_at' => now(),
             ]
         );
 
-        // 4. CTO: cto@company.com (special_order: 2)
+        // 5. CTO: cto@company.com (special_order: 2)
         User::updateOrCreate(
             ['email' => 'cto@company.com'],
             [
@@ -49,12 +55,13 @@ class SuperAdminSeeder extends Seeder
                 'password'          => Hash::make('admin'),
                 'role_id'           => $superAdminRoleId,
                 'designation_id'    => $ctoDesig->id,
+                'department_id'     => $devDept->id,
                 'special_order'     => 2,
                 'email_verified_at' => now(),
             ]
         );
 
-        // 5. HR Department: hr@company.com (special_order: 3)
+        // 6. HR Department: hr@company.com (special_order: 3)
         User::updateOrCreate(
             ['email' => 'hr@company.com'],
             [
@@ -62,6 +69,7 @@ class SuperAdminSeeder extends Seeder
                 'password'          => Hash::make('admin'),
                 'role_id'           => $superAdminRoleId,
                 'designation_id'    => $hrDesig->id,
+                'department_id'     => $hrDept->id,
                 'special_order'     => 3,
                 'email_verified_at' => now(),
             ]

@@ -131,6 +131,17 @@ To explore the dashboard, log in with any of the default seeded SuperAdmin accou
 | **CTO** | `cto@company.com` | `admin` |
 | **HR Department** | `hr@company.com` | `admin` |
 
+### Default Seeded Leave Types & Entitlements
+
+| Leave Type | Annual Limit | Carry Forward | Default Entitlement |
+|---|---|---|---|
+| **Annual Leave** | 5 days | Yes (up to 2 days) | 5 days |
+| **Casual Leave** | 10 days | No | 10 days |
+| **Sick Leave** | 5 days | No | 5 days |
+| **Unpaid Leave** | Unlimited | No | 0 days (unpaid) |
+| **Emergency Leave** | Flexible | No | 0 days |
+| **Absent** | System Tracked | No | 0 days |
+
 ---
 
 ## Customizing the Company Logo

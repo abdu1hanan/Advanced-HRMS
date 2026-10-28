@@ -11,7 +11,7 @@ class DepartmentSeeder extends Seeder
     {
         $departments = [
             ['name' => 'Development Department', 'code' => 'DEV'],
-            ['name' => 'AI Department', 'code' => 'AI'],
+            ['name' => 'Research & Development Department', 'code' => 'RND'],
             ['name' => 'Marketing Department', 'code' => 'MKT'],
             ['name' => 'Designing Department', 'code' => 'DES'],
             ['name' => 'Sales Department', 'code' => 'SAL'],
