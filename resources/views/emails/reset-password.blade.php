@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password — BeetleOps HRMS</title>
+    <title>Reset Password — HRMS</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -107,14 +107,14 @@
         <div class="email-card">
             <!-- Header with HRMS Heading -->
             <div class="email-header">
-                <h1 class="email-title">BeetleOps HRMS</h1>
+                <h1 class="email-title">HRMS</h1>
                 <p class="email-subtitle">Human Resource Management System</p>
             </div>
 
             <!-- Body -->
             <div class="email-body">
                 <p style="margin-top: 0;">Hello <strong>{{ $userName ?? 'there' }}</strong>,</p>
-                <p>We received a request to reset your password for your <strong>BeetleOps HRMS</strong> account. Click the button below to proceed:</p>
+                <p>We received a request to reset your password for your <strong>HRMS</strong> account. Click the button below to proceed:</p>
 
                 <div class="btn-container">
                     <a href="{{ $resetUrl }}" class="btn-reset" target="_blank">Reset My Password</a>
@@ -137,7 +137,7 @@
 
             <!-- Footer with Dynamic Year -->
             <div class="email-footer">
-                &copy; {{ date('Y') }} BeetleOps. All rights reserved.<br>
+                &copy; {{ date('Y') }} HRMS. All rights reserved.<br>
             </div>
         </div>
     </div>

@@ -10,7 +10,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Automatically set up the 3 SuperAdmin accounts (Ammar, Rana Saad, HR Department)
+        // Automatically set up the 3 SuperAdmin accounts (CEO, CTO, HR Department)
         (new SuperAdminSeeder())->run();
     }
 

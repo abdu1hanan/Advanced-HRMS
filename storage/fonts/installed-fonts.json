@@ -1,7 +1,7 @@
 {
     "raleway": {
-        "normal": "E:\\BeetlEOPS(Internship)\\Work Code\\HRMS (BeetleOps)\\storage\\fonts\/raleway_normal_4941f432c13889b1102277d3ebe6d4c0",
-        "bold": "E:\\BeetlEOPS(Internship)\\Work Code\\HRMS (BeetleOps)\\storage\\fonts\/raleway_bold_b491c6c577849147cb02e737ed014bb3",
+        "normal": "raleway_normal_4941f432c13889b1102277d3ebe6d4c0",
+        "bold": "raleway_bold_b491c6c577849147cb02e737ed014bb3",
         "800": "raleway_800_b491c6c577849147cb02e737ed014bb3"
     }
 }

@@ -12,7 +12,7 @@
                     <div>
                         <h5 class="fw-bold text-white mb-1">Account Pending Approval</h5>
                         <p class="text-white opacity-75 small mb-0" style="font-size: 0.85rem; line-height: 1.5; max-width: 820px;">
-                            Welcome to BeetleOps HRMS, <strong class="text-white">{{ $user->name }}</strong>! Your account has been registered and is currently awaiting approval from HR / Administrator. Your profile details are shown below. Once approved, all system tools including attendance logs, personal leaves, and organization hierarchy will be unlocked automatically. Kindly contact HR if you require immediate activation.
+                            Welcome to HRMS, <strong class="text-white">{{ $user->name }}</strong>! Your account has been registered and is currently awaiting approval from HR / Administrator. Your profile details are shown below. Once approved, all system tools including attendance logs, personal leaves, and organization hierarchy will be unlocked automatically. Kindly contact HR if you require immediate activation.
                         </p>
                     </div>
                 </div>

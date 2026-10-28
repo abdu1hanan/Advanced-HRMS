@@ -206,35 +206,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 require __DIR__.'/auth.php';
 
-/*
-|--------------------------------------------------------------------------
-| Documentation Route (Public — no auth required)
-|--------------------------------------------------------------------------
-*/
-Route::get('/docs/{path?}', function ($path = null) {
-    $basePath = base_path('doc website');
-    
-    if ($path) {
-        $filePath = realpath($basePath . '/' . $path);
-        if ($filePath && is_file($filePath) && str_starts_with($filePath, realpath($basePath))) {
-            $extension = pathinfo($filePath, PATHINFO_EXTENSION);
-            $mimeTypes = [
-                'css'  => 'text/css',
-                'js'   => 'application/javascript',
-                'svg'  => 'image/svg+xml',
-                'png'  => 'image/png',
-                'jpg'  => 'image/jpeg',
-                'jpeg' => 'image/jpeg',
-                'webp' => 'image/webp',
-                'json' => 'application/json',
-                'md'   => 'text/markdown',
-            ];
-            $contentType = $mimeTypes[strtolower($extension)] ?? 'text/plain';
-            return response()->file($filePath, ['Content-Type' => $contentType]);
-        }
-    }
-    
-    $docIndex = $basePath . '/index.html';
-    abort_unless(file_exists($docIndex), 404, 'Documentation not found.');
-    return response()->file($docIndex);
-})->where('path', '.*')->name('docs');

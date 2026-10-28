@@ -1025,7 +1025,7 @@ class SlackWebhookController extends Controller
             $slackAlertService = app(\App\Services\SlackAlertService::class);
             $slackAlertService->sendDM(
                 $slackUserId,
-                "Hello! I couldn't map your Slack profile to the BeetleOps HRMS. Please ask HR or an Administrator to map your Slack profile so you can use this channel."
+                "Hello! I couldn't map your Slack profile to the HRMS. Please ask HR or an Administrator to map your Slack profile so you can use this channel."
             );
             return response()->json(['status' => 'unmapped_user']);
         }
@@ -1926,7 +1926,7 @@ class SlackWebhookController extends Controller
         // 1. Check if deletion is already locked
         $isLocked = (bool) $message->is_deletion_locked;
 
-        // 2. Also check if any sign-out message exists in BeetleSync on or after the remote message timestamp
+        // 2. Also check if any sign-out message exists in Slack Sync on or after the remote message timestamp
         if (!$isLocked) {
             $hasSignOutAfter = SlackMessage::where('slack_user_id', $message->slack_user_id)
                 ->where('message_at', '>=', $message->message_at)

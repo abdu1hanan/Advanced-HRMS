@@ -22,9 +22,7 @@
 
     <p style="margin-top: 20px;">
         Best regards,<br><br>
-        <strong>Mahrukh Shaukat</strong><br>
-        <strong>HR Manager</strong><br>
-        <strong>BeetleOPS</strong>
+        <strong>HR Department</strong>
     </p>
 </body>
 </html>

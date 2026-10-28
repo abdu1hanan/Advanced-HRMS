@@ -46,7 +46,7 @@ class AppServiceProvider extends ServiceProvider
             $expireMinutes = config('auth.passwords.'.config('auth.defaults.passwords').'.expire', 15);
 
             return (new MailMessage)
-                ->subject('Password reset request for your BeetleOps HRMS account')
+                ->subject('Password reset request for your HRMS account')
                 ->view('emails.reset-password', [
                     'userName'      => $notifiable->name ?? 'there',
                     'resetUrl'      => $resetUrl,

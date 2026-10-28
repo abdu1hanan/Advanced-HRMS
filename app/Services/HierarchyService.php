@@ -67,13 +67,13 @@ class HierarchyService
             ->get()
             ->keyBy('user_id');
 
-        // Identify Super Admins ordered by special_order (1: Ammar, 2: Saad, 3: HR)
+        // Identify Super Admins ordered by special_order (1: CEO, 2: CTO, 3: HR)
         $superAdmins = $allUsers->filter(function ($u) {
             return $u->isSuperAdmin() || ($u->role && $u->role->name === \App\Models\Role::SUPER_ADMIN);
         })->sortBy(fn($u) => $u->special_order ?? 999)->values();
 
-        $topSuperAdmin = $superAdmins->first(); // special_order 1: Ammar (CEO)
-        $ctoSuperAdmin = $superAdmins->firstWhere('special_order', 2); // special_order 2: Saad (CTO)
+        $topSuperAdmin = $superAdmins->first(); // special_order 1: CEO
+        $ctoSuperAdmin = $superAdmins->firstWhere('special_order', 2); // special_order 2: CTO
         $hrSuperAdmin  = $superAdmins->firstWhere('special_order', 3) ?? $superAdmins->last(); // special_order 3: HR
 
         // Group users by manager_id for fast tree lookup
@@ -91,9 +91,9 @@ class HierarchyService
 
             if ($isSuperAdmin) {
                 // Executive hierarchy spine:
-                // Ammar (1) is apex root (mgr: 0)
-                // Saad (2) is under Ammar (mgr: Ammar)
-                // HR (3) is under Saad (mgr: Saad) or under Ammar if Saad missing
+                // CEO (1) is apex root (mgr: 0)
+                // CTO (2) is under CEO (mgr: CEO)
+                // HR (3) is under CTO (mgr: CTO) or under CEO if CTO missing
                 if ($user->special_order === 1 || ($topSuperAdmin && $user->id === $topSuperAdmin->id)) {
                     $effectiveMgrId = 0;
                 } elseif ($user->special_order === 2) {
@@ -261,7 +261,7 @@ class HierarchyService
                 }
             }
         } else {
-            // Whole Organization: Apex is Top Super Admin (Ammar - 1)
+            // Whole Organization: Apex is Top Super Admin (CEO - 1)
             if ($topSuperAdmin) {
                 $roots[] = $formatNode($topSuperAdmin);
             } else {

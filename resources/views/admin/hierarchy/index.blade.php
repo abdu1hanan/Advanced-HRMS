@@ -8,7 +8,7 @@
         </div>
     </x-slot>
 
-    @section('title', 'System Hierarchy — BeetleOps HRMS')
+    @section('title', 'System Hierarchy — HRMS')
 
     <div class="container-fluid px-0">
         <!-- Filter & Toolbar Card (Separated with High z-index) -->
@@ -180,7 +180,7 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center profile-field-row">
                             <span class="text-white opacity-50 small">Email Address</span>
-                            <span id="modal-email" class="text-white fw-semibold small text-break text-end" style="max-width: 65%;">jane@beetleops.com</span>
+                            <span id="modal-email" class="text-white fw-semibold small text-break text-end" style="max-width: 65%;">jane@company.com</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center profile-field-row">
                             <span class="text-white opacity-50 small">Phone Number</span>

@@ -50,7 +50,7 @@ class UserController extends Controller
         $users = $query->orderByRaw('special_order IS NULL, special_order ASC')->latest()->paginate(20)->withQueryString();
 
         $departments  = Department::orderBy('name')->get();
-        // All users (including SuperAdmins like CTO Saad / CEO Ammar) are candidates for "immediate boss" assignment
+        // All users (including SuperAdmins like CTO / CEO) are candidates for "immediate boss" assignment
         $allUsers    = User::orderByRaw('special_order IS NULL, special_order ASC')
             ->orderBy('name')
             ->get();

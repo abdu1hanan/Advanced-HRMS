@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot name="header">Beetle Sync</x-slot>
+    <x-slot name="header">Slack Sync</x-slot>
 
     <!-- Filters Card -->
     <div class="spotify-card mb-3 mt-3">

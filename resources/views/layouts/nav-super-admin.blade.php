@@ -44,7 +44,7 @@
             <ul class="nav flex-column session-tree-submenu mt-1">
                 <li class="nav-item" style="border: none !important;">
                     <a class="nav-link py-1 text-white opacity-75 {{ request()->routeIs('super-admin.session-management.overrides') ? 'active fw-bold' : '' }}" href="{{ route('super-admin.session-management.overrides') }}">
-                        <i class="bi bi-chat-quote me-2"></i>Beetle Sync
+                        <i class="bi bi-chat-quote me-2"></i>Slack Sync
                     </a>
                 </li>
                 <li class="nav-item" style="border: none !important;">

@@ -1,5 +1,5 @@
 /**
- * 🌟 BeetleOps HRMS - Dynamic Organization Hierarchy Engine
+ * 🌟 HRMS - Dynamic Organization Hierarchy Engine
  * Native scrollable hierarchy view with vertical/horizontal branching,
  * branch collapse/expand, live search, and centered backdrop-blurred detail modal on click.
  */

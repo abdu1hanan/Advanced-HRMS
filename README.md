@@ -1,8 +1,8 @@
 # Human Resource Management System
 
-BeetleOps HRMS is a production-ready, enterprise-grade Human Resource Management System built on the Laravel framework. The system is designed to streamline organizational workflows, automate employee tracking, manage leaves, and integrate seamlessly with external messaging platforms like Slack for automatic attendance mapping.
+HRMS Advanced is a production-ready, enterprise-grade Human Resource Management System built on the Laravel framework. The system is designed to streamline organizational workflows, automate employee tracking, manage leaves, and integrate seamlessly with external messaging platforms like Slack for automatic attendance mapping.
 
-Featuring a modern dark glassmorphism dashboard, granular role-based access control (RBAC), automatic manager-employee hierarchies, and a robust event-driven notification architecture, BeetleOps HRMS serves as a complete solution for modern organizations.
+Featuring a modern dark glassmorphism dashboard, granular role-based access control (RBAC), automatic manager-employee hierarchies, and a robust event-driven notification architecture, HRMS Advanced serves as a complete solution for modern organizations.
 
 ---
 
@@ -75,7 +75,7 @@ cp .env.example .env
 ```
 Open the `.env` file and configure your database, application, and mail server credentials:
 ```env
-APP_NAME="BeetleOps HRMS"
+APP_NAME="HRMS"
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://your-domain.com
@@ -123,10 +123,13 @@ Open your browser and navigate to: `http://127.0.0.1:8000`
 
 ## Default Credentials
 
-To explore the dashboard, log in with the default seeded credentials:
+To explore the dashboard, log in with any of the default seeded SuperAdmin accounts:
 
-* **Email:** `admin@company.com`
-* **Password:** `admin`
+| Role / Designation | Email | Password |
+|---|---|---|
+| **CEO** | `ceo@company.com` | `admin` |
+| **CTO** | `cto@company.com` | `admin` |
+| **HR Department** | `hr@company.com` | `admin` |
 
 ---
 

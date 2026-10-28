@@ -3775,7 +3775,7 @@ class SessionManagementController extends Controller
         if (!empty($existingIds)) {
             SlackMessage::whereIn('id', $existingIds)->delete();
 
-            // Track deleted IDs in cache for real-time BeetleSync polling stream
+            // Track deleted IDs in cache for real-time Slack Sync polling stream
             $recentlyDeleted = \Illuminate\Support\Facades\Cache::get('recently_deleted_slack_msg_ids', []);
             $recentlyDeleted = array_unique(array_merge($recentlyDeleted, $existingIds));
             \Illuminate\Support\Facades\Cache::put('recently_deleted_slack_msg_ids', $recentlyDeleted, now()->addMinutes(2));
@@ -4060,7 +4060,7 @@ class SessionManagementController extends Controller
         if (!empty($existingIds)) {
             SlackMessage::whereIn('id', $existingIds)->delete();
 
-            // Track deleted IDs in cache for real-time BeetleSync polling stream
+            // Track deleted IDs in cache for real-time Slack Sync polling stream
             $recentlyDeleted = \Illuminate\Support\Facades\Cache::get('recently_deleted_slack_msg_ids', []);
             $recentlyDeleted = array_unique(array_merge($recentlyDeleted, $existingIds));
             \Illuminate\Support\Facades\Cache::put('recently_deleted_slack_msg_ids', $recentlyDeleted, now()->addMinutes(2));
